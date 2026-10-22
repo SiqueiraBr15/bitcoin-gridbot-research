@@ -1,4 +1,5 @@
-name: Offline representative checks
+# INACTIVE: only move to .github/workflows after explicit owner approval.
+name: Offline engineering checks (proposal)
 on:
   push:
     branches: [main]
@@ -9,32 +10,39 @@ concurrency:
   group: offline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  representative:
+  offline:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
-      PYTHONPATH: src
       HYPOTHESIS_PROFILE: ci
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6 at preparation
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6, pinned
         with:
           persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6 at preparation
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6, pinned
         with:
           python-version: '3.13'
-      - name: Install pinned runtime and verification dependencies
-        run: >-
-          python -m pip install -c constraints.txt
-          pydantic==2.13.5 pydantic-settings==2.15.0 python-dotenv==1.2.4
-          pytest==9.1.1 hypothesis==6.168.5
-          ruff==0.16.10 mypy==2.4.0
-      - name: Ruff
-        run: ruff check .
-      - name: Formatting
-        run: ruff format --check .
-      - name: Mypy
-        run: mypy
-      - name: Representative suite (not the full coverage gate)
-        run: python -m pytest -q @ci/smoke-suite.txt
-      - name: Synthetic geometry
-        run: python -m examples.offline_grid
+      - name: Pinned installer and isolated editable install
+        run: |
+          python -m pip install pip==26.2.1
+          python -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
+          python -m pip check
+      - name: Lint, formatting and strict typing
+        run: |
+          python -m ruff check .
+          python -m ruff format --check .
+          python -m mypy
+      - name: Bounded smoke, unit and integration groups
+        run: |
+          python -m tools.verify --profile smoke --timeout 90
+          python -m tools.verify --profile unit --timeout 90
+          python -m tools.verify --profile integration --timeout 90
+      - name: Configuration, redaction and repository safety contracts
+        run: python -m pytest -q tests/test_repo_hygiene.py tests/config tests/observability tests/cli
+      - name: Offline synthetic demonstrations
+        run: |
+          python -m examples.offline_grid
+          python -m examples.paper_cycle
+# This proposal is not a full-suite coverage gate or a replacement for release
+# Gitleaks history/tree scanning. No secrets, financial datasets or private API.

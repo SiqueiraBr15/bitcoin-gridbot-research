@@ -118,5 +118,12 @@
     "Anonymized synthetic path fixture",
     "New public documentation, geometry example and representative CI proposal",
     "Canonical LF line endings; no AST or financial logic changes"
-  ]
+  ],
+  "public_only_changes_2026_10_22": [
+    "Pinned build toolchain; virtualenv security update in dev constraints",
+    "Synthetic PAPER example with Fraction oracle and regression tests",
+    "Bounded verification runner, test classification and performance observations",
+    "Reviewed documentation and inactive CI proposal"
+  ],
+  "native_financial_modules_modified": false
 }

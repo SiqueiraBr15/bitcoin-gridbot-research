@@ -1,17 +1,28 @@
-# Contribuição
+# Contribuição e manutenção
 
-Antes de alterar comportamento financeiro, descreva a necessidade e o contrato
-afetado em uma issue técnica. Não crie atividade artificial. Correções pequenas
-de documentação podem ir direto para uma branch.
+Descreva um problema reproduzível e o contrato afetado antes de mudar comportamento
+financeiro. Preserve Decimal, conservação, ciclos, CORE e bloqueios de execução real.
+Não altere políticas congeladas para melhorar resultados históricos.
 
-Fluxo: branch → mudança concreta → verificações pertinentes → revisão →
-commit → PR. Preserve Decimal, conservação, identidade de ciclos, CORE e
-bloqueios de execução real. Não altere regras econômicas congeladas para melhorar
-resultados históricos. Registre limitações e falhas sem rotulá-las como PASS.
+Fluxo: issue concreta → branch → mudança → verificações pertinentes → revisão →
+commit → PR. Não crie atividade para preencher calendário. Um bug deve registrar
+entrada mínima, resultado esperado/observado e um teste que falhe antes da correção.
 
-Verificações locais: Ruff, Mypy e a seleção explícita em `ci/smoke-suite.txt`.
-Outros testes permanecem no pacote; a seleção não transforma a pendência de
-cobertura global em aprovação. Testes financeiros usam somente fixtures sintéticas.
+Instalação: siga o README. Execute Ruff, Mypy e `python -m tools.verify --profile
+smoke`. Escolha grupos adicionais conforme o impacto; `--profile all` mantém todos
+os módulos disponíveis. [TESTING_AND_PERFORMANCE.md](TESTING_AND_PERFORMANCE.md)
+distingue testes aprovados, coleta e cobertura pendente. Timeout não é PASS.
+Mudanças no núcleo exigem propriedades e verificação de invariantes além do smoke.
 
-O projeto ainda não escolheu licença de distribuição. Propostas de contribuição
-devem aguardar a decisão do titular sobre licença e condições de participação.
+Revise dependências em uma branch: release notes, constraints, build, ambiente
+limpo, testes e segurança. Registre descobertas e limitações nas notas de versão.
+Releases devem corresponder a melhorias verificadas e levar proveniência e estado
+real dos gates. Não publique corpus de mercado sem revisão de redistribuição.
+
+Antes de publicar, repita scan de árvore e histórico com Gitleaks, verificando
+erros de leitura e a lista exata de arquivos. Não coloque secrets em exemplos,
+logs, issues ou capturas. Relatos sensíveis seguem [SECURITY.md](SECURITY.md).
+
+A licença ainda depende do titular; condições de participação/distribuição devem
+ser decididas antes de receber contribuições externas. CI remoto também aguarda
+aprovação própria. A documentação não concede autorização de operação financeira.

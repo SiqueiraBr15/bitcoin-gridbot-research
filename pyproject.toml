@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
@@ -69,7 +69,7 @@ strict = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 mypy_path = "src"
-files = ["src", "tests"]
+files = ["src", "tests", "examples", "tools"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

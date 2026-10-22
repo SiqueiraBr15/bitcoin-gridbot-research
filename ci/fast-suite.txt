@@ -1,0 +1,6 @@
+tests/domain/test_fees.py
+tests/strategy/test_arithmetic_grid.py
+tests/application/test_buy_quote_capital.py
+tests/application/test_sell_inventory.py
+tests/test_public_demo.py
+tests/test_verify_runner.py

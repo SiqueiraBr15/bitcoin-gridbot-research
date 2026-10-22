@@ -1,0 +1,3 @@
+tests/domain
+tests/strategy
+tests/portfolio
