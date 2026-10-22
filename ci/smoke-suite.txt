@@ -1,0 +1,17 @@
+tests/domain/test_values.py
+tests/domain/test_quantization.py
+tests/domain/test_market_rules.py
+tests/domain/test_fees.py
+tests/strategy/test_arithmetic_grid.py
+tests/portfolio/test_buy_fills.py
+tests/portfolio/test_buy_finalization.py
+tests/application/test_buy_quote_capital.py
+tests/application/test_sell_inventory.py
+tests/application/test_sell_fills.py
+tests/application/test_sell_economics.py
+tests/paper/test_accounting.py
+tests/paper/test_codec.py
+tests/backtest/test_engine.py
+tests/backtest/test_benchmark_policy.py
+tests/storage/test_operational_journal.py
+tests/architecture/test_core_isolation.py

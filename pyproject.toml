@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gridbot"
+version = "0.1.0.dev0"
+description = "Offline Bitcoin spot accounting, grid simulation and risk research."
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [{ name = "Leonardo Siqueira Ribeiro dos Santos" }]
+classifiers = ["Programming Language :: Python :: 3.13"]
+dependencies = [
+    "pydantic>=2.9,<3",
+    "pydantic-settings>=2.6,<3",
+    "python-dotenv>=1.0,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.120",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
+]
+
+[project.scripts]
+gridbot = "gridbot.cli.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gridbot"]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",  # pycodestyle / pyflakes
+    "I",            # isort
+    "N",            # pep8-naming
+    "UP",           # pyupgrade
+    "B",            # bugbear
+    "SIM",          # simplify
+    "RUF",          # ruff-specific (inclui RUF032: Decimal a partir de float literal)
+    "S",            # bandit
+    "DTZ",          # datetime sem timezone é proibido
+    "T20",          # print
+    "TID",          # banned imports
+    "PT",           # pytest style
+]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.utcnow".msg = "Use um Clock injetado (UTC)."
+"datetime.datetime.utcfromtimestamp".msg = "Use datetime.fromtimestamp(ts, tz=UTC)."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607"]
+"src/gridbot/cli/**" = ["T20"]
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+files = ["src", "tests"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+filterwarnings = ["error"]
+markers = [
+    "tooling: depende de ferramenta externa instalada (ex.: gitleaks); pula se ausente",
+]
+
+[tool.coverage.run]
+source = ["gridbot"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 85
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "^[ \\t]*\\.\\.\\.[ \\t]*(?:#.*)?$",
+]

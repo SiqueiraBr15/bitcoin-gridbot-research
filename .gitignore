@@ -1,0 +1,59 @@
+# ---- Secrets (nunca versionar) ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ---- Python ----
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# ---- Ferramentas ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ---- Dados locais / runtime ----
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.parquet
+data/
+logs/
+runs/
+tmp/
+gitleaks-report.*
+
+# ---- Windows ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ---- macOS ----
+.DS_Store
+
+# ---- IDEs ----
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.code-workspace
+*.swp
+*~

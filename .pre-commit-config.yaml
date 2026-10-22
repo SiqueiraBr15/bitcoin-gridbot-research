@@ -1,0 +1,58 @@
+# Hooks locais: nada é baixado do GitHub.
+# - gitleaks precisa estar no PATH (winget install --id Gitleaks.Gitleaks -e).
+# - ruff / pre-commit-hooks são instalados do PyPI pelo próprio pre-commit, em versões fixas.
+minimum_pre_commit_version: "4.0.0"
+default_install_hook_types: [pre-commit]
+fail_fast: false
+
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (secrets nos arquivos staged)
+        entry: gitleaks git --pre-commit --staged --redact --no-banner --verbose
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: detect-private-key
+        name: detect private key
+        entry: detect-private-key
+        language: python
+        additional_dependencies: ["pre-commit-hooks==5.0.0"]
+        types: [text]
+
+      - id: check-added-large-files
+        name: check added large files
+        entry: check-added-large-files
+        args: ["--maxkb=500"]
+        language: python
+        additional_dependencies: ["pre-commit-hooks==5.0.0"]
+
+      - id: check-toml
+        name: check toml
+        entry: check-toml
+        language: python
+        additional_dependencies: ["pre-commit-hooks==5.0.0"]
+        types: [toml]
+
+      - id: check-yaml
+        name: check yaml
+        entry: check-yaml
+        language: python
+        additional_dependencies: ["pre-commit-hooks==5.0.0"]
+        types: [yaml]
+
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check --force-exclude
+        language: python
+        additional_dependencies: ["ruff==0.16.10"]
+        types_or: [python, pyi]
+
+      - id: ruff-format
+        name: ruff format --check
+        entry: ruff format --check --force-exclude
+        language: python
+        additional_dependencies: ["ruff==0.16.10"]
+        types_or: [python, pyi]

@@ -1,0 +1,19 @@
+# Configuração do gitleaks: regras padrão + regra específica para credenciais Binance.
+title = "gridbot"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "binance-api-credential"
+description = "Binance API key/secret (64 caracteres alfanuméricos)"
+regex = '''(?i)binance[a-z0-9_.\-]*(?:key|secret)["']?\s*[:=]\s*["']?([a-z0-9]{64})\b'''
+secretGroup = 1
+keywords = ["binance"]
+
+[allowlist]
+description = "Arquivos sem secrets por construção"
+paths = [
+  '''(^|/)\.venv/''',
+  '''(^|/)constraints\.txt$''',
+]
