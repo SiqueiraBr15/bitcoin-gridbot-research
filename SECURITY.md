@@ -22,6 +22,16 @@ financeira. Commits antigos conservam pins históricos; não são recomendaçõe
 atuais. A ausência de avisos conhecidos em uma consulta não garante segurança.
 Repita a verificação de dependências antes de instalar ou publicar uma release.
 
+A revisão G3.2 de 23/10/2026 atualizou o pin de desenvolvimento `filelock` de
+4.0.12 para **4.2.1**, versão corrigida de
+[GHSA-v4x8-3wr5-3wq8](https://github.com/tox-dev/filelock/security/advisories/GHSA-v4x8-3wr5-3wq8).
+O advisory trata do lock SQLite de leitura/escrita em diretórios POSIX que outro
+usuário local pode manipular. O caminho Windows testado não é aquele descrito,
+e o GridBot não importa esse lock; não se demonstrou exploração no projeto.
+Filelock pertence às ferramentas de desenvolvimento, não às dependências de
+runtime do wheel. O pin corrigido evita recomendar a versão afetada a quem
+prepara o ambiente. Não foi necessário executar o exploit ou alterar permissões.
+
 O runtime não é vendorizado. Pydantic, pydantic-settings e pydantic-core declaram
 MIT; python-dotenv declara BSD-3-Clause nos metadados examinados. Ferramentas
 possuem condições próprias, incluindo MPL-2.0 em Hypothesis/pathspec e PSF-2.0
