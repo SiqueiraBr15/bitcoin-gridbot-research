@@ -22,6 +22,7 @@ Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
 Esta funcionalidade está em revisão local; CI remoto continua desativado.
 [Auditoria G3.1 e limites da validação](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
+[Integração e prontidão de publicação G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md).
 O candidato local acrescenta navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
 

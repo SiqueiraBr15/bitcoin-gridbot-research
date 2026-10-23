@@ -33,7 +33,31 @@ CI remoto e todas as ordens possíveis de uma sessão monolítica permanecem lim
 
 As seções abaixo preservam medições históricas G1/G2/G3. Seus estados PENDING
 descrevem aquelas rodadas; o fechamento atual está documentado acima. O snapshot
-estático da interface G3 ainda mostra PENDING e não é um monitor de CI.
+estático da interface G3 mostrava PENDING. Na G3.2, a interface passou a identificar
+explicitamente a evidência local arquivada G3.1 e a ausência de CI remoto.
+
+## Integração G3.2
+
+A coleção continua em 3.422 nodeids, sem remoções/renomes. A G3 misturava 1.987
+Python e 19 JS nos 2.006 PASS; a G3.1 acrescentou oito casos Python de tooling:
+`2.006 - 19 + 1.425 + 8 = 3.420 Python PASS`. A diferença aparente de 11 é
+`19 JS - 8 Python novos`, não omissão de testes.
+
+Regressões G3.2: 136 Python do console + 338 pertinentes = **474 PASS distintos**,
+um skip de symlink e 19 JS. Os 28 casos de tooling repetidos após o patch de
+filelock são subconjunto desses 338. Cobertura dirigida atual do console:
+**95,46079779917468%**, separada da nativa G3.1.
+
+Os 104 módulos financeiros, configuração coverage e dependências numéricas de
+runtime permanecem iguais. A medição nativa de 96,53% é evidência arquivada
+compatível com esses fontes; nenhum banco foi reescrito ou combinado com dados
+de console de outra versão. A G3.2 altera apresentação de qualidade/versão,
+assertions do catálogo e o pin de desenvolvimento filelock 4.0.12 → 4.2.1.
+Não representa nova execução monolítica nem CI remoto aprovado.
+
+Instalação limpa, wheel fora do checkout, demo e exports foram exercitados.
+Consulte a [auditoria G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md)
+para identidades, segurança, limites, falhas intermediárias e checkpoint.
 
 ## Escopos explícitos
 
