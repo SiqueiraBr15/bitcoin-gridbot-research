@@ -1,7 +1,39 @@
 # Testes, reprodução e performance
 
 Esta validação é local em Windows/Python 3.13. Nenhuma execução Linux ou GitHub
-Actions foi demonstrada. A suíte global com cobertura permanece PENDING.
+Actions foi demonstrada.
+
+## Fechamento G3.1 — 23/10/2026
+
+Inventário atual: **3.422 casos Python**, com **3.420 PASS e dois SKIP**
+preexistentes; **19 JavaScript PASS**, sem somar reexecuções. Zero pendentes.
+Os 1.425 pendentes G3 foram concluídos; oito regressões de infraestrutura são
+novas. A evidência é uma união segmentada verificada por nodeids e hashes,
+incluindo a reutilização auditada dos resultados G3 compatíveis.
+
+Cobertura nativa consolidada sobre **264 bancos completos, 104 módulos**:
+**96,52624362001981%**, branches preservados, threshold original **85%**, exit 0.
+Não é média de percentuais nem cobertura de toda a árvore do checkout: source
+original `gridbot`; console Python dirigido 95,45% separado, testes JS separados.
+
+Campanha inicial: 5.399,53 s, 168 segmentos completos/1.348 casos e cinco
+timeouts preservados. Retomadas concorrentes: 79 casos em 1.674,67 s e seis
+propriedades/máquinas em 2.270,27 s. Não somar esses dois tempos como parede
+sequencial. PaperMachine passou em 573,69 s; TwoGenerationMachine em 1.099,24 s;
+último slot do journal em 387,37 s. Não houve redução de exemplos ou assertions.
+
+O custo medido concentra-se em validação recursiva, reconstrução e replay,
+amplificado pela cobertura. Nenhuma regra financeira foi otimizada/removida.
+O runner finito permite retomar o complemento dos casos concluídos. Linux,
+CI remoto e todas as ordens possíveis de uma sessão monolítica permanecem limites.
+
+- [Auditoria G3.1](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
+- [Manifesto com nodeids e hashes](docs/reviews/G3_1_EXECUTION_MANIFEST.json.gz).
+- [Procedimento de execução e consolidação](docs/G3_1_VALIDATION_PROTOCOL.md).
+
+As seções abaixo preservam medições históricas G1/G2/G3. Seus estados PENDING
+descrevem aquelas rodadas; o fechamento atual está documentado acima. O snapshot
+estático da interface G3 ainda mostra PENDING e não é um monitor de CI.
 
 ## Escopos explícitos
 

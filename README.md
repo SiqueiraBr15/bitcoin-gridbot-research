@@ -119,9 +119,13 @@ python -m mypy
 
 O runner usa limites finitos por alvo; falha/timeout retorna código não zero.
 Nenhum teste foi desabilitado e o perfil Hypothesis CI permanece com 300 exemplos.
-O gate global de cobertura continua **PENDING**. O timeout monolítico anterior
-permanece registrado; completar segmentos não aprova a suíte global com cobertura.
-Leia [TESTING_AND_PERFORMANCE.md](TESTING_AND_PERFORMANCE.md).
+O fechamento local G3.1 contabilizou **3.420 Python PASS + dois skips** e
+**19 JavaScript PASS**, sem pendentes. A cobertura nativa consolidada foi
+**96,53%**, com branches e threshold original de 85%, exit 0. O inventário e a
+união segmentada foram verificados por nodeids e hashes; os timeouts anteriores
+permanecem registrados. Isso não demonstra execução Linux/CI remoto nem todas
+as ordens monolíticas. Leia [TESTING_AND_PERFORMANCE.md](TESTING_AND_PERFORMANCE.md)
+e a [auditoria G3.1](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
 
 A [proposta de CI](ci/github-actions-proposal.yml) é inativa, fora de
 `.github/workflows`. Não há execução remota aprovada ou badges de CI/cobertura.
