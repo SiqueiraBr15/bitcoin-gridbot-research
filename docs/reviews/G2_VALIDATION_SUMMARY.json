@@ -1,0 +1,226 @@
+{
+  "phase": "G2",
+  "baseline": "5b7244fa0c79457dc18238bfe7245e9226e62542",
+  "new_test_cases": {
+    "python": 35,
+    "javascript": 15
+  },
+  "distinct_passing_cases": {
+    "console_python": 91,
+    "selected_existing_regressions": 322,
+    "javascript": 15,
+    "total": 428
+  },
+  "coverage": {
+    "covered_lines": 491,
+    "num_statements": 509,
+    "percent_covered": 96.13526570048309,
+    "percent_covered_display": "96",
+    "missing_lines": 18,
+    "excluded_lines": 0,
+    "percent_statements_covered": 96.46365422396856,
+    "percent_statements_covered_display": "96",
+    "num_branches": 112,
+    "num_partial_branches": 6,
+    "covered_branches": 106,
+    "missing_branches": 6,
+    "percent_branches_covered": 94.64285714285714,
+    "percent_branches_covered_display": "95"
+  },
+  "global_coverage": "PENDING",
+  "archive_verification": {
+    "status": "PASS",
+    "catalog_rows": 4266,
+    "archive_total_marks": 1730196,
+    "verified_wallets": 108,
+    "verified_marks": 46134,
+    "archived_risk_fields_equal": true,
+    "real_paradox": {
+      "policy": "P_BANDS",
+      "nav_usdt": "7448.1387153822000",
+      "btc_physical": "0.11243",
+      "cash_usdt": "4097.0692484822",
+      "delta_nav_usdt": "-168.9368049304",
+      "delta_btc": "0.02509",
+      "delta_cash_usdt": "-916.7650796304",
+      "btc_mark_component_usdt": "747.8282747"
+    },
+    "startup_wall_seconds": 0.3850745999952778,
+    "selection_cold_wall_seconds_traced": 1.5501800000056392,
+    "selection_cold_cpu_seconds_traced": 1.546875,
+    "warm_wall_seconds_traced": [
+      0.09464300000399817,
+      0.08277729999099392,
+      0.0998327999986941,
+      0.0955722000071546,
+      0.08283119999396149
+    ],
+    "warm_cpu_seconds_traced": [
+      0.09375,
+      0.078125,
+      0.109375,
+      0.09375,
+      0.078125
+    ],
+    "cache_hits": 5,
+    "cache_entries": 1,
+    "python_traced_current_bytes": 3884926,
+    "python_traced_peak_bytes": 17290480,
+    "memory_scope": "selection phase only, archive preloaded; tracemalloc is not whole RSS",
+    "new_backtests": 0,
+    "binance_requests": 0
+  },
+  "public_screenshots": {
+    "g2-synthetic-distributions.png": {
+      "sha256": "b833ceb05794b1598b0ccc6972c04106e1b0a7469b15f565423f5b31e834b29f",
+      "bytes": 46359,
+      "source": "SYNTHETIC_DEMO",
+      "capture": "real IAB viewport screenshot; not a resized mockup"
+    },
+    "g2-synthetic-paper.png": {
+      "sha256": "0c8b460d5d8a4db0d96805711b0a3d4c4236c14af5be099f7eacb8625b2585e1",
+      "bytes": 78840,
+      "source": "SYNTHETIC_DEMO",
+      "capture": "real IAB viewport screenshot; not a resized mockup"
+    },
+    "g2-synthetic-risk.png": {
+      "sha256": "8e0942591591843823c50db8bf7be9a7adc6af2193c21b5eec69697ac70b1974",
+      "bytes": 67032,
+      "source": "SYNTHETIC_DEMO",
+      "capture": "real IAB viewport screenshot; not a resized mockup"
+    }
+  },
+  "receipts": {
+    "g1_reproduced_before_changes": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 20253261100,
+      "log_sha256": "e31577f0339bc52172f1981e34a96f18f481fa4df57efe44cba426098d7729b8"
+    },
+    "directed_combined_1": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 53672117300,
+      "log_sha256": "ae3863a30839465697804a103aaaf0f2f9adc4b05c006cf15c32380ca8f24db8"
+    },
+    "directed_final": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "timeout_seconds": 120,
+      "elapsed_ns": 53710440700,
+      "log_sha256": "181c980161e9a1dc4dacd209ed3386363f45227ae938808a2f98fd797c1dd3ec"
+    },
+    "directed_final_corrected": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 53839445800,
+      "log_sha256": "371885e716c40aa0c83e0f9816abef8b68adcf46f9d62c3f7daf01964c71ff6f"
+    },
+    "existing_regression": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 17601954300,
+      "log_sha256": "24cfc08c1fa2fa4a74fa657f2bfad202c0933728a49d21af7359676ba567e338"
+    },
+    "node_tests_final": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 30,
+      "elapsed_ns": 145842500,
+      "log_sha256": "2484ad92524ee04d54016c38e74c13c7cdb1cbec4dec9f5581fae1aa222b1a5c"
+    },
+    "ruff_release": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 60,
+      "elapsed_ns": 133177200,
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    "format_release": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 60,
+      "elapsed_ns": 151967400,
+      "log_sha256": "0585600054b1cf3cd35eb7d6163d69187b5b15cdf6f840b0f9e4af5f22676d24"
+    },
+    "mypy_release": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 675862100,
+      "log_sha256": "246d7377b8968c929adab45093c1f6ef76886edea04fc637e8cb495fd4e8a5bc"
+    },
+    "frontend_format_final": {
+      "status": "FAIL",
+      "exit_code": 1,
+      "timeout_seconds": 60,
+      "elapsed_ns": 1757393000,
+      "log_sha256": "44360c03a1d8fa781c52af40f85208986ef98a485bd9ce52bf6891810a3272c3"
+    },
+    "frontend_release": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 60,
+      "elapsed_ns": 1534447500,
+      "log_sha256": "a46743a372e8a25add72c2327b66813c540ed89a06628b3126ed23e9693833d2"
+    },
+    "pip_check": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 584086700,
+      "log_sha256": "672aec65a45bed50e70229c70934a7eebf0462595c459b83023027645d57cccf"
+    },
+    "pre_commit_feature": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 2646162200,
+      "log_sha256": "823f73816e6b9d5951577e5e0115543b90ae3ca573b5106765bd9e8dfe13a928"
+    },
+    "commit_feature": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 120,
+      "elapsed_ns": 1822740000,
+      "log_sha256": "9a34a9a269e1d680ffb6e23d158a518c4b6acba08afbed1d37e7b5b7f918a27f"
+    },
+    "gitleaks_history": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 60,
+      "elapsed_ns": 593273400,
+      "log_sha256": "a1abeb3ab1bd9d8370b7f3f0ce1e3ee9b431cf98903fbf8971b016771af1b332"
+    },
+    "git_fsck": {
+      "status": "PASS",
+      "exit_code": 0,
+      "timeout_seconds": 60,
+      "elapsed_ns": 134167900,
+      "log_sha256": "8f49fcb8ce7accd6668bd9316b6a78d4c0c6b8f672bd430d7c2ddc8a691c5b20"
+    }
+  },
+  "visual_final": {
+    "page_viewport_combinations": 18,
+    "viewports": [
+      "1366x768",
+      "1920x1080",
+      "540x900"
+    ],
+    "overflows": 0,
+    "clipped_svg_text": 0,
+    "screenshot_limitation": "Brave capture timeout; real synthetic PNGs from IAB default viewport"
+  },
+  "preservation": {
+    "original_rehashed_files": 1665,
+    "changed": 0,
+    "six_untracked_unchanged": true,
+    "native_src_and_examples_diff_vs_G1": false,
+    "global_coverage": "PENDING"
+  },
+  "gitleaks_history_findings": 9
+}
