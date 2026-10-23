@@ -9,15 +9,21 @@ Python. The active strategies studied did not demonstrate a robust advantage
 over simple benchmarks. This is an engineering/research portfolio, not a live
 trading system.
 
-## Console local de pesquisa · G1
+## Console local de pesquisa · G2
 
 Após a instalação abaixo, execute `python -m research_console` no checkout e abra
 **http://127.0.0.1:8765**. No Windows, `start_console.cmd` usa o ambiente `.venv`.
 O console inclui patrimônio, BTC, drawdown, janelas e a demo PAPER determinística.
+G2 acrescenta seleção persistente na sessão, referência comparativa, diferenças
+exatas em USDT/pp/BTC, consulta por teclado e downloads CSV/JSON/SVG.
+Os eixos identificam unidades e cortes; o drawdown tem zero no topo.
 Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 **dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
 Esta funcionalidade está em revisão local; CI remoto continua desativado.
+[Auditoria G2 e limites da validação](docs/reviews/G2_RESEARCH_CONSOLE_PRO_AUDIT.md).
+
+![Console G2 em execução com dados sintéticos](docs/images/g2-synthetic-paper.png)
 
 ## O que você encontra aqui
 
@@ -86,7 +92,8 @@ Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Evidências de engenharia
 
-Validação local Windows/Python 3.13, em ambiente novo, com dependências fixadas:
+Validação da publicação anterior em Windows/Python 3.13, em ambiente novo, com
+dependências fixadas (histórico; não é nova execução integral da G2):
 
 | Verificação | Resultado e alcance |
 | --- | --- |

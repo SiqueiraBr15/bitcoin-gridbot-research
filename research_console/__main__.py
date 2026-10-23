@@ -19,15 +19,22 @@ def main() -> None:
     args = parser.parse_args()
     if not 1024 <= args.port <= 65535:
         parser.error("Use uma porta de 1024 a 65535")
-    archive, failed = None, False
+    archive, failed, reason = None, False, None
     if args.archive_root is not None:
         try:
             archive = Archive(args.archive_root)
-        except (ValueError, OSError, KeyError, TypeError, EOFError):
+        except (ValueError, OSError, KeyError, TypeError, EOFError) as exc:
             failed = True
+            reason = (
+                "MISSING_SOURCE"
+                if isinstance(exc, FileNotFoundError)
+                else "INVALID_SCHEMA_OR_SOURCE"
+            )
             sys.stderr.write("Arquivo de pesquisa indisponível ou integridade inválida.\n")
     try:
-        with LocalServer(Service(archive, archive_error=failed), args.port) as server:
+        with LocalServer(
+            Service(archive, archive_error=failed, archive_reason=reason), args.port
+        ) as server:
             sys.stdout.write(
                 f"GridBot PAPER: http://127.0.0.1:{server.server_port}\nCtrl+C para encerrar.\n"
             )

@@ -44,3 +44,26 @@ O pacote preserva um coletor opt-in de arquivos públicos em
 que todo comando do pacote seja incapaz de rede. As demos e o CLI de diagnóstico
 não o acionam; ele não foi executado nesta missão. Dados prospectivos e ordens
 reais continuam sujeitos a contratos/autorização separados.
+
+
+## Console G2: consulta local fora do núcleo
+
+`research_console` não integra o wheel financeiro. `data.py` admite somente o
+contrato M1.R congelado, verifica conteúdo e projeta campos permitidos. `risk.py`
+mantém o contrato G1/M1.R. `analysis.py` calcula somente diferenças entre resultados
+já existentes, extrema por métrica, intensidade e distribuições sintéticas em
+Fraction; não gera ordens, decisões ou backtests.
+
+`server.py` serve rotas fixas em loopback e guarda até quatro seleções completas
+validadas em LRU. A chave inclui versão, origem, seleção e hashes; cada acesso,
+inclusive cache hit, verifica novamente o conteúdo relevante. Respostas são cópias.
+`state.js` normaliza preferências da sessão; `charts.js` determina domínios e
+coordenadas e consulta marcas existentes; `app.js` organiza as seis páginas.
+Não há cálculo de NAV ou decisão de risco financeiro no JavaScript. BigInt só
+ordena strings decimais sem perda de precisão; Number só formata e desenha.
+
+O histórico autorizado continua local e separado da distribuição. Novas
+estatísticas multidatas desse corpus não são promovidas a resultados públicos:
+ficam indisponíveis; as distribuições demonstrativas usam apenas dois cenários
+sintéticos identificados. Ver contratos, segurança e uso em
+[RESEARCH_CONSOLE.md](docs/RESEARCH_CONSOLE.md).

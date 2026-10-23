@@ -20,13 +20,14 @@ POLICIES = ("B0_BH", "B1_HALF", "B2_DCA", "B3_CASH", "P_BANDS", "P_MONTHLY")
 COSTS = ("CA", "CX2", "CB")
 MAX_RAW = 512 * 1024
 MAX_JSON = 8 * 1024 * 1024
-NUMBER = re.compile(r"-?\d{1,20}(?:\.\d{1,60})?(?:[eE][+-]?\d{1,3})?\Z")
+NUMBER = re.compile(r"-?\d{1,20}(?:\.\d{1,60})?(?:[eE][+-]?\d{1,3})?\Z", re.ASCII)
 
 
 def number(value: Any, *, positive: bool = False) -> Decimal:
     require(isinstance(value, str) and bool(NUMBER.fullmatch(value)), "Número inválido")
     result = Decimal(value)
     require(result.is_finite() and result >= 0 and (not positive or result > 0), "Saldo inválido")
+    require(result == 0 or -100 <= result.adjusted() <= 20, "Magnitude inválida")
     return result
 
 
@@ -52,12 +53,20 @@ def safe_read(root: Path, relative: str) -> bytes:
     return raw
 
 
+def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result = {}
+    for key, value in pairs:
+        require(key not in result, "Campo JSON duplicado")
+        result[key] = value
+    return result
+
+
 def decode(raw: bytes, compressed: bool = False) -> Any:
     if compressed:
         with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
             raw = stream.read(MAX_JSON + 1)
     require(len(raw) <= MAX_JSON, "JSON excede limite")
-    return json.loads(raw)
+    return json.loads(raw, object_pairs_hook=_unique_pairs)
 
 
 def public_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -169,6 +178,8 @@ class Archive:
         self.root = root / "m1_risk"
         raw = safe_read(self.root, "M1_RISK_ARTIFACT_MANIFEST.json")
         require(hashlib.sha256(raw).hexdigest() == pin, "Manifesto não reconhecido")
+        self.pin = pin
+        self.metadata_files: list[str] = []
         self.files = decode(raw)["files"]
         rows = []
         for months in (6, 12, 24):
@@ -181,12 +192,14 @@ class Archive:
                     "Partição divergente",
                 )
                 rows.extend(partition)
+                self.metadata_files.append(name)
         require(0 < len(rows) <= 4266, "Catálogo excessivo ou vazio")
         self.rows = sorted(rows, key=lambda r: (r["months"], r["cost"], r["start"], r["policy"]))
         self.summaries = [public_row(r) for r in self.rows]
         keys = {(r["start"], r["months"], r["cost"], r["policy"]) for r in self.rows}
         require(len(keys) == len(rows), "Duplicata na matriz")
         self.index = self.load("M1_RISK_CURVE_INDEX.json")
+        self.metadata_files.append("M1_RISK_CURVE_INDEX.json")
         require(
             self.index["wallets"] == len(rows) and len(self.index["parts"]) <= 200,
             "Índice divergente",
@@ -196,14 +209,45 @@ class Archive:
             require(type(part["wallets"]) is int and 0 < part["wallets"] <= 30, "Chunk inválido")
             self.locations.extend([part["file"]] * part["wallets"])
         require(len(self.locations) == len(rows), "Índice incompleto")
+        if pin == ARCHIVE_PIN:
+            require(
+                len(rows) == 4266 and self.index["marks"] == 1730196,
+                "Contagem do contrato divergente",
+            )
+            require(
+                self.index["columns"] == ["time_utc", "price", "cash_usdt", "btc", "nav_usdt"],
+                "Schema de unidades divergente",
+            )
 
-    def load(self, name: str) -> Any:
+    def checked_raw(self, name: str) -> bytes:
         raw = safe_read(self.root, name)
         expected = self.files["docs/reviews/m1_risk/" + name]
         require(
             len(raw) == expected["bytes"] and hashlib.sha256(raw).hexdigest() == expected["sha256"],
             "Integridade da origem divergente",
         )
+        return raw
+
+    def fingerprint(self, start: str, months: int, cost: str) -> tuple[str, ...]:
+        """Rehash inputs even on cache hit; modification never returns stale values."""
+        require(
+            hashlib.sha256(safe_read(self.root, "M1_RISK_ARTIFACT_MANIFEST.json")).hexdigest()
+            == self.pin,
+            "Manifesto não reconhecido",
+        )
+        names = set(self.metadata_files)
+        names.update(
+            self.locations[i]
+            for i, r in enumerate(self.rows)
+            if (r["start"][:10], r["months"], r["cost"]) == (start, months, cost)
+        )
+        return (
+            self.pin,
+            *(hashlib.sha256(self.checked_raw(name)).hexdigest() for name in sorted(names)),
+        )
+
+    def load(self, name: str) -> Any:
+        raw = self.checked_raw(name)
         return decode(raw, name.endswith(".gz"))
 
     def selection(self, start: str, months: int, cost: str) -> list[dict[str, Any]]:
@@ -222,6 +266,7 @@ class Archive:
             ]
             require(len(matches) == 1, "Courbe indisponível")
             marks = matches[0]["marks"]
+            require(len(marks) == row["marks"], "Contagem de marcas divergente")
             actual = hashlib.sha256(json.dumps(marks, separators=(",", ":")).encode()).hexdigest()
             require(actual == row["marks_sha256"] == matches[0]["marks_sha256"], "Série adulterada")
             selected.append(view(self.summaries[index], marks))

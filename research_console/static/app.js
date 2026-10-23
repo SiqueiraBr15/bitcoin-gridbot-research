@@ -10,14 +10,6 @@ const labels = {
   round_trip: "Round trip · sintético",
   falling_mark: "Queda de marcação · sintético",
 };
-const colors = [
-  "#81adff",
-  "#d1b3ff",
-  "#e5c283",
-  "#91a3ba",
-  "#62ddbb",
-  "#ff8b97",
-];
 const titles = {
   overview: "Visão geral",
   wealth: "Patrimônio",
@@ -26,628 +18,919 @@ const titles = {
   windows: "Janelas históricas",
   demo: "Demonstração PAPER",
 };
-let catalog,
-  accounts = [],
-  page = "overview",
-  generation = 0,
-  demoReady = false;
-const money = (x) =>
-  x == null
-    ? "Dados indisponíveis"
-    : Number(x).toLocaleString("pt-BR", {
+const money = (v) =>
+  v == null
+    ? "Indisponível"
+    : Number(v).toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-const coins = (x) =>
-  x == null
-    ? "Dados indisponíveis"
-    : Number(x).toLocaleString("pt-BR", {
+const coins = (v) =>
+  v == null
+    ? "Indisponível"
+    : Number(v).toLocaleString("pt-BR", {
         minimumFractionDigits: 5,
         maximumFractionDigits: 8,
       });
-const percent = (x) =>
-  x == null ? "Dados indisponíveis" : money(Number(x) * 100) + "%";
-const node = (tag, text, cls) => {
+const pct = (v) => (v == null ? "Indisponível" : money(Number(v) * 100) + "%");
+const el = (tag, text, cls) => {
   const e = document.createElement(tag);
-  if (text != null) e.textContent = text;
+  if (text != null) e.textContent = String(text);
   if (cls) e.className = cls;
   return e;
 };
-async function api(url) {
-  const r = await fetch(url, { credentials: "same-origin", cache: "no-store" });
-  if (!r.ok) throw new Error("Dados indisponíveis ou integridade inválida");
-  return r.json();
-}
-function options(id, values, preferred) {
-  const e = $(id),
-    before = preferred || e.value;
-  e.replaceChildren(
-    ...values.map((v) => {
-      const o = node("option", labels[v] || v);
-      o.value = v;
-      return o;
-    }),
-  );
-  if (values.includes(before)) e.value = before;
-}
-function dates() {
-  const rows = catalog.rows.filter(
-    (r) => String(r.months) === $("months").value && r.cost === $("cost").value,
-  );
-  options(
-    "start",
-    [...new Set(rows.map((r) => r.start.slice(0, 10)))],
-    $("start").value || "2022-12-02",
-  );
-}
-function card(container, label, value, detail, cls) {
-  const c = node("div", null, "card");
-  c.append(
-    node("div", label, "label"),
-    node("div", value, "value " + (cls || "")),
-    node("small", detail),
-  );
-  container.append(c);
+let catalog = { rows: [], archive_status: "UNAVAILABLE" },
+  state = { ...GridState.defaults },
+  payload = { accounts: [] },
+  demoPolicy = "round_trip",
+  loading = false,
+  error = "",
+  requestId = 0,
+  search = "",
+  sort = "start",
+  descending = false,
+  offset = 0,
+  zoom = false;
+try {
+  state = {
+    ...state,
+    ...JSON.parse(sessionStorage.getItem("gridbot.g2.selection") || "{}"),
+  };
+} catch {}
+if (!titles[state.page]) state.page = "overview";
+if (!["archive", "demo"].includes(state.source)) state.source = "archive";
+const synthetic = () => state.page === "demo" || state.source === "demo";
+const selected = () => (synthetic() ? demoPolicy : state.policy);
+function save() {
+  try {
+    sessionStorage.setItem("gridbot.g2.selection", JSON.stringify(state));
+  } catch {}
 }
 function panel(title, text) {
-  const e = node("section", null, "panel");
-  e.append(node("h2", title));
-  if (text) e.append(node("p", text));
-  return e;
+  const p = el("section", null, "panel");
+  p.append(el("h2", title));
+  if (text) p.append(el("p", text, "explain"));
+  return p;
 }
-function table(container, headers, rows) {
-  const w = node("div", null, "table-wrap"),
-    t = node("table"),
-    head = node("thead"),
-    tr = node("tr");
-  headers.forEach((h) => tr.append(node("th", h)));
+function metric(parent, title, value, detail, cls = "") {
+  const c = el("div", null, "metric " + cls);
+  c.append(
+    el("span", title, "metric-label"),
+    el("strong", value, "metric-value"),
+    el("small", detail),
+  );
+  parent.append(c);
+}
+function table(parent, headers, rows) {
+  const wrap = el("div", null, "table-wrap"),
+    t = el("table"),
+    tr = el("tr"),
+    head = el("thead"),
+    body = el("tbody");
+  headers.forEach((h) => tr.append(el("th", h)));
   head.append(tr);
   t.append(head);
-  const body = node("tbody");
   rows.forEach((row) => {
-    const r = node("tr");
-    row.forEach((c) => r.append(node("td", String(c))));
+    const r = el("tr");
+    row.forEach((cell) => {
+      const td = el("td");
+      if (cell instanceof Node) td.append(cell);
+      else td.textContent = String(cell ?? "Indisponível");
+      r.append(td);
+    });
     body.append(r);
   });
   t.append(body);
-  w.append(t);
-  container.append(w);
+  wrap.append(t);
+  parent.append(wrap);
 }
-function chart(container, title, field, unit, selectedOnly = false) {
-  const p = panel(
-      title,
-      "Passe o cursor para consultar somente marcações observadas. Lacunas maiores que um dia ficam desconectadas.",
-    ),
-    box = node("div", null, "chart"),
-    legend = node("div", null, "legend");
-  const shown = selectedOnly
-    ? accounts.filter((a) => a.summary.policy === $("policy").value)
-    : accounts;
-  const ns = "http://www.w3.org/2000/svg",
-    svg = document.createElementNS(ns, "svg");
-  svg.setAttribute("viewBox", "0 0 900 300");
-  svg.setAttribute("role", "img");
-  svg.setAttribute("aria-label", title);
-  const points = shown.flatMap((a) => a.series),
-    ys = points.map((p) => Number(p[field]));
-  if (!ys.length) {
-    p.append(node("p", "Dados indisponíveis"));
-    container.append(p);
-    return;
-  }
-  const xmin = Math.min(...points.map((p) => Date.parse(p.time))),
-    xmax = Math.max(...points.map((p) => Date.parse(p.time)));
-  let ymin = Math.min(...ys),
-    ymax = Math.max(...ys);
-  if (field === "drawdown") {
-    ymin = Math.min(ymin, -0.2);
-    ymax = 0;
-  }
-  const pad = (ymax - ymin || 1) * 0.09;
-  ymin -= pad;
-  ymax += pad;
-  const xx = (t) => 60 + ((Date.parse(t) - xmin) / (xmax - xmin || 1)) * 820,
-    yy = (v) => 255 - ((v - ymin) / (ymax - ymin)) * 230;
-  function shape(tag, attrs) {
-    const el = document.createElementNS(ns, tag);
-    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
-    svg.append(el);
-    return el;
-  }
-  for (let i = 0; i < 5; i++) {
-    const value = ymin + ((ymax - ymin) * i) / 4,
-      y = yy(value);
-    shape("line", { x1: 60, x2: 880, y1: y, y2: y, stroke: "#263248" });
-    const text = shape("text", { x: 52, y: y + 4, "text-anchor": "end" });
-    text.textContent =
-      unit === "%"
-        ? money(value * 100)
-        : unit === "BTC"
-          ? coins(value)
-          : money(value);
-  }
-  if (field === "drawdown") {
-    shape("line", {
-      x1: 60,
-      x2: 880,
-      y1: yy(-0.2),
-      y2: yy(-0.2),
-      stroke: "#ff8b97",
-      "stroke-dasharray": "6 4",
-    });
-    shape("text", { x: 65, y: yy(-0.2) - 6 }).textContent =
-      "−20% · referência indicativa";
-  }
-  shown.forEach((a, i) => {
-    const color = colors[i % colors.length];
-    legend.append(
-      node(
-        "span",
-        labels[a.summary.policy] || a.summary.policy,
-        "legend-color c" + (i % 6),
-      ),
-    );
-    let chunk = [];
-    const draw = () => {
-      if (chunk.length)
-        shape("polyline", {
-          points: chunk
-            .map((p) => `${xx(p.time)},${yy(Number(p[field]))}`)
-            .join(" "),
-          fill: "none",
-          stroke: color,
-          "stroke-width": a.summary.policy === $("policy").value ? 3 : 1.6,
-        });
-      chunk = [];
-    };
-    a.series.forEach((p, j) => {
-      if (j && Date.parse(p.time) - Date.parse(a.series[j - 1].time) > 86400000)
-        draw();
-      chunk.push(p);
-    });
-    draw();
-  });
-  shape("text", { x: 60, y: 285 }).textContent = new Date(xmin)
-    .toISOString()
-    .slice(0, 10);
-  shape("text", { x: 880, y: 285, "text-anchor": "end" }).textContent =
-    new Date(xmax).toISOString().slice(0, 10);
-  const readout = node(
-      "div",
-      "Selecione uma política para consultar os pontos.",
-      "readout",
-    ),
-    cursor = shape("line", {
-      x1: 60,
-      x2: 60,
-      y1: 20,
-      y2: 255,
-      stroke: "#ffffff",
-      "stroke-opacity": 0.3,
-    });
-  svg.addEventListener("pointermove", (event) => {
-    const rect = svg.getBoundingClientRect(),
-      x = ((event.clientX - rect.left) / rect.width) * 900;
-    const a =
-      shown.find((a) => a.summary.policy === $("policy").value) || shown[0];
-    let nearest = a.series[0];
-    a.series.forEach((p) => {
-      if (Math.abs(xx(p.time) - x) < Math.abs(xx(nearest.time) - x))
-        nearest = p;
-    });
-    cursor.setAttribute("x1", xx(nearest.time));
-    cursor.setAttribute("x2", xx(nearest.time));
-    readout.textContent = `${nearest.time} · ${labels[a.summary.policy] || a.summary.policy}: ${unit === "%" ? percent(nearest[field]) : unit === "BTC" ? coins(nearest[field]) : money(nearest[field])} ${unit === "%" ? "" : unit}`;
-  });
-  box.append(svg, readout);
-  p.append(legend, box);
-  container.append(p);
+function button(text, fn, cls = "action") {
+  const b = el("button", text, cls);
+  b.type = "button";
+  b.addEventListener("click", fn);
+  return b;
 }
-function render() {
-  const content = $("content");
-  content.replaceChildren();
-  $("title").textContent = titles[page];
-  $("subtitle").textContent =
-    page === "demo"
-      ? "Dois cenários fictícios, com conservação e replay verificáveis."
-      : "Consulte evidências arquivadas; compare a mesma janela e o mesmo custo.";
-  document
-    .querySelectorAll("nav button")
-    .forEach((b) => b.classList.toggle("active", b.dataset.page === page));
-  const synthetic = $("source").value === "demo";
-  $("start").disabled = $("months").disabled = $("cost").disabled = synthetic;
-  $("status").textContent = synthetic
-    ? "SYNTHETIC_DEMO · preços fictícios · contas independentes"
-    : accounts.length
-      ? `ARCHIVED_RESEARCH_RESULT · ${accounts[0].summary.start.slice(0, 10)} → ${accounts[0].summary.end.slice(0, 10)} · UTC · ${accounts[0].series.length} marcas por conta · hashes e NAV conferidos`
-      : "UNAVAILABLE · dados indisponíveis · " + catalog.archive_integrity;
-  if (page === "overview") {
-    const c = node("div", null, "cards");
-    card(c, "Modo de execução", "PAPER", "Sem operações reais");
-    card(
-      c,
-      "Resultados arquivados",
-      String(catalog.rows.length),
-      "Somente resultados admitidos",
-    );
-    card(
-      c,
-      "Última pesquisa",
-      catalog.research_date || "Indisponível",
-      "Data do relatório, não de importação",
-    );
-    card(c, "Referência de risco", "20%", "Não é mecanismo de proteção");
-    content.append(c);
-    const p = panel(
-      "O que a pesquisa demonstrou",
-      "GRID tradicional, GRID persistente e rebalanceamento por bandas não demonstraram vantagem robusta suficiente sobre benchmarks simples.",
-    );
-    p.append(
-      node(
-        "p",
-        "Nenhuma política com BTC respeitou 20% de drawdown em todas as janelas M1. Menos violações históricas não significa segurança operacional.",
-      ),
-    );
-    content.append(p);
-    const q = panel(
-      "Fontes e integridade",
-      "M1 / M1.R: resultados retrospectivos, com datas e horizontes sobrepostos. M2: revisão do conflito entre crescimento, BTC e risco. R1: vantagem das bandas não demonstrada.",
-    );
-    q.append(
-      node(
-        "p",
-        `Arquivo: ${catalog.archive_integrity}. Matrizes são conferidas ao abrir; curvas selecionadas são verificadas antes de aparecer. Fonte ausente nunca é substituída por uma curva histórica inventada.`,
-      ),
-      node(
-        "p",
-        "Comparadores M1: comprar e manter, 50/50 passivo, DCA, caixa, bandas e mensal. CA/CX2/CB mantêm os contratos de execução arquivados; custos não são condições futuras garantidas.",
-      ),
-      node(
-        "p",
-        "Cobertura global PENDING. CORE e V2 permanecem congelados. Nenhum dado prospectivo é coletado.",
-      ),
-    );
-    content.append(q);
-    return;
-  }
-  if (page === "demo" && !demoReady) {
-    const p = panel(
-      "Execute a demonstração sintética",
-      "100 USDT iniciais por conta. Preços deliberadamente fictícios. Reutiliza a demonstração PAPER existente, sem candles históricos ou chamadas de rede.",
-    );
-    const b = node("button", "Executar cenários sintéticos", "action");
-    b.addEventListener("click", async () => {
-      b.disabled = true;
-      try {
-        const result = await api("/api/demo");
-        accounts = result.accounts;
-        demoReady = true;
-        $("source").value = "demo";
-        options(
-          "policy",
-          accounts.map((a) => a.summary.policy),
-        );
-        render();
-      } catch (e) {
-        $("status").textContent = e.message;
-        b.disabled = false;
-      }
-    });
-    p.append(b);
-    content.append(p);
-    return;
-  }
-  if (!accounts.length) {
-    const empty = node("section", null, "empty");
-    empty.append(
-      node("h2", "Dados indisponíveis"),
-      node(
-        "p",
-        "Autorize uma origem arquivada no comando local ou abra Demonstração PAPER. Nenhum histórico é copiado automaticamente.",
-      ),
-    );
-    content.append(empty);
-    return;
-  }
-  const a =
-      accounts.find((a) => a.summary.policy === $("policy").value) ||
-      accounts[0],
-    s = a.summary,
-    r = a.risk;
-  const cards = node("div", null, "cards");
-  card(
-    cards,
-    "NAV final",
-    money(s.nav_usdt) + " USDT",
-    "Inicial: " + money(s.initial_usdt),
-  );
-  card(
-    cards,
-    "Retorno acumulado",
-    percent(a.series.at(-1).return),
-    "Sobre o capital inicial",
-    Number(a.series.at(-1).return) < 0 ? "negative" : "positive",
-  );
-  card(
-    cards,
-    "BTC físico",
-    coins(s.btc_physical),
-    "Moedas líquidas, sem somar reservas",
-  );
-  card(
-    cards,
-    "Drawdown máximo",
-    percent(r.max_drawdown_magnitude),
-    r.violates_20_percent
-      ? "EXCEDEU 20% observados"
-      : "Dentro de 20% observados",
-    r.violates_20_percent ? "negative" : "positive",
-  );
-  content.append(cards);
-  if (page === "wealth" || page === "windows" || page === "demo") {
-    chart(content, "Patrimônio marcado · USDT", "nav", "USDT");
-    if (page === "wealth")
-      chart(
-        content,
-        "Retorno acumulado · capital inicial incluído",
-        "return",
-        "%",
-      );
-  }
-  if (page === "btc") {
-    chart(content, "BTC físico líquido", "btc", "BTC");
-    chart(content, "BTC equivalente patrimonial", "btc_equivalent", "BTC");
-    chart(content, "Caixa em USDT", "cash", "USDT");
-    const p = panel(
-      "Quantidade de moedas e patrimônio são medidas diferentes",
-      "NAV = caixa USDT + BTC físico × preço. BTC equivalente = NAV / preço; ele não adiciona moedas à carteira.",
-    );
-    p.append(
-      node(
-        "p",
-        "Na mesma janela, mais BTC pode vir acompanhado de menos caixa e menor NAV. Para a comparação pareada: ΔNAV = preço final × ΔBTC + Δcaixa. Se ambas tiverem o mesmo BTC e caixa não negativo frente a uma carteira só de BTC, menor NAV exigiria investigar os dados.",
-      ),
-    );
-    content.append(p);
-  }
-  if (page === "risk") {
-    chart(content, "Drawdown em relação ao pico observado", "drawdown", "%");
-    chart(content, "Exposição observada ao BTC", "exposure", "%");
-    const p = panel(
-      "Episódio do drawdown máximo",
-      "Marcações diárias e capital inicial incluídos. Empates, igualdade na recuperação e censura seguem M1.R; não há inferência intradiária.",
-    );
-    const dl = node("dl");
-    for (const [k, v] of [
-      ["Pico", r.max_drawdown_peak],
-      ["Vale", r.max_drawdown_trough],
-      ["NAV no pico", r.peak_nav_usdt],
-      ["NAV no vale", r.trough_nav_usdt],
-      [
-        "Recuperação",
-        r.recovery_at ||
-          (r.recovery_censored ? "Censurada no fim da janela" : "Sem queda"),
-      ],
-      [
-        "Maior episódio observado",
-        money(r.longest_episode_seconds / 86400) + " dias",
-      ],
-      [
-        "Tempo amostral abaixo do pico",
-        money(r.sampled_underwater_seconds_left / 86400) +
-          " dias (amostra à esquerda)",
-      ],
-    ]) {
-      dl.append(node("dt", k), node("dd", v || "Sem queda"));
-    }
-    p.append(dl);
-    content.append(p);
-    if (!synthetic) {
-      const q = panel(
-        "Frequência histórica de violações",
-        "Mesmo horizonte e custo selecionados, todas as datas arquivadas. Janelas se sobrepõem: contagens não são probabilidades futuras ou recomendações.",
-      );
-      const rows = Object.keys(labels)
-        .filter((k) => k.startsWith("B") || k.startsWith("P_"))
-        .map((policy) => {
-          const rows = catalog.rows.filter(
-            (r) =>
-              r.policy === policy &&
-              String(r.months) === $("months").value &&
-              r.cost === $("cost").value,
-          );
-          return [
-            labels[policy],
-            rows.filter((r) => r.violates_20_percent).length +
-              " / " +
-              rows.length,
-          ];
-        });
-      table(q, ["Política", "Violações / janelas"], rows);
-      content.append(q);
-    }
-  }
-  const comparison = panel(
-    "Comparação na mesma janela",
-    synthetic
-      ? "Contas sintéticas independentes; não representam estratégias históricas."
-      : "M1 retrospectiva · janelas sobrepostas · valores líquidos de fees modeladas, sem liquidação final, impostos ou risco USDT.",
-  );
-  table(
-    comparison,
-    [
-      "Política",
-      "NAV USDT",
-      "BTC físico",
-      "BTC equivalente",
-      "Caixa USDT",
-      "Fees USDT",
-      "DD máximo",
-      "Exposição média",
-    ],
-    accounts.map((a) => {
-      const s = a.summary;
-      return [
-        labels[s.policy] || s.policy,
-        money(s.nav_usdt),
-        coins(s.btc_physical),
-        coins(s.btc_equivalent),
-        money(s.cash_usdt),
-        money(s.fees_usdt),
-        percent(a.risk.max_drawdown_magnitude),
-        percent(s.exposure_mean),
-      ];
+function select(id, values, value, names = labels) {
+  const control = $(id);
+  control.replaceChildren(
+    ...values.map((v) => {
+      const option = el("option", names[v] || v);
+      option.value = v;
+      return option;
     }),
   );
-  content.append(comparison);
-  if (a.benchmark_gaps) {
-    const gaps = panel(
-      "Diferenças pareadas de patrimônio e retorno",
-      "Política selecionada menos benchmark, no mesmo período, capital e preço final. Sem combinar janelas.",
-    );
-    table(
-      gaps,
-      ["Benchmark", "ΔNAV USDT", "Δretorno pp", "ΔBTC físico", "Δcaixa USDT"],
-      Object.entries(a.benchmark_gaps).map(([key, g]) => [
-        labels[key],
-        money(g.nav_usdt),
-        money(g.return_pp),
-        coins(g.btc_physical),
-        money(g.cash_usdt),
-      ]),
-    );
-    content.append(gaps);
+  if (!values.length) {
+    const option = el("option", "Dados indisponíveis");
+    option.value = "";
+    control.append(option);
   }
-  if (page === "demo") {
-    const p = panel("Eventos, fills e conservação", a.conservation);
-    table(
-      p,
-      ["Revisão", "Evento"],
-      a.events.map((e) => [e.revision, e.kind]),
-    );
-    table(
-      p,
-      [
-        "Instante UTC",
-        "Ordem PAPER",
-        "Lado simulado",
-        "BTC",
-        "Preço USDT",
-        "Fee USDT",
-      ],
-      a.fills.map((f) => [
-        f.time,
-        f.order_ref,
-        f.side,
-        f.btc,
-        f.price,
-        f.fee_usdt,
-      ]),
-    );
-    table(
-      p,
-      [
-        "Marca UTC",
-        "NAV USDT",
-        "Disponível USDT",
-        "Reservado USDT",
-        "BTC líquido",
-      ],
-      a.series.map((p) => [
-        p.time,
-        p.nav,
-        p.available_usdt,
-        p.reserved_usdt,
-        p.btc,
-      ]),
-    );
-    content.append(p);
+  control.value = values.includes(value) ? value : values[0] || "";
+  control.disabled = !values.length;
+}
+function controls() {
+  const demo = synthetic();
+  $("source").value = state.source;
+  $("history-controls").hidden = demo;
+  $("demo-controls").hidden = !demo;
+  $("reference-wrap").hidden = demo;
+  $("source-wrap").hidden = state.page === "demo";
+  $("reset").hidden = demo;
+  if (demo) {
+    select("demo-policy", ["round_trip", "falling_mark"], demoPolicy);
+    return;
   }
-  if (!synthetic) {
-    const b = node("button", "Exportar esta janela · JSON local", "action");
-    b.addEventListener("click", async () => {
-      try {
-        const r = await api("/api/export?" + query()),
-          blob = new Blob([JSON.stringify(r, null, 2)], {
-            type: "application/json",
-          }),
-          url = URL.createObjectURL(blob),
-          a = node("a");
-        a.href = url;
-        a.download = "gridbot-selected-research.json";
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        $("status").textContent = e.message;
-      }
-    });
-    content.append(b);
-  }
+  state = GridState.validSelection(state, catalog.rows);
+  save();
+  const rows = catalog.rows;
+  select(
+    "months",
+    [...new Set(rows.map((r) => String(r.months)))],
+    state.months,
+    { 6: "6 meses", 12: "12 meses", 24: "24 meses" },
+  );
+  select(
+    "cost",
+    [
+      ...new Set(
+        rows
+          .filter((r) => String(r.months) === state.months)
+          .map((r) => r.cost),
+      ),
+    ],
+    state.cost,
+    { CA: "CA · principal", CX2: "CX2 · fee duplicada", CB: "CB · adverso" },
+  );
+  select(
+    "start",
+    [
+      ...new Set(
+        rows
+          .filter(
+            (r) => String(r.months) === state.months && r.cost === state.cost,
+          )
+          .map((r) => r.start.slice(0, 10)),
+      ),
+    ],
+    state.start,
+    {},
+  );
+  const policies = rows
+    .filter(
+      (r) =>
+        r.start.slice(0, 10) === state.start &&
+        String(r.months) === state.months &&
+        r.cost === state.cost,
+    )
+    .map((r) => r.policy);
+  select("policy", policies, state.policy);
+  select("reference", policies, state.reference);
+}
+async function api(url) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.reason || "LOCAL_REQUEST_FAILED");
+  return data;
 }
 function query() {
   return new URLSearchParams({
-    start: $("start").value,
-    months: $("months").value,
-    cost: $("cost").value,
+    start: state.start,
+    months: state.months,
+    cost: state.cost,
+    reference: state.reference,
+    policies: state.visible.join(","),
   });
 }
-async function load() {
-  const token = ++generation;
-  $("status").textContent = "Validando seleção e hashes…";
+async function load(runDemo = false) {
+  const id = ++requestId;
+  loading = true;
+  error = "";
+  payload = { accounts: [] };
+  controls();
+  render();
   try {
     let result;
-    if ($("source").value === "demo") {
-      if (!demoReady) {
-        accounts = [];
-        options("policy", []);
+    if (synthetic()) {
+      if (!runDemo) {
+        loading = false;
         render();
         return;
       }
       result = await api("/api/demo");
-    } else if (catalog.rows.length && $("start").value) {
+    } else if (state.start && catalog.rows.length)
       result = await api("/api/selection?" + query());
-    } else result = { accounts: [] };
-    if (token !== generation) return;
-    accounts = result.accounts;
-    options(
-      "policy",
-      accounts.map((a) => a.summary.policy),
-    );
+    else result = { accounts: [], source_kind: "UNAVAILABLE" };
+    if (id !== requestId) return;
+    payload = result;
+    loading = false;
     render();
   } catch (e) {
-    if (token !== generation) return;
-    accounts = [];
+    if (id !== requestId) return;
+    error = e.message;
+    loading = false;
+    payload = { accounts: [], source_kind: "UNAVAILABLE" };
     render();
-    $("status").textContent = "UNAVAILABLE · " + e.message;
   }
 }
-document.querySelectorAll("nav button").forEach((b) =>
-  b.addEventListener("click", () => {
-    page = b.dataset.page;
-    if (page === "demo") {
-      $("source").value = "demo";
-      load();
-    } else render();
-  }),
-);
-["start", "months", "cost", "source"].forEach((id) =>
-  $(id).addEventListener("change", () => {
-    if (id === "months" || id === "cost") dates();
-    if (id === "source") {
-      if ($("source").value === "demo") page = "demo";
-      else if (page === "demo") page = "wealth";
+function navigate(page) {
+  state.page = page;
+  window.scrollTo({ top: 0, behavior: "auto" });
+  save();
+  load(synthetic() && demoLoaded);
+}
+let demoLoaded = false;
+function drawChart(parent, title, field, unit) {
+  GridCharts.lineChart(parent, {
+    accounts: payload.accounts,
+    field,
+    unit,
+    title,
+    selected: selected(),
+    labels,
+    zoom: field === "nav" && zoom,
+  });
+}
+function empty(parent) {
+  const why = error || catalog.archive_reason;
+  const p = panel(
+    why ? "Evidência recusada" : "Dados indisponíveis",
+    why
+      ? {
+          INTEGRITY_MISMATCH:
+            "O hash da origem divergiu. Valores e cache não serão usados.",
+          MISSING_SOURCE: "Um arquivo autorizado está ausente.",
+          INVALID_SELECTION: "A combinação escolhida não é admitida.",
+          INVALID_SCHEMA_OR_SERIES:
+            "Schema, contagem ou série temporal inválida.",
+        }[why] || "Não foi possível validar os dados locais."
+      : "Nenhum histórico foi autorizado ou distribuído. Não geramos curvas para preencher lacunas.",
+  );
+  p.append(button("Abrir demonstração sintética", () => navigate("demo")));
+  parent.append(p);
+}
+function overview(parent) {
+  const c = el("div", null, "metrics");
+  metric(c, "Execução", "PAPER / OFFLINE", "Sem ordens reais");
+  metric(
+    c,
+    "Acervo admitido",
+    catalog.rows.length,
+    "Linhas de resultados, não janelas independentes",
+  );
+  metric(
+    c,
+    "Última pesquisa",
+    catalog.research_date || "Indisponível",
+    "Data do relatório arquivado",
+  );
+  metric(
+    c,
+    "Referência de risco",
+    "20%",
+    "Preferência analítica, não stop-loss",
+  );
+  parent.append(c);
+  const p = panel(
+    "Pesquisa com resultados verificáveis",
+    "GRID tradicional, GRID persistente e bandas não demonstraram vantagem robusta suficiente sobre benchmarks simples. Nenhuma política com BTC respeitou 20% em todas as janelas M1.",
+  );
+  p.append(
+    el(
+      "p",
+      "O console compara contas equivalentes e separa patrimônio, quantidade física de BTC e risco. A pesquisa é retrospectiva; janelas sobrepostas não são amostras independentes.",
+    ),
+  );
+  p.append(
+    button("Explorar patrimônio", () => navigate("wealth")),
+    button("Executar demo PAPER", () => navigate("demo"), "secondary"),
+  );
+  parent.append(p);
+  provenance(parent);
+}
+function provenance(parent) {
+  const p = panel(
+    "Proveniência da análise",
+    "Resultados arquivados e cenários fictícios mantêm identidades distintas. O checksum confirma igualdade ao artefato admitido; não autentica o mercado externo.",
+  );
+  const data = payload.provenance || {},
+    dl = el("dl");
+  const items = [
+    ["Fonte", synthetic() ? "SYNTHETIC_DEMO" : catalog.archive_status],
+    ["Dataset", data.dataset_id || catalog.dataset_id || "UNAVAILABLE"],
+    [
+      "Integridade",
+      data.integrity || catalog.archive_integrity || "Fonte não autorizada",
+    ],
+    ["Unidades", "USDT · BTC · UTC · ratios / pp explícitos"],
+    [
+      "Manifesto SHA-256",
+      data.manifest_sha256 || catalog.manifest_sha256 || "Não aplicável à demo",
+    ],
+  ];
+  items.forEach(([key, value]) => dl.append(el("dt", key), el("dd", value)));
+  p.append(
+    dl,
+    el(
+      "p",
+      "Sem impostos, liquidação final ou risco USDT modelados. Marcação diária não prova ausência de perdas intradiárias. Cobertura global PENDING.",
+      "explain",
+    ),
+  );
+  parent.append(p);
+}
+function comparison(parent) {
+  const p = panel(
+    synthetic()
+      ? "Contas sintéticas independentes"
+      : "Comparador na mesma janela",
+    synthetic()
+      ? "As trajetórias de preços fictícios diferem; não há benchmark pareado entre esses cenários."
+      : `Referência: ${labels[state.reference]}. Diferenças em USDT, pontos percentuais e BTC; não há vencedora geral.`,
+  );
+  const rows =
+      payload.comparison?.rows || payload.accounts.map((a) => a.summary),
+    ext = payload.comparison?.extrema;
+  function value(row, key, formatter) {
+    const span = el("span", formatter(row[key]));
+    if (ext && ext[key]) {
+      const min = ext[key].minimum.includes(row.policy),
+        max = ext[key].maximum.includes(row.policy);
+      if (max || min)
+        span.append(
+          el(
+            "small",
+            max && min ? " = empate" : max ? " ↑ maior" : " ↓ menor",
+            "extremum",
+          ),
+        );
     }
-    load();
+    return span;
+  }
+  table(
+    p,
+    [
+      "Política",
+      "NAV USDT",
+      "Retorno",
+      "BTC físico",
+      "BTC equivalente",
+      "Caixa USDT",
+      "DD máximo",
+      "Exposição média",
+      "Fees USDT",
+      "ΔNAV USDT",
+      "Δretorno pp",
+      "ΔBTC",
+    ],
+    rows.map((row) => [
+      labels[row.policy] || row.policy,
+      value(row, "nav_usdt", money),
+      value(row, "return", pct),
+      value(row, "btc_physical", coins),
+      value(row, "btc_equivalent", coins),
+      value(row, "cash_usdt", money),
+      value(row, "max_drawdown", pct),
+      value(row, "exposure_mean", pct),
+      value(row, "fees_usdt", money),
+      row.delta_nav_usdt == null ? "—" : money(row.delta_nav_usdt),
+      row.delta_return_pp == null ? "—" : money(row.delta_return_pp),
+      row.delta_btc == null ? "—" : coins(row.delta_btc),
+    ]),
+  );
+  parent.append(p);
+}
+function visibleControls(parent) {
+  if (synthetic()) return;
+  const p = el("div", null, "series-controls");
+  p.append(el("strong", "Políticas na comparação"));
+  catalog.rows
+    .filter(
+      (r) =>
+        r.start.slice(0, 10) === state.start &&
+        String(r.months) === state.months &&
+        r.cost === state.cost,
+    )
+    .forEach((row) => {
+      const label = el("label"),
+        input = el("input");
+      input.type = "checkbox";
+      input.checked = state.visible.includes(row.policy);
+      input.disabled = row.policy === state.reference;
+      input.setAttribute("aria-label", "Comparar " + labels[row.policy]);
+      input.addEventListener("change", () => {
+        state.visible = input.checked
+          ? [...state.visible, row.policy]
+          : state.visible.filter((x) => x !== row.policy);
+        if (!state.visible.includes(state.policy))
+          state.policy = state.reference;
+        save();
+        load();
+      });
+      label.append(input, el("span", labels[row.policy]));
+      p.append(label);
+    });
+  parent.append(p);
+}
+function risk(parent, a) {
+  drawChart(parent, "Drawdown observado · zero no topo", "drawdown", "%");
+  const r = a.risk,
+    details = panel(
+      "Pico, vale e recuperação",
+      "Limite de referência analítico, não mecanismo garantido de proteção. Durações são observadas entre marcas; não trajetórias intradiárias.",
+    );
+  const summary = payload.comparison?.rows.find(
+    (r) => r.policy === a.summary.policy,
+  );
+  const dl = el("dl");
+  [
+    ["Pico UTC", r.max_drawdown_peak || "Sem drawdown"],
+    ["Vale UTC", r.max_drawdown_trough || "Sem drawdown"],
+    [
+      "NAV no pico",
+      r.peak_nav_usdt == null
+        ? "Não aplicável"
+        : money(r.peak_nav_usdt) + " USDT",
+    ],
+    [
+      "NAV no vale",
+      r.trough_nav_usdt == null
+        ? "Não aplicável"
+        : money(r.trough_nav_usdt) + " USDT",
+    ],
+    [
+      "Recuperação",
+      r.recovery_at ||
+        (r.recovery_censored
+          ? "Não observada · censurada no endpoint"
+          : "Sem queda"),
+    ],
+    [
+      "Maior episódio observado",
+      money(r.longest_episode_seconds / 86400) + " dias",
+    ],
+    [
+      "Amostragem abaixo do pico",
+      money(r.sampled_underwater_seconds_left / 86400) +
+        " dias · amostra à esquerda",
+    ],
+    [
+      "Excesso acima de 20%",
+      summary
+        ? money(summary.risk_excess_pp) + " pp"
+        : r.violates_20_percent
+          ? "Violação no cenário sintético"
+          : "Sem excesso observado",
+    ],
+  ].forEach(([k, v]) => dl.append(el("dt", k), el("dd", v)));
+  details.append(dl);
+  parent.append(details);
+  if (payload.frequencies) {
+    const f = panel(
+      "Violações em todas as entradas disponíveis",
+      "Mesmo horizonte e custo. Contagens históricas não estimam probabilidades futuras.",
+    );
+    table(
+      f,
+      ["Política", "Violações / janelas"],
+      payload.frequencies.map((r) => [
+        labels[r.policy],
+        r.violations + " / " + r.observations,
+      ]),
+    );
+    parent.append(f);
+  }
+  drawChart(parent, "Exposição ao BTC nas marcas observadas", "exposure", "%");
+}
+function btc(parent) {
+  const pair = el("div", null, "chart-grid");
+  parent.append(pair);
+  drawChart(pair, "BTC físico líquido · sem CORE pessoal", "btc", "BTC");
+  drawChart(
+    pair,
+    "BTC equivalente · NAV dividido pelo mark",
+    "btc_equivalent",
+    "BTC",
+  );
+  const p = panel(
+    "BTC físico, poder de compra e patrimônio",
+    "BTC físico são moedas líquidas na carteira simulada. BTC equivalente expressa NAV / mark e não adiciona moedas. NAV é patrimônio total em USDT.",
+  );
+  const gaps =
+    payload.comparison?.rows.filter((r) => r.more_btc_less_nav) || [];
+  if (gaps.length) {
+    for (const row of gaps) {
+      p.append(
+        el(
+          "p",
+          `${labels[row.policy]} tem ${coins(row.delta_btc)} BTC a mais que ${labels[state.reference]}, mas NAV ${money(row.delta_nav_usdt)} USDT menor: o valor dos BTC adicionais é ${money(row.btc_mark_component_usdt)} USDT, enquanto a diferença de caixa é ${money(row.delta_cash_usdt)} USDT.`,
+        ),
+      );
+    }
+  } else
+    p.append(
+      el(
+        "p",
+        "Nesta seleção não há caso de mais BTC e menor NAV contra a referência escolhida. Compare sempre o mesmo instante e mark.",
+      ),
+    );
+  parent.append(p);
+  drawChart(
+    parent,
+    "Caixa USDT · reservas não somadas novamente",
+    "cash",
+    "USDT",
+  );
+}
+function explorer(parent) {
+  const p = panel(
+    "Consultar janelas existentes",
+    "Pesquisa retrospectiva. Ordenação descreve resultados conhecidos; não seleciona política para o futuro. Custos e horizontes continuam separados.",
+  );
+  const toolbar = el("div", null, "explorer-tools"),
+    input = el("input");
+  input.type = "search";
+  input.placeholder = "Pesquisar data ou ID da política";
+  input.setAttribute("aria-label", "Pesquisar janelas");
+  input.value = search;
+  const ordering = el("select");
+  ordering.setAttribute("aria-label", "Ordenar janelas");
+  [
+    ["start", "Data inicial"],
+    ["nav_usdt", "NAV"],
+    ["return", "Retorno"],
+    ["max_drawdown", "Drawdown"],
+    ["btc_physical", "BTC físico"],
+  ].forEach(([v, t]) => {
+    const o = el("option", t);
+    o.value = v;
+    ordering.append(o);
+  });
+  ordering.value = sort;
+  const desc = button(
+    descending ? "Ordem decrescente" : "Ordem crescente",
+    () => {
+      descending = !descending;
+      offset = 0;
+      render();
+    },
+    "secondary",
+  );
+  const applySearch = () => {
+    search = input.value;
+    offset = 0;
+    render();
+  };
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") applySearch();
+  });
+  const searchButton = button("Pesquisar", applySearch, "secondary");
+  ordering.addEventListener("change", () => {
+    sort = ordering.value;
+    offset = 0;
+    render();
+  });
+  toolbar.append(input, searchButton, ordering, desc);
+  p.append(toolbar);
+  const rows = synthetic()
+    ? payload.accounts.map((a) => a.summary)
+    : catalog.rows.filter(
+        (r) =>
+          String(r.months) === state.months &&
+          r.cost === state.cost &&
+          state.visible.includes(r.policy),
+      );
+  const ordered = GridState.orderedRows(rows, search, sort, descending),
+    shown = ordered.slice(offset, offset + 18);
+  p.append(
+    el(
+      "p",
+      `${ordered.length} resultados existentes · exibindo ${ordered.length ? offset + 1 : 0}–${Math.min(offset + 18, ordered.length)}. Nenhuma janela nova foi gerada.`,
+    ),
+  );
+  table(
+    p,
+    [
+      "Início UTC",
+      "Política",
+      "Horizonte",
+      "Custo",
+      "NAV USDT",
+      "Retorno",
+      "DD máximo",
+      "20%",
+    ],
+    shown.map((r) => [
+      r.start.slice(0, 10),
+      labels[r.policy] || r.policy,
+      r.months ? r.months + " meses" : "3 minutos sintéticos",
+      r.cost,
+      money(r.nav_usdt),
+      pct(r.return),
+      pct(r.max_drawdown),
+      r.violates_20_percent ? "EXCEDEU" : "Dentro observado",
+    ]),
+  );
+  const prev = button(
+      "Anterior",
+      () => {
+        offset = Math.max(0, offset - 18);
+        render();
+      },
+      "secondary",
+    ),
+    next = button(
+      "Próxima",
+      () => {
+        offset += 18;
+        render();
+      },
+      "secondary",
+    );
+  prev.disabled = offset === 0;
+  next.disabled = offset + 18 >= ordered.length;
+  p.append(prev, next);
+  parent.append(p);
+  const d = payload.distributions;
+  if (!d || d.status === "UNAVAILABLE") {
+    parent.append(
+      panel(
+        "Distribuições novas indisponíveis para o acervo interno",
+        "O item G2-E limita novas análises a artefatos públicos auditados ou sintéticos. O corpus M1 não foi copiado. A consulta local continua disponível; selecione a fonte sintética para demonstrar distribuições explicitamente fictícias.",
+      ),
+    );
+    return;
+  }
+  const dist = panel(
+    "Distribuições · SYNTHETIC_DEMO",
+    `${d.observations} cenários fictícios, não uma campanha histórica e não amostra para inferência.`,
+  );
+  for (const [key, title] of [
+    ["return", "Retornos"],
+    ["max_drawdown", "Drawdowns"],
+  ]) {
+    GridCharts.histogram(dist, d[key].bins, title);
+    dist.append(
+      el("h3", title),
+      el(
+        "p",
+        `Positivos: ${d[key].positive}; negativos: ${d[key].negative}; zeros: ${d[key].zero}.`,
+      ),
+    );
+    table(
+      dist,
+      ["Faixa inferior", "Faixa superior", "Contagem"],
+      d[key].bins.map((b) => [pct(b.low), pct(b.high), b.count]),
+    );
+  }
+  parent.append(dist);
+}
+function demo(parent, a) {
+  const p = panel(
+    "Linha do tempo PAPER",
+    "Intenções e reservas não são ativos adicionais. Fills e fees são os eventos executados no motor sintético existente.",
+  );
+  p.append(el("p", a.conservation, "verified"));
+  table(
+    p,
+    ["Revisão", "Evento"],
+    a.events.map((e) => [e.revision, e.kind]),
+  );
+  table(
+    p,
+    ["UTC", "Ordem simulada", "Lado", "BTC", "Preço fictício USDT", "Fee USDT"],
+    a.fills.map((f) => [
+      f.time,
+      f.order_ref,
+      f.side,
+      f.btc,
+      f.price,
+      f.fee_usdt,
+    ]),
+  );
+  table(
+    p,
+    [
+      "UTC",
+      "Preço fictício",
+      "Disponível USDT",
+      "Reservado USDT",
+      "BTC líquido",
+      "NAV USDT",
+    ],
+    a.series.map((s) => [
+      s.time,
+      s.price,
+      s.available_usdt,
+      s.reserved_usdt,
+      s.btc,
+      s.nav,
+    ]),
+  );
+  parent.append(p);
+}
+async function download(format) {
+  try {
+    let url = synthetic()
+      ? "/api/demo" + (format === "csv" ? ".csv" : "")
+      : (format === "csv" ? "/api/export.csv?" : "/api/export?") + query();
+    const response = await fetch(url, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Exportação recusada por integridade.");
+    const blob = await response.blob(),
+      link = el("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "gridbot-selection." + format;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  } catch (e) {
+    $("status").textContent = e.message;
+  }
+}
+function render() {
+  controls();
+  $("title").textContent = titles[state.page];
+  $("subtitle").textContent = synthetic()
+    ? "SYNTHETIC_DEMO · contas fictícias independentes · PAPER / OFFLINE"
+    : "Evidência arquivada, comparação equivalente e risco explícito.";
+  document.querySelectorAll("nav button").forEach((b) => {
+    b.classList.toggle("active", b.dataset.page === state.page);
+    b.setAttribute(
+      "aria-current",
+      b.dataset.page === state.page ? "page" : "false",
+    );
+  });
+  const content = $("content");
+  content.replaceChildren();
+  $("status").className = error ? "status error" : "status";
+  $("status").textContent = loading
+    ? "Validando origem, hashes e seleção…"
+    : error
+      ? "Evidência recusada · " + error
+      : payload.accounts.length
+        ? `${synthetic() ? "SYNTHETIC_DEMO" : "ARCHIVED_RESEARCH_RESULT"} · ${payload.accounts[0].summary.start} → ${payload.accounts[0].summary.end} · ${payload.accounts.length} contas`
+        : catalog.archive_integrity || "Dados indisponíveis";
+  content.setAttribute("aria-busy", String(loading));
+  if (loading) {
+    content.append(
+      panel(
+        "Carregando evidências",
+        "Aguarde a validação. Nenhum valor da seleção anterior é exibido sob os novos filtros.",
+      ),
+    );
+    return;
+  }
+  if (error || (catalog.archive_reason && !synthetic())) {
+    empty(content);
+    return;
+  }
+  if (state.page === "overview") {
+    overview(content);
+    return;
+  }
+  if (synthetic() && !payload.accounts.length && !error) {
+    const p = panel(
+      "Demonstração determinística existente",
+      "100 USDT por conta. Preços fictícios, sem credenciais, candles históricos ou conexão à exchange.",
+    );
+    const run = button("Executar cenários sintéticos", () => {
+      demoLoaded = true;
+      load(true);
+    });
+    p.append(run);
+    content.append(p);
+    return;
+  }
+  if (!payload.accounts.length) {
+    empty(content);
+    return;
+  }
+  const account =
+      payload.accounts.find((a) => a.summary.policy === selected()) ||
+      payload.accounts[0],
+    s = account.summary,
+    r = account.risk;
+  const cards = el("div", null, "metrics");
+  metric(
+    cards,
+    "NAV final",
+    money(s.nav_usdt) + " USDT",
+    "Inicial: " + money(s.initial_usdt) + " USDT",
+  );
+  metric(
+    cards,
+    "Retorno",
+    pct(s.return),
+    "Sobre o capital inicial",
+    Number(s.return) < 0 ? "negative" : "positive",
+  );
+  metric(
+    cards,
+    "BTC físico",
+    coins(s.btc_physical),
+    "Moedas líquidas; BTCeq é outra medida",
+  );
+  metric(
+    cards,
+    "Drawdown máximo",
+    pct(r.max_drawdown_magnitude),
+    r.violates_20_percent
+      ? "EXCEDEU 20% observados"
+      : "Dentro dos 20% observados",
+    r.violates_20_percent ? "negative" : "positive",
+  );
+  content.append(cards);
+  visibleControls(content);
+  if (state.page === "wealth" || state.page === "demo") {
+    const tools = el("div", null, "chart-tools");
+    tools.append(
+      button(
+        zoom
+          ? "Usar domínio desde zero"
+          : "Ajustar domínio Y · corte identificado",
+        () => {
+          zoom = !zoom;
+          render();
+        },
+        "secondary",
+      ),
+    );
+    content.append(tools);
+    drawChart(content, "Patrimônio marcado · USDT", "nav", "USDT");
+    if (state.page === "wealth") {
+      const pair = el("div", null, "chart-grid");
+      content.append(pair);
+      drawChart(pair, "Retorno acumulado", "return", "%");
+      drawChart(pair, "Exposição ao BTC", "exposure", "%");
+    }
+  }
+  if (state.page === "btc") btc(content);
+  if (state.page === "risk") risk(content, account);
+  if (state.page === "windows") explorer(content);
+  comparison(content);
+  if (state.page === "demo") demo(content, account);
+  const actions = el("div", null, "export-actions");
+  actions.append(
+    button("Baixar tabela CSV", () => download("csv"), "secondary"),
+    button("Baixar seleção JSON", () => download("json"), "secondary"),
+  );
+  content.append(actions);
+  const provenanceDetails = el("details");
+  provenanceDetails.append(
+    el("summary", "Origem, integridade e limites desta seleção"),
+  );
+  provenance(provenanceDetails);
+  content.append(provenanceDetails);
+}
+document
+  .querySelectorAll("nav button")
+  .forEach((b) => b.addEventListener("click", () => navigate(b.dataset.page)));
+document.querySelector(".brand").addEventListener("click", (e) => {
+  e.preventDefault();
+  navigate("overview");
+});
+["source", "start", "months", "cost", "reference"].forEach((key) =>
+  $(key).addEventListener("change", () => {
+    state[key] = $(key).value;
+    offset = 0;
+    state = GridState.validSelection(state, catalog.rows);
+    save();
+    load(synthetic() && demoLoaded);
   }),
 );
-$("policy").addEventListener("change", render);
+$("policy").addEventListener("change", () => {
+  state.policy = $("policy").value;
+  const needsLoad = !state.visible.includes(state.policy);
+  if (needsLoad) state.visible.push(state.policy);
+  save();
+  if (needsLoad) load();
+  else render();
+});
+$("demo-policy").addEventListener("change", () => {
+  demoPolicy = $("demo-policy").value;
+  render();
+});
+$("reset").addEventListener("click", () => {
+  state = GridState.validSelection(
+    { ...GridState.defaults, page: state.page },
+    catalog.rows,
+  );
+  search = "";
+  offset = 0;
+  save();
+  load();
+});
 api("/api/catalog")
   .then((c) => {
     catalog = c;
+    state = GridState.validSelection(state, c.rows);
     $("version").textContent = c.version;
-    dates();
-    return load();
+    load(synthetic() && demoLoaded);
   })
-  .catch(() => {
-    $("status").textContent = "Console indisponível. Confira o processo local.";
+  .catch((e) => {
+    error = e.message;
+    render();
   });
