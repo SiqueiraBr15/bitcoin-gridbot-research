@@ -24,6 +24,8 @@ from research_console.demo import demonstration
 from research_console.risk import EXCEEDED, INSUFFICIENT, WITHIN, Mark, classify, profile
 from research_console.server import LocalServer, Service
 
+import gridbot
+
 
 def marks_for(values: list[int]) -> list[Mark]:
     start = datetime(2020, 1, 1, tzinfo=UTC)
@@ -306,6 +308,17 @@ def test_http_menus_catalog_and_selection(server: LocalServer) -> None:
         assert status == 200
         assert body
         assert b"DO_NOT_DISPLAY" not in body
+        if path == "/api/catalog":
+            catalog = json.loads(body)
+            assert catalog["version"] == f"G3.2 / {gridbot.__version__}"
+            assert catalog["global_coverage"] == "LOCAL_G3_1_PASS"
+            validation = catalog["local_validation"]
+            assert validation["source"] == "gridbot"
+            assert validation["branches"] is True
+            assert validation["threshold_percent"] == "85"
+            assert validation["remote_ci"] == "NOT_EXECUTED"
+            assert validation["measured_baseline"] == "d2cdf2f"
+            assert Fraction(validation["native_coverage_percent"]) == Fraction("96.52624362001981")
         if path.startswith("/api/export"):
             assert "attachment" in headers["Content-Disposition"]
 

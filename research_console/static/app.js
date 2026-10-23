@@ -397,7 +397,17 @@ function provenance(parent) {
     dl,
     el(
       "p",
-      "Sem impostos, liquidação final ou risco USDT modelados. Marcação diária não prova ausência de perdas intradiárias. Cobertura global PENDING.",
+      "Sem impostos, liquidação final ou risco USDT modelados. Marcação diária não prova ausência de perdas intradiárias.",
+      "explain",
+    ),
+  );
+  const validation = catalog.local_validation;
+  p.append(
+    el(
+      "p",
+      validation
+        ? `Validação local ${validation.phase}: ${money(validation.native_coverage_percent)}% de cobertura nativa (${validation.source}, linhas e ramos); limiar ${validation.threshold_percent}%. ${validation.environment}. Evidência arquivada; CI remoto não executado.`
+        : "Validação local indisponível. Consulte as auditorias do projeto; CI remoto não executado.",
       "explain",
     ),
   );

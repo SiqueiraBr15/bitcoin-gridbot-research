@@ -1,11 +1,20 @@
-# Research Console G3 RC
+# Research Console — instalação e uso
 
 Consulta local de resultados arquivados e demonstração PAPER. Sem novas
 estratégias, ordens reais, coleta de mercado ou ajustes econômicos.
 
 ## Instalar e abrir
 
-No PowerShell, dentro do checkout:
+No PowerShell, obtenha o checkout que contém a candidata aprovada:
+
+```powershell
+git clone https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git
+cd bitcoin-gridbot-research
+```
+
+Antes do merge autorizado, a main pública anterior não inclui o console.
+Use a branch/commit indicada no PR quando ela estiver publicada. A preparação
+local G3.2 não realizou push. Dentro desse checkout:
 
 ```powershell
 py -3.13 -m venv .venv
@@ -158,9 +167,12 @@ node --test tests/console/chart_state.test.cjs
 ```
 
 Node é ferramenta opcional para testes, não dependência de execução; sem npm
-install para abrir. Cobertura dirigida não substitui a global **PENDING**.
+install para abrir. A evidência nativa G3.1 é **96,52624362001981%**, source
+`gridbot`, branches, threshold 85%, Windows/Python 3.13.16, baseline d2cdf2f.
+Ela é separada da cobertura dirigida do console; nenhuma média foi feita.
+O console identifica essa evidência arquivada e informa CI remoto não executado.
 Threshold 85% e Hypothesis CI 300 preservados. Consulte a
-[auditoria G2](reviews/G2_RESEARCH_CONSOLE_PRO_AUDIT.md) para execuções, falhas
+[auditoria G3.1](reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md) para execuções, falhas
 intermediárias, capturas reais e limitações ambientais.
 
 
@@ -241,6 +253,22 @@ com Fraction contra JSON/gzip e HTTP/exports. A distribuição pública não con
 o corpus necessário; sem ele, o comando não promete reprodução histórica.
 
 Ver [auditoria G3](reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md)
-para falhas intermediárias, resultados efetivos, profiling, testes globais
-pendentes e limitações das capturas. Gitleaks não equivale a auditoria de CVEs
+para falhas intermediárias, resultados efetivos, profiling e limitações das
+capturas. Os pendentes daquela fase foram fechados na G3.1, sem apagar o histórico.
+Gitleaks não equivale a auditoria de CVEs
 ou de toda a máquina. Nenhum push/Actions/release remoto foi autorizado na G3.
+
+## Versão e primeiro uso público
+
+O pacote permanece em **0.1.0.dev0**, coerente com pyproject, CLI e metadados
+instalados. G3.2 identifica a integração técnica; não é uma tag publicada.
+**0.1.0rc1** é proposta para eventual pré-release. Um bump futuro precisa
+atualizar/testar os metadados e a regressão de versão antes de criar a tag;
+nenhuma release ou mudança de versão foi feita automaticamente.
+
+Sem a pasta original, o modo público mostra DATA_UNAVAILABLE para pesquisa
+histórica. A demo funciona por si. Os 4.266 resultados arquivados descrevem o
+contrato de um acervo privado opcional, não simulações incluídas no download.
+Exemplos públicos: `examples.paper_cycle` e `examples.offline_grid`, sintéticos.
+O comparador histórico exige o contrato admitido e contas equivalentes; na demo,
+os cenários têm trajetórias distintas e não recebem um benchmark pareado fictício.

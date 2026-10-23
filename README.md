@@ -9,7 +9,7 @@ Python. The active strategies studied did not demonstrate a robust advantage
 over simple benchmarks. This is an engineering/research portfolio, not a live
 trading system.
 
-## Console local de pesquisa · G3 RC
+## Console local de pesquisa
 
 Após a instalação abaixo, execute `python -m research_console` no checkout e abra
 **http://127.0.0.1:8765**. No Windows, `start_console.cmd` usa o ambiente `.venv`.
@@ -21,7 +21,7 @@ Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 **dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
 Esta funcionalidade está em revisão local; CI remoto continua desativado.
-[Auditoria G3 e limites da validação](docs/reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md).
+[Auditoria G3.1 e limites da validação](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
 O candidato local acrescenta navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
 
@@ -46,12 +46,20 @@ A instalação requer acesso ao PyPI; depois, a demonstração usa apenas dados
 sintéticos em memória. Não requer chaves, contas ou dados de mercado.
 
 ```powershell
+git clone https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git
+cd bitcoin-gridbot-research
 py -3.13 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install pip==26.2.1
-python -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
-python -m examples.paper_cycle
+.\.venv\Scripts\python.exe -m pip install pip==26.2.1
+.\.venv\Scripts\python.exe -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
+.\start_console.cmd
 ```
+
+Use o checkout que contém o console, identificado no PR/release. A candidata
+G3.2 ainda depende de publicação autorizada; a main anterior não contém a UI.
+Abra `http://127.0.0.1:8765`, escolha **Demonstração PAPER** e clique em
+**Executar cenários sintéticos**. CSV/JSON exportam essa seleção; os gráficos
+oferecem SVG. Ctrl+C no terminal encerra o processo. Não há início automático.
+O exemplo JSON sem navegador é `.\.venv\Scripts\python.exe -m examples.paper_cycle`.
 
 Em Linux/macOS: `python3.13 -m venv .venv` e `source .venv/bin/activate`,
 seguindo os mesmos comandos `python`. Essa plataforma ainda não foi executada
@@ -94,17 +102,21 @@ Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Evidências de engenharia
 
-Validação da publicação anterior em Windows/Python 3.13, em ambiente novo, com
-dependências fixadas (histórico; não é nova execução integral da G3):
+Evidência local G3.1 em Windows/Python 3.13.16, com dependências fixadas,
+inventário completo e união auditada de execuções segmentadas:
 
 | Verificação | Resultado e alcance |
 | --- | --- |
-| Instalação | Editable e wheel; import/CLI do wheel fora do checkout |
-| Testes | 1.623 casos distintos aprovados em segmentos, incluindo 5 novos; 1 skip Windows |
-| Seleção anterior | Todos os 930 casos cobertos pelos segmentos concluídos |
-| Coleta completa | 3.277 casos coletados; não significa 3.277 executados |
+| Testes Python | **3.420 PASS + dois skips preexistentes**, 3.422 nodeids, zero pendentes |
+| JavaScript | **19 PASS**, separados de pytest |
+| Cobertura nativa | **96,53%**; source `gridbot`, linhas + branches, threshold **85%**, exit 0 |
+| Console Python | Cobertura dirigida própria, separada da nativa; consultar auditorias |
 | Ruff e Mypy | Verificações locais aprovadas, incluindo exemplos e ferramentas |
 | Demonstração | Conservação racional, replay, determinismo e bloqueio de rede testado |
+
+As contagens anteriores e tentativas com timeout permanecem nos relatórios.
+O número de cobertura identifica os 104 módulos nativos, não toda a árvore do
+checkout. A interface o apresenta como evidência arquivada, sem badge de CI.
 
 ```text
 python -m tools.verify --profile smoke

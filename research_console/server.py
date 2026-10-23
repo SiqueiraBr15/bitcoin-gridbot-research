@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
+from gridbot import __version__
 from research_console.analysis import (
     SCHEMA,
     UNITS,
@@ -50,7 +51,7 @@ class Service:
         if self.archive:
             self.archive.fingerprint("", 0, "")
         return {
-            "version": "G3 RC / 0.1.0.dev0",
+            "version": f"G3.2 / {__version__}",
             "mode": "PAPER / OFFLINE",
             "archive_status": "ARCHIVED_RESEARCH_RESULT" if self.archive else "UNAVAILABLE",
             "archive_integrity": "MATRICES_VERIFIED_CURVES_ON_SELECTION"
@@ -62,7 +63,17 @@ class Service:
             "rows": self.archive.summaries if self.archive else [],
             "risk_tolerance": "1/5",
             "sample": "RETROSPECTIVE_OVERLAPPING_WINDOWS",
-            "global_coverage": "PENDING",
+            "global_coverage": "LOCAL_G3_1_PASS",
+            "local_validation": {
+                "phase": "G3.1",
+                "native_coverage_percent": "96.52624362001981",
+                "source": "gridbot",
+                "branches": True,
+                "threshold_percent": "85",
+                "environment": "Windows / Python 3.13.16",
+                "remote_ci": "NOT_EXECUTED",
+                "measured_baseline": "d2cdf2f",
+            },
             "dataset_id": "M1_R_DAILY_MARKS_V1" if self.archive else None,
             "manifest_sha256": self.archive.pin if self.archive else None,
             "archive_marks": self.archive.index.get("marks") if self.archive else None,
