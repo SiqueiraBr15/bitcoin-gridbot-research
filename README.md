@@ -109,8 +109,8 @@ A [proposta de CI](ci/github-actions-proposal.yml) é inativa, fora de
 
 ## Pesquisa: o que foi aprendido
 
-As estratégias ativas examinadas **não demonstraram vantagem robusta** sobre
-benchmarks simples. Houve resultados locais positivos e negativos e compromissos
+GRID tradicional, GRID persistente e rebalanceamento por bandas **não demonstraram
+vantagem robusta suficiente** sobre benchmarks simples nas campanhas examinadas. Houve resultados locais positivos e negativos e compromissos
 entre patrimônio, BTC físico, risco e custos. Nenhuma política com BTC respeitou
 uma tolerância indicativa de drawdown de 20% em todas as janelas avaliadas.
 Caixa preservou valor nominal no modelo, sem crescimento ou acumulação de BTC.
@@ -142,6 +142,6 @@ Projeto conduzido por **Leonardo Siqueira Ribeiro dos Santos / SiqueiraBr15**,
 com assistência de IA em implementação, testes, documentação e revisão.
 Essa assistência não constitui auditoria externa certificada.
 
-**Licença pendente de decisão do titular.** Não há arquivo LICENSE nem licença
-open source presumida. As dependências preservam suas próprias licenças e não
-são vendorizadas.
+Licenciado sob a [MIT](LICENSE). Copyright © 2026 Leonardo Siqueira Ribeiro dos Santos.
+As dependências preservam suas próprias licenças; seus fontes não são vendorizados.
+Veja [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) para o escopo e atribuições.

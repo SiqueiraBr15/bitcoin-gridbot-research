@@ -23,6 +23,6 @@ Antes de publicar, repita scan de árvore e histórico com Gitleaks, verificando
 erros de leitura e a lista exata de arquivos. Não coloque secrets em exemplos,
 logs, issues ou capturas. Relatos sensíveis seguem [SECURITY.md](SECURITY.md).
 
-A licença ainda depende do titular; condições de participação/distribuição devem
-ser decididas antes de receber contribuições externas. CI remoto também aguarda
-aprovação própria. A documentação não concede autorização de operação financeira.
+O projeto usa [MIT](LICENSE). Contribua apenas com material que você tenha direito
+de disponibilizar sob essa licença e preserve atribuições de terceiros.
+CI remoto permanece desativado. A documentação não concede autorização de operação financeira.

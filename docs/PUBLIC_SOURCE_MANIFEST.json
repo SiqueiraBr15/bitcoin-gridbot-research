@@ -125,5 +125,10 @@
     "Bounded verification runner, test classification and performance observations",
     "Reviewed documentation and inactive CI proposal"
   ],
-  "native_financial_modules_modified": false
+  "native_financial_modules_modified": false,
+  "publication_preparation": {
+    "license": "MIT",
+    "third_party_licenses_separate": true,
+    "financial_code_modified": false
+  }
 }

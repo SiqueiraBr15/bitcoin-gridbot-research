@@ -25,5 +25,5 @@ Repita a verificação de dependências antes de instalar ou publicar uma releas
 O runtime não é vendorizado. Pydantic, pydantic-settings e pydantic-core declaram
 MIT; python-dotenv declara BSD-3-Clause nos metadados examinados. Ferramentas
 possuem condições próprias, incluindo MPL-2.0 em Hypothesis/pathspec e PSF-2.0
-em typing_extensions. A decisão de licença do GridBot não substitui essas condições.
+em typing_extensions. A licença MIT do GridBot não substitui essas condições.
 Não se afirma aqui uma revisão jurídica completa das dependências transitivas.
