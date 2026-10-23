@@ -47,8 +47,8 @@ são copiados e preservados. Para retomar uma execução incompleta:
 ```
 
 Aumentar prazo só depois de investigar o caso; não repetir orçamento sem hipótese.
-Se um lote continuar excedendo o limite, subdivida seus nodeids de forma explícita,
-preservando a união e exclusividade no manifesto. Não interprete silêncio como
+Para subdividir lotes interrompidos, acrescente `--max-cases 1` à retomada;
+o novo plano preserva a união e exclusividade dos nodeids. Não interprete silêncio como
 deadlock. Uma falha financeira não autoriza corrigir regras para obter aprovação.
 
 Alteração de identidade invalida a reutilização automática: recoloque os segmentos
@@ -63,8 +63,10 @@ ou fontes. O tool compara hashes atuais; não é assinatura criptográfica exter
 ```
 
 Se a primeira campanha concluir tudo, omita bundle-2. O `combine` verifica
-identidades, hashes, disjunção, ausência de resultados incompletos e dados de
-branches. Usa `Coverage.combine(..., keep=True, strict=True)`; mantém inputs,
+identidades, hashes, disjunção, ausência de resultados incompletos, dados de
+branches e os arquivos efetivamente medidos. Recusa fontes externas e exige a
+união completa dos módulos nativos; declarar source não basta para filtrar um
+banco importado. Usa `Coverage.combine(..., keep=True, strict=True)`; mantém inputs,
 gera JSON/HTML e compara com o threshold original, sem overrides.
 
 Escopo original: **`source=["gridbot"]`, branches, fail_under=85**. UI Python

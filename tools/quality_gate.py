@@ -244,7 +244,12 @@ def inventory(directory: Path) -> int:
 
 
 def campaign(
-    inventory_path: Path, directory: Path, timeout: int, budget: int, pending_path: Path | None
+    inventory_path: Path,
+    directory: Path,
+    timeout: int,
+    budget: int,
+    pending_path: Path | None,
+    max_cases: int = 20,
 ) -> int:
     import gzip
 
@@ -258,7 +263,7 @@ def campaign(
         if not pending <= {item["nodeid"] for item in items}:
             raise ValueError("pending nodeids not present in inventory")
         items = [item for item in items if item["nodeid"] in pending]
-    planned = partition(items)
+    planned = partition(items, max_cases)
     write_json(
         directory / "plan.json",
         {
@@ -332,9 +337,12 @@ def main() -> int:
     parser.add_argument("--collect-only", action="store_true")
     parser.add_argument("--segment-seconds", type=int, default=300)
     parser.add_argument("--budget-seconds", type=int, default=5400)
+    parser.add_argument("--max-cases", type=int, default=20)
     args = parser.parse_args()
     if not 1 <= args.segment_seconds <= 1800 or not 5 <= args.budget_seconds <= 14400:
         parser.error("finite segment/budget limits required")
+    if not 1 <= args.max_cases <= 100:
+        parser.error("max-cases must be between 1 and 100")
     os.environ.setdefault("HYPOTHESIS_PROFILE", "ci")
     if args.mode == "_worker":
         return worker(args.out, args.collect_only)
@@ -343,7 +351,12 @@ def main() -> int:
     if args.inventory is None:
         parser.error("run requires --inventory")
     return campaign(
-        args.inventory, args.out, args.segment_seconds, args.budget_seconds, args.pending
+        args.inventory,
+        args.out,
+        args.segment_seconds,
+        args.budget_seconds,
+        args.pending,
+        args.max_cases,
     )
 
 

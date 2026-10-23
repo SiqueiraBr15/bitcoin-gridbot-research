@@ -18,6 +18,24 @@ from typing import Any
 from tools.quality_gate import ROOT, digest, identity, reconcile, write_json
 
 
+def validate_measured_files(paths: list[Path], expected: set[Path]) -> None:
+    """A declared source setting alone does not constrain coverage report inputs."""
+    from coverage import CoverageData
+
+    measured: set[Path] = set()
+    for path in paths:
+        data = CoverageData(basename=str(path))
+        data.read()
+        if not data.has_arcs():
+            raise ValueError("branch coverage is required")
+        files = {Path(name).resolve() for name in data.measured_files()}
+        if not files <= expected:
+            raise ValueError("coverage contains foreign source files")
+        measured.update(files)
+    if measured != expected:
+        raise ValueError("native source inventory incomplete")
+
+
 def export_campaign(
     inventory_path: Path, campaign_path: Path, directory: Path, prior_bundles: list[Path]
 ) -> int:
@@ -107,7 +125,7 @@ def verify_bundles(
 
 
 def consolidate(inventory_path: Path, bundle_paths: list[Path], directory: Path) -> int:
-    from coverage import Coverage, CoverageData
+    from coverage import Coverage
 
     inventory = json.loads(inventory_path.read_text())
     if inventory["identity"] != identity():
@@ -116,11 +134,9 @@ def consolidate(inventory_path: Path, bundle_paths: list[Path], directory: Path)
     statuses, paths = verify_bundles(inventory, bundles)
     if not paths:
         raise ValueError("no completed coverage files")
-    for path in paths:
-        data = CoverageData(basename=str(path))
-        data.read()
-        if not data.has_arcs():
-            raise ValueError("branch coverage is required")
+    validate_measured_files(
+        paths, {path.resolve() for path in (ROOT / "src/gridbot").rglob("*.py")}
+    )
     directory.mkdir(parents=True, exist_ok=False)
     coverage = Coverage(
         config_file=str(Path(__file__).resolve().parents[1] / "pyproject.toml"),

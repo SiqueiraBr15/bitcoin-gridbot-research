@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 from tools import quality_coverage
-from tools.quality_coverage import export_campaign, verify_bundles
+from tools.quality_coverage import export_campaign, validate_measured_files, verify_bundles
 from tools.quality_gate import digest
 
 
@@ -30,6 +30,28 @@ def test_bundle_rejects_identity_overlap_timeout_and_changed_data(tmp_path: Path
     data.write_bytes(b"changed")
     with pytest.raises(ValueError, match="checksum"):
         verify_bundles(inventory, [(location, bundle)])
+
+
+def test_measured_sources_must_match_the_full_native_inventory(tmp_path: Path) -> None:
+    from coverage import CoverageData
+
+    native = (tmp_path / "native.py").resolve()
+    foreign = (tmp_path / "foreign.py").resolve()
+    path = tmp_path / "native.coverage"
+    data = CoverageData(basename=str(path))
+    data.add_arcs({str(native): [(-1, 1), (1, -1)]})
+    data.write()
+    validate_measured_files([path], {native})
+    with pytest.raises(ValueError, match="inventory incomplete"):
+        validate_measured_files([path], {native, foreign})
+    with pytest.raises(ValueError, match="foreign source"):
+        validate_measured_files([path], {foreign})
+    line_path = tmp_path / "line-only.coverage"
+    line_data = CoverageData(basename=str(line_path))
+    line_data.add_lines({str(native): [1]})
+    line_data.write()
+    with pytest.raises(ValueError, match="branch"):
+        validate_measured_files([line_path], {native})
 
 
 def test_bundle_rejects_unknown_nodes_duplicates_and_path_escape(tmp_path: Path) -> None:
