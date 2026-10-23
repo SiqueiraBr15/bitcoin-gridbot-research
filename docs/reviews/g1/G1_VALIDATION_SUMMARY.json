@@ -1,0 +1,74 @@
+{
+  "phase": "G1",
+  "result": "PASS",
+  "baseline_public_commit": "a28e6f35b7b0acb42cee6dc97959cdf65f6022b0",
+  "implementation_commit": "cdd4d1f3d519705972c82b6304c1a9572db7a0b1",
+  "directed_tests": 56,
+  "directed_coverage_percent": 95.25862068965517,
+  "regression_tests": 322,
+  "directed_timeout_seconds": 120,
+  "hypothesis_ci_examples": 300,
+  "global_coverage": "PENDING",
+  "ruff": "PASS",
+  "mypy": "PASS",
+  "format": "PASS",
+  "pip_check": "PASS",
+  "node_syntax": "PASS",
+  "precommit": "PASS",
+  "catalog_rows": 4266,
+  "archived_selections_checked": 18,
+  "archived_wallets_checked": 108,
+  "archived_marks_checked": 46134,
+  "risk_profile_AST_equal_M1_R": true,
+  "original_hashes_preserved": 1665,
+  "untracked_historical_preserved": 6,
+  "frozen_V2_sha256": "44e9639554d01c13e2e0648613e7904a6f1649ca934b00b3821021aa28582249",
+  "new_runtime_dependencies": 0,
+  "public_private_datasets_added": 0,
+  "historical_backtests_executed": 0,
+  "binance_requests": 0,
+  "local_bind": "127.0.0.1",
+  "github_push_performed": false,
+  "ui_manual": [
+    "overview",
+    "wealth",
+    "btc",
+    "risk",
+    "windows",
+    "demo",
+    "date_selection",
+    "horizon_selection",
+    "cost_selection",
+    "policy_selection",
+    "observed_point_tooltip",
+    "unavailable_without_archive",
+    "source_switch_back"
+  ],
+  "screenshots": "SYNTHETIC_DEMO only",
+  "earlier_attempts": [
+    {
+      "attempt": "directed_tests_1",
+      "passed": 45,
+      "failed": 5,
+      "cause": "HTTP test helper incorrectly used HTTPConnection as context manager; corrected with closing."
+    },
+    {
+      "attempt": "directed_tests_2",
+      "passed": 49,
+      "failed": 1,
+      "cause": "3-second HTTP test client timeout during coverage-instrumented synthetic demo; finite client limit 15 seconds, suite limit unchanged 120 seconds."
+    },
+    {
+      "attempt": "existing_regression",
+      "exit_code": 4,
+      "cause": "Nonexistent tests/examples path; corrected to existing tests/test_public_demo.py. No test ran in failed collection."
+    }
+  ],
+  "limitations": [
+    "Global suite and global coverage remain pending.",
+    "Windows browser manual verification; Linux, remote CI, mobile and physical Full HD not separately exercised.",
+    "M1.R source contract pinned; R1/M2 contextual, not generic importers.",
+    "Original study curves outside selected 108 wallets not all recalculated.",
+    "Development loopback server is not a hostile-local-user sandbox."
+  ]
+}
