@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GridBot | Research Console</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside>
+      <a class="brand" href="#overview"
+        ><span class="brandmark">G</span
+        ><span>GridBot<small>RESEARCH CONSOLE</small></span></a
+      >
+      <div class="local">● LOCAL · PAPER / OFFLINE</div>
+      <nav aria-label="Painéis">
+        <button data-page="overview" class="active">Visão geral</button>
+        <button data-page="wealth">Patrimônio</button
+        ><button data-page="btc">Acumulação de BTC</button>
+        <button data-page="risk">Risco e drawdown</button
+        ><button data-page="windows">Janelas históricas</button>
+        <button data-page="demo">Demonstração PAPER</button>
+      </nav>
+      <div class="side-note">
+        <strong>Pesquisa, com limites claros.</strong>
+        <p>
+          Sem ordens reais. Sem conexão à exchange. Estratégias e parâmetros
+          congelados.
+        </p>
+        <span id="version">G1</span>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <div class="eyebrow">ENGENHARIA & PESQUISA QUANTITATIVA</div>
+          <h1 id="title">Visão geral</h1>
+          <p id="subtitle">Evidências antes de conclusões.</p>
+        </div>
+        <span class="badge">PAPER / OFFLINE</span>
+      </header>
+      <div class="notice">
+        Sistema experimental, sem prontidão para trading real. A referência de
+        drawdown de <strong>20%</strong> é uma preferência analítica; não
+        garante limite de perda.
+      </div>
+      <section id="filters" class="filters" aria-label="Seleção de pesquisa">
+        <label
+          >Fonte<select id="source">
+            <option value="archive">Pesquisa arquivada · M1 / M1.R</option>
+            <option value="demo">SYNTHETIC_DEMO · PAPER</option>
+          </select></label
+        >
+        <label>Data inicial<select id="start"></select></label
+        ><label
+          >Horizonte<select id="months">
+            <option>6</option>
+            <option>12</option>
+            <option selected>24</option>
+          </select></label
+        >
+        <label
+          >Custo<select id="cost">
+            <option>CA</option>
+            <option>CX2</option>
+            <option>CB</option>
+          </select></label
+        >
+        <label>Política / cenário<select id="policy"></select></label>
+      </section>
+      <div id="status" class="status" role="status">
+        Carregando catálogo local…
+      </div>
+      <div id="content" aria-live="polite"></div>
+      <footer>
+        GridBot G1 · Valores em USDT, BTC líquido e marcação observada. Sem
+        interpolação de candles ou geração de backtests históricos.
+      </footer>
+    </main>
+  </body>
+</html>

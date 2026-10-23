@@ -9,6 +9,16 @@ Python. The active strategies studied did not demonstrate a robust advantage
 over simple benchmarks. This is an engineering/research portfolio, not a live
 trading system.
 
+## Console local de pesquisa · G1
+
+Após a instalação abaixo, execute `python -m research_console` no checkout e abra
+**http://127.0.0.1:8765**. No Windows, `start_console.cmd` usa o ambiente `.venv`.
+O console inclui patrimônio, BTC, drawdown, janelas e a demo PAPER determinística.
+Histórico depende de origem local explicitamente autorizada; sem ela, mostra
+**dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
+[Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
+Esta funcionalidade está em revisão local; CI remoto continua desativado.
+
 ## O que você encontra aqui
 
 - Geometria em ticks inteiros, sizing quantizado e valores financeiros em Decimal.
