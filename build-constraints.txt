@@ -1,5 +1,6 @@
 # Isolated wheel/editable build dependencies for Python 3.13.
 hatchling==1.32.4
+editables==0.6
 packaging==26.3
 pathspec==1.1.1
 pluggy==1.6.0

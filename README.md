@@ -9,7 +9,7 @@ Python. The active strategies studied did not demonstrate a robust advantage
 over simple benchmarks. This is an engineering/research portfolio, not a live
 trading system.
 
-## Console local de pesquisa · G2
+## Console local de pesquisa · G3 RC
 
 Após a instalação abaixo, execute `python -m research_console` no checkout e abra
 **http://127.0.0.1:8765**. No Windows, `start_console.cmd` usa o ambiente `.venv`.
@@ -21,9 +21,11 @@ Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 **dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
 Esta funcionalidade está em revisão local; CI remoto continua desativado.
-[Auditoria G2 e limites da validação](docs/reviews/G2_RESEARCH_CONSOLE_PRO_AUDIT.md).
+[Auditoria G3 e limites da validação](docs/reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md).
+O candidato local acrescenta navegação voltar/avançar, timeout/cancelamento,
+marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
 
-![Console G2 em execução com dados sintéticos](docs/images/g2-synthetic-paper.png)
+![Console G3 em execução com dados sintéticos](docs/images/g3-paper-1280.jpg)
 
 ## O que você encontra aqui
 
@@ -93,7 +95,7 @@ Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Evidências de engenharia
 
 Validação da publicação anterior em Windows/Python 3.13, em ambiente novo, com
-dependências fixadas (histórico; não é nova execução integral da G2):
+dependências fixadas (histórico; não é nova execução integral da G3):
 
 | Verificação | Resultado e alcance |
 | --- | --- |
@@ -146,7 +148,9 @@ Este snapshot é experimental e **não está pronto para dinheiro real**. Não i
 adaptador ativo de ordens, credenciais ou datasets pessoais. Há um coletor opt-in
 de arquivos públicos oficiais no núcleo preservado; ele não foi executado nesta
 missão e não participa das demonstrações. Nenhuma coleta prospectiva foi autorizada.
-O wheel distribui o pacote `gridbot`; exemplos/testes/ferramentas ficam no checkout.
+O wheel G3 distribui `gridbot`, `research_console` e os exemplos sintéticos,
+incluindo os assets locais. Testes e ferramentas de auditoria ficam no checkout.
+Após instalar/ativar o ambiente, `gridbot-research-console` funciona fora do clone.
 As versões fixadas restringem dependências, sem prometer builds binariamente
 idênticos em toda plataforma ou disponibilidade permanente do PyPI.
 

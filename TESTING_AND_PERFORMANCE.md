@@ -108,9 +108,31 @@ localmente; sintaxe/proveniência das actions são verificadas separadamente.
 Ativação remota e validação Linux ainda dependem de aprovação e execução reais.
 
 O pacote foi instalado editable num venv novo e como wheel noutro venv; o wheel
-foi importado fora do checkout e o entrypoint testado. Somente `gridbot` é empacotado;
-examples/tools/tests devem ser usados a partir do checkout. Pins limitam resolução,
+foi importado fora do checkout e o entrypoint testado. Na publicação anterior somente `gridbot` era empacotado. O wheel G3 passa a
+incluir console/assets e exemplos sintéticos; tools/tests continuam no checkout. Pins limitam resolução,
 sem lock criptográfico completo ou promessa de identidade binária entre plataformas.
 
 Método de diagnóstico: [pytest durations](https://docs.pytest.org/en/stable/how-to/usage.html#profiling-test-execution-duration)
 e [constraints de build do pip](https://pip.pypa.io/en/stable/user_guide/#build-constraints).
+
+
+## G3: evidências novas e pendência global
+
+As contagens nas seções anteriores são históricas. A G3 repetiu uma propriedade
+com a mesma semente CI: call 2,72 s sem tracing e 8,87 s com branches, sem reduzir
+exemplos. Uma campanha segmentada teve orçamento total de 600 s (120 s para um
+grupo misto, 60 s por módulo posterior). Timeouts permanecem incompletos; não são
+PASS. O grupo misto foi depois decomposto sem storage: 1.308 PASS e um skip Windows
+em 81,75 s sob coverage. Isso não executa os módulos de storage retirados dessa
+sondagem: eles continuam listados como pendentes, sem desabilitar nenhum teste.
+
+Ressalvas: subprocessos por segmento não provam ausência de bugs dependentes da
+ordem de uma sessão global. Arquivos de coverage só são agregados de processos
+que terminaram com sucesso. O relatório parcial com limiar 85 preservado não é
+aprovação global, mesmo se sua porcentagem for alta. Nenhuma repetição monolítica
+longa foi justificada pelos tempos observados. Mudanças no custo dominante de
+validação recursiva financeira requerem autorização específica do orquestrador.
+
+A auditoria G3 documenta a contagem final, skips, tabela por módulo, cobertura
+dirigida, manifests de nodeids, comandos, comparação antes/depois e riscos.
+[Relatório G3](docs/reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md).

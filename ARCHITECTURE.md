@@ -36,8 +36,8 @@ Não existe adaptador de trading real habilitado nesta distribuição.
 confere saldos/NAV em Fraction a partir dos fills. O replay PAPER é verificado
 separadamente. Não há persistência em disco ou uso de dados financeiros privados
 nesse caminho. `tools/verify.py` controla apenas processos de teste e limites;
-`tools/test_catalog.py` coleta e classifica casos. Esses auxiliares não fazem
-parte do wheel e não modificam a autoridade financeira.
+`tools/test_catalog.py` coleta e classifica casos. As ferramentas de verificação não fazem parte do wheel; os exemplos sintéticos
+agora o integram. Nenhum desses auxiliares modifica a autoridade financeira.
 
 O pacote preserva um coletor opt-in de arquivos públicos em
 `marketdata.public_archives`, com allowlist e quotas. Sua existência não significa
@@ -46,9 +46,10 @@ não o acionam; ele não foi executado nesta missão. Dados prospectivos e orden
 reais continuam sujeitos a contratos/autorização separados.
 
 
-## Console G2: consulta local fora do núcleo
+## Console G2/G3: consulta local fora do núcleo
 
-`research_console` não integra o wheel financeiro. `data.py` admite somente o
+`research_console` é uma camada separada do núcleo financeiro; o wheel G3 inclui
+console, assets e exemplos sintéticos para execução fora do checkout. `data.py` admite somente o
 contrato M1.R congelado, verifica conteúdo e projeta campos permitidos. `risk.py`
 mantém o contrato G1/M1.R. `analysis.py` calcula somente diferenças entre resultados
 já existentes, extrema por métrica, intensidade e distribuições sintéticas em
@@ -67,3 +68,21 @@ estatísticas multidatas desse corpus não são promovidas a resultados público
 ficam indisponíveis; as distribuições demonstrativas usam apenas dois cenários
 sintéticos identificados. Ver contratos, segurança e uso em
 [RESEARCH_CONSOLE.md](docs/RESEARCH_CONSOLE.md).
+
+
+## G3: fronteiras de qualidade
+
+O núcleo `src/gridbot`, `risk.py` e o adaptador financeiro `demo.py` permanecem
+preservados. As correções concentram-se em transporte/estado, identidade de
+exports e validação de entradas. JSON é UTF-8 com limites estruturais antes da
+alocação; queries vazias/desconhecidas não são descartadas por parse_qs.
+A cópia profunda do cache ocorre depois de escolher o subconjunto, preservando
+isolamento mutável e validação de hashes em todo hit. Nenhuma validação do motor
+congelado foi removida para acelerar a suíte.
+
+O frontend separa proveniência sintética da histórica mesmo quando ambas as
+fontes estão disponíveis. Charts desconectam seus ResizeObservers no teardown;
+tabelas detalhadas são preenchidas sob demanda e paginadas. Timings DOM medem
+somente criação/renderização síncrona, não paint de GPU ou tempo até pixels.
+O novo oráculo de auditoria é uma ferramenta de desenvolvimento fora do wheel;
+sua leitura e cálculo racional não executam políticas ou campanhas históricas.

@@ -1,4 +1,4 @@
-# Research Console G2
+# Research Console G3 RC
 
 Consulta local de resultados arquivados e demonstração PAPER. Sem novas
 estratégias, ordens reais, coleta de mercado ou ajustes econômicos.
@@ -143,7 +143,8 @@ CSP limita recursos/conexões à origem e impede framing. Sem CORS/escrita HTTP,
 rotas de trading ou leitura arbitrária. Nomes fixos, limites de leitura e
 descompressão, recusa de links/junctions/origens de rede. Não é sandbox contra
 usuário local capaz de adulterar processo; não exponha via proxy público.
-Console e exemplos requerem checkout e não integram o wheel do núcleo.
+O wheel G3 inclui núcleo, console, exemplos sintéticos e assets. Nenhum corpus
+privado é empacotado. Testes/tools continuam no checkout.
 
 ## Verificar
 
@@ -161,3 +162,85 @@ install para abrir. Cobertura dirigida não substitui a global **PENDING**.
 Threshold 85% e Hypothesis CI 300 preservados. Consulte a
 [auditoria G2](reviews/G2_RESEARCH_CONSOLE_PRO_AUDIT.md) para execuções, falhas
 intermediárias, capturas reais e limitações ambientais.
+
+
+## G3: operação, diagnóstico e exports reproduzíveis
+
+A navegação registra páginas na URL (`#wealth`, `#risk`, `#demo`, etc.).
+Voltar/avançar e reload preservam preferências válidas da sessão. A chave de
+preferências G2 foi mantida por compatibilidade; não guarda séries ou caminhos.
+Novas consultas cancelam fetches anteriores; leitura/API/export têm deadline
+cliente de 15 s. Um cancelamento não interrompe uma validação já iniciada no
+servidor, mas sua resposta não substitui a seleção mais recente.
+
+A API usa cookie de sessão com nome por porta. Windows recebe bind exclusivo;
+uma segunda instância na mesma porta falha explicitamente. Use `--port` diferente,
+sem encerrar automaticamente outro processo. Ctrl+C encerra o processo manual.
+Sem serviços, tarefas agendadas ou alteração de política global do Windows.
+
+No checkout, o launcher opcional PowerShell valida o ambiente local:
+
+```powershell
+.\start_console.ps1
+.\start_console.ps1 -Port 8766
+```
+
+`-Python` aceita o caminho de um interpretador já instalado; `-ArchiveRoot`
+aceita somente uma fonte local autorizada do contrato descrito acima. Se a política
+do PowerShell impedir scripts, use `start_console.cmd` ou `python -m research_console`;
+não é necessário alterar a política de execução. O launcher CMD não fica esperando
+tecla quando faltar o ambiente: retorna erro e aponta as instruções de instalação.
+
+Após instalação do wheel em um venv, mesmo fora do clone:
+
+```powershell
+gridbot-research-console --port 8765
+```
+
+O modo público abre com `DATA_UNAVAILABLE` para pesquisa ausente. A demo só
+aparece após escolha e execução explícitas. **Reexecutar cenários sintéticos**
+executa novamente o caminho nativo determinístico; navegação e downloads comuns
+reutilizam a projeção validada em memória. Não são preços de mercado.
+
+Cada gráfico oferece **Consultar marcas exatas em tabela**, com 25 marcas por
+página da política em foco. Valores permanecem strings exatas; ratios são
+identificados como razões (por exemplo −0.2 = −20%). Há caption e cabeçalhos de
+coluna; o gráfico continua consultável por setas/Home/End, com estado textual.
+Não se afirma certificação WCAG ou equivalência a leitor de tela não testado.
+
+API/JSON e CSV usam `GRIDBOT_RESEARCH_SELECTION_V3`. Campos novos são aditivos;
+os campos anteriores continuam. A identidade inclui fonte, dataset, janela UTC,
+horizonte, custo, políticas, foco, referência e manifesto aplicável. CSV inclui
+também capital inicial, mark final e hash das marcas históricas. Pontos decimais
+são a representação interna; vírgulas pt-BR são apenas formatação visual.
+CSV UTF-8 BOM é separado por vírgula, com quoting padrão; importe explicitamente
+essa opção em planilhas que usem ponto e vírgula por locale. Não se afirma que
+Excel foi operado neste teste.
+
+SVG é `GRIDBOT_CHART_EXPORT_V1` e contém `<metadata>` JSON com identidade e
+resumos exatos/unidades, além de traços visuais. O manifesto histórico não é
+atribuído à demo: nela é nulo/não aplicável. Round trip é equivalência de campos,
+não reimportação como fonte oficial ou identidade binária da imagem em todo
+viewport. CSV rejeita identificadores/valores incompatíveis com seu schema,
+incluindo fórmulas, sem converter silenciosamente a identidade de política.
+JSON exige UTF-8, constantes finitas, profundidade/estrutura e leitura limitadas.
+
+O download é cancelado se a seleção mudar durante sua preparação. Mensagens de
+timeout/fonte inválida não exibem caminhos nem stack traces; recarregue a página
+para obter uma nova sessão após reiniciar o serviço. Confira primeiro a porta e
+o ambiente se houver recusa HTTP; não desative controles de origem/sessão.
+
+A auditoria financeira opcional exige autorização da pasta e não executa backtest:
+
+```powershell
+python -m tools.audit_console_archive --archive-root "PASTA_ABSOLUTA_LOCAL_AUTORIZADA_DE_RELATORIOS"
+```
+
+O comando imprime resumo limitado de 27 seleções predeterminadas, verificadas
+com Fraction contra JSON/gzip e HTTP/exports. A distribuição pública não contém
+o corpus necessário; sem ele, o comando não promete reprodução histórica.
+
+Ver [auditoria G3](reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md)
+para falhas intermediárias, resultados efetivos, profiling, testes globais
+pendentes e limitações das capturas. Gitleaks não equivale a auditoria de CVEs
+ou de toda a máquina. Nenhum push/Actions/release remoto foi autorizado na G3.
