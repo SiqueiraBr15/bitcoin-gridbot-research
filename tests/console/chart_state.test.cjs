@@ -167,3 +167,79 @@ test("scientific notation ordering and duplicate restored policies", () => {
 test("unleveraged exposure chart is bounded by zero and 100 percent", () => {
   assert.deepEqual(domain([0, 0.5, 1], "exposure"), [0, 1]);
 });
+
+test("route history accepts known pages and ignores skip links or HTML", () => {
+  const { routePage } = require("../../research_console/static/state.js");
+  assert.equal(routePage("#risk"), "risk");
+  for (const h of ["#content", "#<script>", "#../../private", ""])
+    assert.equal(routePage(h), null);
+});
+
+test("SVG identity projection preserves exact strings and drops private extras", () => {
+  const { exportMetadata } = require("../../research_console/static/charts.js");
+  const row = {
+    policy: "B0_BH",
+    nav_usdt: "100.000000000000000001",
+    private_path: "NEVER_EXPORT",
+  };
+  const result = exportMetadata(
+    {
+      schema: "GRIDBOT_RESEARCH_SELECTION_V3",
+      source_kind: "SYNTHETIC_DEMO",
+      dataset_id: "SYNTHETIC_PUBLIC_DEMO_V1",
+      focused_policy: "B0_BH",
+      private_path: "NEVER_EXPORT",
+    },
+    [{ summary: row }],
+    "nav",
+    "USDT",
+  );
+  assert.equal(result.summaries[0].nav_usdt, row.nav_usdt);
+  assert.equal(result.selection.dataset_id, "SYNTHETIC_PUBLIC_DEMO_V1");
+  assert.ok(!JSON.stringify(result).includes("NEVER_EXPORT"));
+  assert.equal(result.schema, "GRIDBOT_CHART_EXPORT_V1");
+});
+
+test("accessible mark table pages original exact observations", () => {
+  const { markRows } = require("../../research_console/static/charts.js");
+  const series = Array.from({ length: 60 }, (_, i) => ({
+    time: String(i),
+    nav: "100.000000000000000001",
+  }));
+  const accounts = [{ summary: { policy: "B0_BH" }, series }];
+  assert.equal(markRows(accounts, "nav", "B0_BH", 0).length, 25);
+  assert.deepEqual(markRows(accounts, "nav", "B0_BH", 50)[0], {
+    time: "50",
+    value: "100.000000000000000001",
+  });
+  assert.equal(markRows([], "nav", "B0_BH").length, 0);
+});
+
+test("synthetic provenance never inherits the historical manifest or unexecuted integrity", () => {
+  const { provenance } = require("../../research_console/static/state.js");
+  const archive = {
+    archive_status: "ARCHIVED_RESEARCH_RESULT",
+    dataset_id: "M1_R_DAILY_MARKS_V1",
+    manifest_sha256: "historical_hash",
+    archive_integrity: "MATRICES_VERIFIED",
+  };
+  const pending = provenance(true, {}, archive);
+  assert.equal(pending.manifest_sha256, null);
+  assert.equal(pending.dataset_id, "SYNTHETIC_PUBLIC_DEMO_V1");
+  assert.equal(pending.integrity, "NOT_EXECUTED");
+  const ran = provenance(
+    true,
+    {
+      dataset_id: "SYNTHETIC_PUBLIC_DEMO_V1",
+      integrity: "NATIVE_REPLAY_VERIFIED",
+    },
+    archive,
+  );
+  assert.equal(ran.manifest_sha256, null);
+  assert.equal(ran.integrity, "NATIVE_REPLAY_VERIFIED");
+  assert.equal(
+    provenance(false, {}, archive).manifest_sha256,
+    "historical_hash",
+  );
+  assert.equal(provenance(false, {}, {}).dataset_id, "DATA_UNAVAILABLE");
+});

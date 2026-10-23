@@ -413,6 +413,20 @@ input[type="checkbox"] {
   border: 1px solid var(--line);
   border-radius: 7px;
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+caption {
+  white-space: normal;
+  text-align: left;
+  color: var(--muted);
+  padding: 8px;
+}
 table {
   border-collapse: collapse;
   width: 100%;
@@ -637,4 +651,23 @@ footer {
 .brand small {
   white-space: nowrap;
   letter-spacing: 0.7px;
+}
+
+@media (max-width: 420px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  #source-wrap,
+  #demo-controls,
+  .filters label {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+  #demo-controls label {
+    min-width: 0;
+    width: 100%;
+  }
+  nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

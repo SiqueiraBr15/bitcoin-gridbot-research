@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import secrets
 import socket
 from collections import OrderedDict
@@ -14,7 +15,15 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-from research_console.analysis import UNITS, compare, distributions, export_csv, frequencies
+from research_console.analysis import (
+    SCHEMA,
+    UNITS,
+    compare,
+    distributions,
+    export_csv,
+    frequencies,
+    selection_identity,
+)
 from research_console.data import COSTS, POLICIES, Archive
 from research_console.demo import demonstration
 from research_console.risk import display
@@ -41,7 +50,7 @@ class Service:
         if self.archive:
             self.archive.fingerprint("", 0, "")
         return {
-            "version": "G2 / 0.1.0.dev0",
+            "version": "G3 RC / 0.1.0.dev0",
             "mode": "PAPER / OFFLINE",
             "archive_status": "ARCHIVED_RESEARCH_RESULT" if self.archive else "UNAVAILABLE",
             "archive_integrity": "MATRICES_VERIFIED_CURVES_ON_SELECTION"
@@ -66,17 +75,33 @@ class Service:
             return {"source_kind": "UNAVAILABLE", "accounts": []}
         if (
             not {"start", "months", "cost"} <= set(query)
-            or set(query) - {"start", "months", "cost", "reference", "policies"}
-            or any(len(v) != 1 for v in query.values())
+            or set(query) - {"start", "months", "cost", "reference", "policies", "focus"}
+            or any(len(v) != 1 or not v[0] for v in query.values())
         ):
             raise ValueError("Seleção inválida")
         start, months, cost = query["start"][0], query["months"][0], query["cost"][0]
-        if len(start) != 10 or months not in ("6", "12", "24") or cost not in ("CA", "CX2", "CB"):
+        if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", start) or months not in (
+            "6",
+            "12",
+            "24",
+        ):
             raise ValueError("Seleção inválida")
         if cost not in COSTS:
             raise ValueError("Seleção inválida")
+        reference = query.get("reference", ["B0_BH"])[0]
+        wanted = query.get("policies", [",".join(POLICIES)])[0].split(",")
+        focus = query.get("focus", [reference])[0]
+        if (
+            reference not in POLICIES
+            or not wanted
+            or len(wanted) != len(set(wanted))
+            or not set(wanted) <= set(POLICIES)
+            or reference not in wanted
+            or focus not in wanted
+        ):
+            raise ValueError("Seleção inválida")
         fingerprint = self.archive.fingerprint(start, int(months), cost)
-        key = (str(self.archive.root), "G2_VIEW_V1", start, months, cost, *fingerprint)
+        key = (str(self.archive.root), "G3_VIEW_V1", start, months, cost, *fingerprint)
         if key in self.cache:
             self.cache_hits += 1
             self.cache.move_to_end(key)
@@ -84,20 +109,9 @@ class Service:
             self.cache[key] = self.archive.selection(start, int(months), cost)
             while len(self.cache) > 4:
                 self.cache.popitem(last=False)
-        accounts = deepcopy(self.cache[key])
-        reference = query.get(
-            "reference", [accounts[0]["summary"]["policy"] if accounts else "B0_BH"]
-        )[0]
-        wanted = query.get("policies", [",".join(POLICIES)])[0].split(",")
-        if (
-            reference not in POLICIES
-            or not wanted
-            or len(wanted) != len(set(wanted))
-            or not set(wanted) <= set(POLICIES)
-            or reference not in wanted
-        ):
-            raise ValueError("Seleção inválida")
-        accounts = [a for a in accounts if a["summary"]["policy"] in wanted]
+        # Profiled G2 copied all six trajectories even for a one-policy view.
+        # Project first, but deep-copy every selected nested value before exposure.
+        accounts = deepcopy([a for a in self.cache[key] if a["summary"]["policy"] in wanted])
         for account in accounts:
             row = account["summary"]
             account["benchmark_gaps"] = {}
@@ -118,7 +132,17 @@ class Service:
             "source_kind": "ARCHIVED_RESEARCH_RESULT" if accounts else "UNAVAILABLE",
             "accounts": accounts,
             "risk_tolerance": "1/5",
-            "schema": "GRIDBOT_RESEARCH_SELECTION_V2",
+            "schema": SCHEMA,
+            "selection": selection_identity(
+                accounts,
+                source="ARCHIVED_RESEARCH_RESULT",
+                dataset="M1_R_DAILY_MARKS_V1",
+                reference=reference,
+                focus=focus,
+                manifest=self.archive.pin,
+            )
+            if accounts
+            else None,
             "units": UNITS,
             "provenance": {
                 "dataset_id": "M1_R_DAILY_MARKS_V1",
@@ -134,8 +158,10 @@ class Service:
             "reason": None if accounts else "SELECTION_UNAVAILABLE",
         }
 
-    def demonstration(self) -> dict[str, Any]:
-        if self.demo is None:
+    def demonstration(self, focus: str = "round_trip", *, rerun: bool = False) -> dict[str, Any]:
+        if focus not in ("round_trip", "falling_mark"):
+            raise ValueError("Seleção inválida")
+        if self.demo is None or rerun:
             self.demo = demonstration()
         accounts = deepcopy(self.demo)
         for account in accounts:
@@ -148,7 +174,14 @@ class Service:
             "source_kind": "SYNTHETIC_DEMO",
             "accounts": accounts,
             "units": UNITS,
-            "schema": "GRIDBOT_RESEARCH_SELECTION_V2",
+            "schema": SCHEMA,
+            "selection": selection_identity(
+                accounts,
+                source="SYNTHETIC_DEMO",
+                dataset="SYNTHETIC_PUBLIC_DEMO_V1",
+                reference=None,
+                focus=focus,
+            ),
             "provenance": {
                 "dataset_id": "SYNTHETIC_PUBLIC_DEMO_V1",
                 "source": "SYNTHETIC_DEMO",
@@ -163,10 +196,19 @@ class Service:
 
 
 class LocalServer(HTTPServer):
+    allow_reuse_address = False
+
     def __init__(self, service: Service, port: int = 8765) -> None:
         self.service = service
         self.session = secrets.token_hex(32)
         super().__init__(("127.0.0.1", port), Handler)
+        self.cookie_name = f"gridbot_console_{self.server_port}"
+
+    def server_bind(self) -> None:
+        # Windows SO_REUSEADDR can allow a second listener on the same address.
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
     def get_request(self) -> tuple[socket.socket, Any]:
         connection, address = super().get_request()
@@ -210,7 +252,8 @@ class Handler(BaseHTTPRequestHandler):
             cookie.load(self.headers.get("Cookie", ""))
         except CookieError:
             return False
-        token = cookie["console"].value if "console" in cookie else ""
+        name = self.server.cookie_name
+        token = cookie[name].value if name in cookie else ""
         return (
             len(token) == 64
             and token.isascii()
@@ -241,7 +284,9 @@ class Handler(BaseHTTPRequestHandler):
         )
         if cookie:
             self.send_header(
-                "Set-Cookie", f"console={self.server.session}; HttpOnly; SameSite=Strict; Path=/"
+                "Set-Cookie",
+                f"{self.server.cookie_name}={self.server.session}; "
+                "HttpOnly; SameSite=Strict; Path=/",
             )
         if export:
             self.send_header(
@@ -259,7 +304,14 @@ class Handler(BaseHTTPRequestHandler):
         if not self.allowed() or len(self.path) > 2048:
             self.respond(403, b'{"error":"Local origin required"}')
             return
-        url = urlsplit(self.path)
+        try:
+            url = urlsplit(self.path)
+        except ValueError:
+            self.respond(400, b'{"error":"Invalid request target"}')
+            return
+        if url.scheme or url.netloc:
+            self.respond(400, b'{"error":"Local path required"}')
+            return
         assets = {
             "/": ("index.html", "text/html"),
             "/app.js": ("app.js", "text/javascript"),
@@ -269,7 +321,12 @@ class Handler(BaseHTTPRequestHandler):
         }
         if url.path in assets and not url.query:
             name, mime = assets[url.path]
-            self.respond(200, (STATIC / name).read_bytes(), mime, cookie=url.path == "/")
+            try:
+                body = (STATIC / name).read_bytes()
+            except OSError:
+                self.respond(503, b'{"error":"Local asset unavailable"}')
+                return
+            self.respond(200, body, mime, cookie=url.path == "/")
             return
         if not self.authenticated():
             self.respond(403, b'{"error":"Session required"}')
@@ -278,9 +335,24 @@ class Handler(BaseHTTPRequestHandler):
             if url.path == "/api/catalog" and not url.query:
                 result = self.server.service.catalog()
             elif url.path in ("/api/selection", "/api/export", "/api/export.csv"):
-                result = self.server.service.selection(parse_qs(url.query, max_num_fields=5))
-            elif url.path in ("/api/demo", "/api/demo.csv") and not url.query:
-                result = self.server.service.demonstration()
+                result = self.server.service.selection(
+                    parse_qs(
+                        url.query, keep_blank_values=True, strict_parsing=True, max_num_fields=6
+                    )
+                )
+            elif url.path in ("/api/demo", "/api/demo.csv"):
+                query = parse_qs(
+                    url.query, keep_blank_values=True, strict_parsing=True, max_num_fields=2
+                )
+                if (
+                    set(query) - {"focus", "rerun"}
+                    or any(len(v) != 1 for v in query.values())
+                    or ("rerun" in query and query["rerun"] != ["1"])
+                ):
+                    raise ValueError("Seleção inválida")
+                result = self.server.service.demonstration(
+                    query.get("focus", ["round_trip"])[0], rerun=query.get("rerun") == ["1"]
+                )
             else:
                 self.respond(404, b'{"error":"Not found"}')
                 return
@@ -297,6 +369,8 @@ class Handler(BaseHTTPRequestHandler):
                 export=url.path.startswith("/api/export") or is_csv,
                 csv_export=is_csv,
             )
+        except (BrokenPipeError, ConnectionResetError, TimeoutError):
+            return  # A disconnected reader does not change state or trigger another response.
         except (ValueError, KeyError, TypeError, OSError, EOFError, OverflowError) as exc:
             message = str(exc)
             reason = (

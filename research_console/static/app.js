@@ -50,7 +50,9 @@ let catalog = { rows: [], archive_status: "UNAVAILABLE" },
   sort = "start",
   descending = false,
   offset = 0,
-  zoom = false;
+  zoom = false,
+  loadController = null,
+  exporting = false;
 try {
   state = {
     ...state,
@@ -59,6 +61,8 @@ try {
 } catch {}
 if (!titles[state.page]) state.page = "overview";
 if (!["archive", "demo"].includes(state.source)) state.source = "archive";
+state.page = GridState.routePage(location.hash) || state.page;
+if (!location.hash) history.replaceState(null, "", "#" + state.page);
 const synthetic = () => state.page === "demo" || state.source === "demo";
 const selected = () => (synthetic() ? demoPolicy : state.policy);
 function save() {
@@ -87,7 +91,17 @@ function table(parent, headers, rows) {
     tr = el("tr"),
     head = el("thead"),
     body = el("tbody");
-  headers.forEach((h) => tr.append(el("th", h)));
+  headers.forEach((h) => {
+    const th = el("th", h);
+    th.scope = "col";
+    tr.append(th);
+  });
+  const caption = el(
+    "caption",
+    parent.querySelector("h2")?.textContent || "Dados da seleção",
+    "sr-only",
+  );
+  t.append(caption);
   head.append(tr);
   t.append(head);
   rows.forEach((row) => {
@@ -185,14 +199,29 @@ function controls() {
   select("policy", policies, state.policy);
   select("reference", policies, state.reference);
 }
-async function api(url) {
-  const response = await fetch(url, {
-    credentials: "same-origin",
-    cache: "no-store",
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.reason || "LOCAL_REQUEST_FAILED");
-  return data;
+async function api(url, signal = null, blob = false) {
+  const timeout = AbortSignal.timeout(15000);
+  try {
+    const response = await fetch(url, {
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(
+        /^[A-Z_]+$/.test(data.reason || "")
+          ? data.reason
+          : "LOCAL_REQUEST_FAILED",
+      );
+    }
+    return blob ? await response.blob() : await response.json();
+  } catch (e) {
+    if (e.name === "TimeoutError") throw new Error("LOCAL_REQUEST_TIMEOUT");
+    if (e.name === "AbortError") throw new Error("LOCAL_REQUEST_CANCELLED");
+    if (e instanceof SyntaxError) throw new Error("LOCAL_RESPONSE_INVALID");
+    throw e;
+  }
 }
 function query() {
   return new URLSearchParams({
@@ -201,9 +230,13 @@ function query() {
     cost: state.cost,
     reference: state.reference,
     policies: state.visible.join(","),
+    focus: state.policy,
   });
 }
-async function load(runDemo = false) {
+async function load(runDemo = false, rerun = false) {
+  loadController?.abort();
+  loadController = new AbortController();
+  const controller = loadController;
   const id = ++requestId;
   loading = true;
   error = "";
@@ -218,9 +251,14 @@ async function load(runDemo = false) {
         render();
         return;
       }
-      result = await api("/api/demo");
+      result = await api(
+        "/api/demo?focus=" +
+          encodeURIComponent(demoPolicy) +
+          (rerun ? "&rerun=1" : ""),
+        controller.signal,
+      );
     } else if (state.start && catalog.rows.length)
-      result = await api("/api/selection?" + query());
+      result = await api("/api/selection?" + query(), controller.signal);
     else result = { accounts: [], source_kind: "UNAVAILABLE" };
     if (id !== requestId) return;
     payload = result;
@@ -234,12 +272,21 @@ async function load(runDemo = false) {
     render();
   }
 }
-function navigate(page) {
+function navigate(page, push = true) {
+  if (!titles[page]) return;
+  if (push && page !== state.page) history.pushState(null, "", "#" + page);
   state.page = page;
   window.scrollTo({ top: 0, behavior: "auto" });
   save();
   load(synthetic() && demoLoaded);
+  $("title").focus();
 }
+function restoreRoute() {
+  const page = GridState.routePage(location.hash);
+  if (page && page !== state.page) navigate(page, false);
+}
+window.addEventListener("popstate", restoreRoute);
+window.addEventListener("hashchange", restoreRoute);
 let demoLoaded = false;
 function drawChart(parent, title, field, unit) {
   GridCharts.lineChart(parent, {
@@ -250,6 +297,7 @@ function drawChart(parent, title, field, unit) {
     selected: selected(),
     labels,
     zoom: field === "nav" && zoom,
+    context: { ...payload.selection, focused_policy: selected() },
   });
 }
 function empty(parent) {
@@ -264,13 +312,26 @@ function empty(parent) {
           INVALID_SELECTION: "A combinação escolhida não é admitida.",
           INVALID_SCHEMA_OR_SERIES:
             "Schema, contagem ou série temporal inválida.",
+          LOCAL_REQUEST_TIMEOUT:
+            "A consulta local excedeu 15 segundos. Tente novamente.",
+          LOCAL_REQUEST_CANCELLED:
+            "A consulta anterior foi cancelada ao mudar a seleção.",
+          LOCAL_RESPONSE_INVALID:
+            "O serviço local retornou uma resposta inválida.",
         }[why] || "Não foi possível validar os dados locais."
-      : "Nenhum histórico foi autorizado ou distribuído. Não geramos curvas para preencher lacunas.",
+      : "DATA_UNAVAILABLE · Nenhum histórico foi autorizado ou distribuído. Não geramos curvas para preencher lacunas.",
   );
   p.append(button("Abrir demonstração sintética", () => navigate("demo")));
   parent.append(p);
 }
 function overview(parent) {
+  if (!catalog.rows.length && !synthetic())
+    parent.append(
+      panel(
+        "Modo público sem histórico",
+        "DATA_UNAVAILABLE · Execute a demonstração sintética explicitamente ou autorize um acervo local compatível. Nenhuma pesquisa histórica é incluída automaticamente.",
+      ),
+    );
   const c = el("div", null, "metrics");
   metric(c, "Execução", "PAPER / OFFLINE", "Sem ordens reais");
   metric(
@@ -314,19 +375,21 @@ function provenance(parent) {
     "Proveniência da análise",
     "Resultados arquivados e cenários fictícios mantêm identidades distintas. O checksum confirma igualdade ao artefato admitido; não autentica o mercado externo.",
   );
-  const data = payload.provenance || {},
+  const data = GridState.provenance(
+      synthetic(),
+      payload.provenance || {},
+      catalog,
+    ),
     dl = el("dl");
   const items = [
-    ["Fonte", synthetic() ? "SYNTHETIC_DEMO" : catalog.archive_status],
-    ["Dataset", data.dataset_id || catalog.dataset_id || "UNAVAILABLE"],
-    [
-      "Integridade",
-      data.integrity || catalog.archive_integrity || "Fonte não autorizada",
-    ],
+    ["Fonte", data.source_kind],
+    ["Dataset", data.dataset_id],
+    ["Integridade", data.integrity],
     ["Unidades", "USDT · BTC · UTC · ratios / pp explícitos"],
     [
       "Manifesto SHA-256",
-      data.manifest_sha256 || catalog.manifest_sha256 || "Não aplicável à demo",
+      data.manifest_sha256 ||
+        (synthetic() ? "Não aplicável à demo" : "Indisponível"),
     ],
   ];
   items.forEach(([key, value]) => dl.append(el("dt", key), el("dd", value)));
@@ -398,6 +461,12 @@ function comparison(parent) {
       row.delta_return_pp == null ? "—" : money(row.delta_return_pp),
       row.delta_btc == null ? "—" : coins(row.delta_btc),
     ]),
+  );
+  p.append(
+    el(
+      "p",
+      "Mais ciclos não implicam mais lucro: cada execução pode consumir fees e caixa. Exposição ao BTC, custos e marcação influenciam o NAV; compare o mesmo período e custo. Janelas sobrepostas não são evidências independentes.",
+    ),
   );
   parent.append(p);
 }
@@ -731,26 +800,32 @@ function demo(parent, a) {
   parent.append(p);
 }
 async function download(format) {
+  if (exporting) return;
+  exporting = true;
+  const identity = () => (synthetic() ? "demo:" + demoPolicy : String(query()));
+  const initial = identity();
   try {
     let url = synthetic()
-      ? "/api/demo" + (format === "csv" ? ".csv" : "")
+      ? "/api/demo" +
+        (format === "csv" ? ".csv" : "") +
+        "?focus=" +
+        encodeURIComponent(demoPolicy)
       : (format === "csv" ? "/api/export.csv?" : "/api/export?") + query();
-    const response = await fetch(url, {
-      credentials: "same-origin",
-      cache: "no-store",
-    });
-    if (!response.ok) throw new Error("Exportação recusada por integridade.");
-    const blob = await response.blob(),
-      link = el("a");
+    const blob = await api(url, null, true);
+    if (initial !== identity())
+      throw new Error("Seleção mudou; exportação cancelada.");
+    const link = el("a");
     link.href = URL.createObjectURL(blob);
     link.download = "gridbot-selection." + format;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   } catch (e) {
     $("status").textContent = e.message;
+  } finally {
+    exporting = false;
   }
 }
-function render() {
+function renderPage() {
   controls();
   $("title").textContent = titles[state.page];
   $("subtitle").textContent = synthetic()
@@ -764,6 +839,7 @@ function render() {
     );
   });
   const content = $("content");
+  GridCharts.dispose(content);
   content.replaceChildren();
   $("status").className = error ? "status error" : "status";
   $("status").textContent = loading
@@ -872,6 +948,14 @@ function render() {
   if (state.page === "windows") explorer(content);
   comparison(content);
   if (state.page === "demo") demo(content, account);
+  if (state.page === "demo")
+    content.append(
+      button(
+        "Reexecutar cenários sintéticos",
+        () => load(true, true),
+        "secondary",
+      ),
+    );
   const actions = el("div", null, "export-actions");
   actions.append(
     button("Baixar tabela CSV", () => download("csv"), "secondary"),
@@ -884,6 +968,14 @@ function render() {
   );
   provenance(provenanceDetails);
   content.append(provenanceDetails);
+}
+function render() {
+  const started = performance.now();
+  try {
+    renderPage();
+  } finally {
+    $("content").dataset.renderMs = String(performance.now() - started);
+  }
 }
 document
   .querySelectorAll("nav button")

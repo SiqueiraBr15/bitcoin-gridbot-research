@@ -71,6 +71,30 @@
         return descending ? -cmp : cmp;
       });
   }
+  function routePage(hash) {
+    const page = String(hash).replace(/^#/, "");
+    return ["overview", "wealth", "btc", "risk", "windows", "demo"].includes(
+      page,
+    )
+      ? page
+      : null;
+  }
+  function provenance(synthetic, data = {}, catalog = {}) {
+    if (synthetic)
+      return {
+        source_kind: "SYNTHETIC_DEMO",
+        dataset_id: data.dataset_id || "SYNTHETIC_PUBLIC_DEMO_V1",
+        integrity: data.integrity || "NOT_EXECUTED",
+        manifest_sha256: null,
+      };
+    return {
+      source_kind: catalog.archive_status || "UNAVAILABLE",
+      dataset_id: data.dataset_id || catalog.dataset_id || "DATA_UNAVAILABLE",
+      integrity:
+        data.integrity || catalog.archive_integrity || "SOURCE_NOT_AUTHORIZED",
+      manifest_sha256: data.manifest_sha256 || catalog.manifest_sha256 || null,
+    };
+  }
   function decimalCompare(a, b) {
     // Exact ordering of projected decimal strings; never a portfolio calculation.
     function parts(value) {
@@ -96,7 +120,14 @@
     );
     return ix < iy ? -1 : ix > iy ? 1 : 0;
   }
-  const api = { defaults, validSelection, orderedRows, decimalCompare };
+  const api = {
+    defaults,
+    validSelection,
+    orderedRows,
+    decimalCompare,
+    routePage,
+    provenance,
+  };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GridState = api;
 })(typeof window !== "undefined" ? window : globalThis);

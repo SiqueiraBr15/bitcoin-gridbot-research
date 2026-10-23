@@ -9,6 +9,70 @@
     "#ff96a2",
   ];
   const dashes = ["", "9 4", "3 3", "12 3 2 3", "7 3 2 3", "2 4"];
+  function exportMetadata(context, accounts, field, unit) {
+    const identity = {};
+    for (const key of [
+      "schema",
+      "schema_version",
+      "source_kind",
+      "dataset_id",
+      "manifest_sha256",
+      "focused_policy",
+      "reference",
+      "start",
+      "end",
+      "months",
+      "cost",
+    ])
+      identity[key] = context[key] ?? null;
+    const keys = [
+      "policy",
+      "initial_usdt",
+      "final_mark",
+      "nav_usdt",
+      "return",
+      "btc_physical",
+      "btc_equivalent",
+      "cash_usdt",
+      "fees_usdt",
+      "max_drawdown",
+      "exposure_mean",
+      "marks_sha256",
+    ];
+    return {
+      schema: "GRIDBOT_CHART_EXPORT_V1",
+      selection: identity,
+      field,
+      unit,
+      summary_units: {
+        nav_usdt: "USDT",
+        initial_usdt: "USDT",
+        final_mark: "USDT/BTC",
+        return: "ratio",
+        btc_physical: "BTC",
+        btc_equivalent: "BTC",
+        cash_usdt: "USDT",
+        fees_usdt: "USDT",
+        max_drawdown: "ratio",
+        exposure_mean: "ratio",
+      },
+      summaries: accounts.map((a) =>
+        Object.fromEntries(keys.map((k) => [k, a.summary[k] ?? null])),
+      ),
+    };
+  }
+  function markRows(accounts, field, selected, offset = 0) {
+    const account =
+      accounts.find((a) => a.summary.policy === selected) || accounts[0];
+    return (account?.series || [])
+      .slice(offset, offset + 25)
+      .map((p) => ({ time: p.time, value: p[field] }));
+  }
+  function dispose(container) {
+    container
+      .querySelectorAll(".chart-panel")
+      .forEach((box) => box.dispatchEvent(new Event("gridbot-dispose")));
+  }
   function domain(values, field, zoom = false) {
     if (!values.length) return null;
     if (values.some((v) => !Number.isFinite(v)))
@@ -43,7 +107,16 @@
   }
   function lineChart(
     container,
-    { accounts, field, unit, title, selected, labels, zoom = false },
+    {
+      accounts,
+      field,
+      unit,
+      title,
+      selected,
+      labels,
+      zoom = false,
+      context = {},
+    },
   ) {
     const ns = "http://www.w3.org/2000/svg",
       box = document.createElement("section");
@@ -86,6 +159,11 @@
         )
         .join(" | ");
       copy.prepend(desc);
+      const metadata = document.createElementNS(ns, "metadata");
+      metadata.textContent = JSON.stringify(
+        exportMetadata(context, accounts, field, unit),
+      );
+      copy.prepend(metadata);
       const dimensions = original.viewBox.baseVal,
         headerHeight = 48 + accounts.length * 20;
       const group = document.createElementNS(ns, "g");
@@ -115,6 +193,8 @@
         22,
         "#edf2fa",
       );
+      // Exact UTC window and benchmark remain machine-readable in metadata;
+      // visible source and units never depend on external resources.
       accounts.forEach((a, i) =>
         label(
           `${i + 1}. ${labels[a.summary.policy] || a.summary.policy}`,
@@ -178,6 +258,7 @@
     note.textContent = `Eixo Y: ${f(unit === "%" ? low * 100 : low)} a ${f(unit === "%" ? high * 100 : high)} ${unit}. ${zoom ? "Domínio ajustado explicitamente; consulte a escala." : "Domínio absoluto com zero de referência."} Sem interpolar lacunas acima de um dia.`;
     let current = 0;
     function draw() {
+      const started = performance.now();
       plot.replaceChildren();
       const width = Math.max(plot.clientWidth, 280),
         height = 310,
@@ -310,6 +391,7 @@
         show(active.series[current]);
       });
       plot.append(svg);
+      box.dataset.drawMs = String(performance.now() - started);
     }
     draw();
     const observer = new ResizeObserver(() => {
@@ -317,6 +399,72 @@
       else observer.disconnect();
     });
     observer.observe(plot);
+    box.addEventListener("gridbot-dispose", () => observer.disconnect(), {
+      once: true,
+    });
+    const details = document.createElement("details"),
+      summary = document.createElement("summary");
+    summary.textContent =
+      "Consultar marcas exatas em tabela · política em foco";
+    details.append(summary);
+    const data = document.createElement("div");
+    details.append(data);
+    let offset = 0;
+    function fillTable() {
+      data.replaceChildren();
+      const table = document.createElement("table"),
+        caption = document.createElement("caption");
+      caption.textContent = `${labels[selected] || selected} · ${title} · ${unit === "%" ? "razão exata (−0.2 = −20%)" : unit} · UTC`;
+      table.append(caption);
+      const head = document.createElement("thead"),
+        row = document.createElement("tr");
+      for (const label of ["Instante UTC", "Valor exato"]) {
+        const th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = label;
+        row.append(th);
+      }
+      head.append(row);
+      table.append(head);
+      const body = document.createElement("tbody");
+      for (const point of markRows(accounts, field, selected, offset)) {
+        const tr = document.createElement("tr");
+        for (const value of [point.time, point.value]) {
+          const td = document.createElement("td");
+          td.textContent = String(value);
+          tr.append(td);
+        }
+        body.append(tr);
+      }
+      table.append(body);
+      const wrap = document.createElement("div");
+      wrap.className = "table-wrap";
+      wrap.tabIndex = 0;
+      wrap.append(table);
+      data.append(wrap);
+      const length = (
+        accounts.find((a) => a.summary.policy === selected) || accounts[0]
+      ).series.length;
+      for (const [name, delta] of [
+        ["Marcas anteriores", -25],
+        ["Próximas marcas", 25],
+      ]) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "secondary";
+        b.textContent = name;
+        b.disabled = delta < 0 ? offset === 0 : offset + 25 >= length;
+        b.addEventListener("click", () => {
+          offset += delta;
+          fillTable();
+        });
+        data.append(b);
+      }
+    }
+    details.addEventListener("toggle", () => {
+      if (details.open) fillTable();
+    });
+    box.append(details);
   }
   function histogram(container, bins, title) {
     const section = document.createElement("section");
@@ -352,7 +500,15 @@
     section.append(svg);
     container.append(section);
   }
-  const api = { domain, nearest, lineChart, histogram };
+  const api = {
+    domain,
+    nearest,
+    lineChart,
+    histogram,
+    exportMetadata,
+    markRows,
+    dispose,
+  };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GridCharts = api;
 })(typeof window !== "undefined" ? window : globalThis);

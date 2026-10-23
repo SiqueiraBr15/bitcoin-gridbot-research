@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import re
+import zlib
 from datetime import datetime, timedelta
 from decimal import Decimal
 from fractions import Fraction
@@ -20,6 +21,8 @@ POLICIES = ("B0_BH", "B1_HALF", "B2_DCA", "B3_CASH", "P_BANDS", "P_MONTHLY")
 COSTS = ("CA", "CX2", "CB")
 MAX_RAW = 512 * 1024
 MAX_JSON = 8 * 1024 * 1024
+MAX_DEPTH = 32
+MAX_ITEMS = 250000
 NUMBER = re.compile(r"-?\d{1,20}(?:\.\d{1,60})?(?:[eE][+-]?\d{1,3})?\Z", re.ASCII)
 
 
@@ -63,10 +66,38 @@ def _unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 def decode(raw: bytes, compressed: bool = False) -> Any:
     if compressed:
-        with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
-            raw = stream.read(MAX_JSON + 1)
+        require(len(raw) <= MAX_RAW, "JSON comprimido excede limite")
+        try:
+            with gzip.GzipFile(fileobj=io.BytesIO(raw)) as stream:
+                raw = stream.read(MAX_JSON + 1)
+        except zlib.error as exc:
+            raise ValueError("JSON comprimido inválido") from exc
     require(len(raw) <= MAX_JSON, "JSON excede limite")
-    return json.loads(raw, object_pairs_hook=_unique_pairs)
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("JSON UTF-8 inválido") from exc
+    # Bound structural work before allocating a deeply nested/very wide object.
+    depth = items = 0
+    quoted = False
+    for match in re.finditer(rb'\\.|"|[{}\[\]:,]', raw):
+        token = match[0]
+        if token == b'"':
+            quoted = not quoted
+        elif not quoted:
+            if token in (b"[", b"{"):
+                depth += 1
+                require(depth <= MAX_DEPTH, "JSON aninhado excede limite")
+            elif token in (b"]", b"}"):
+                depth -= 1
+            elif token in (b",", b":"):
+                items += 1
+                require(items <= MAX_ITEMS, "JSON com registros excessivos")
+    return json.loads(text, object_pairs_hook=_unique_pairs, parse_constant=_invalid_constant)
+
+
+def _invalid_constant(value: str) -> Any:
+    raise ValueError("JSON não finito inválido")
 
 
 def public_row(row: dict[str, Any]) -> dict[str, Any]:
@@ -106,6 +137,7 @@ def public_row(row: dict[str, Any]) -> dict[str, Any]:
         "violates_20_percent": dd > Fraction(1, 5),
         "return": display(nav / Fraction(row["initial_usdt"]) - 1),
         "classification": "EXPLORATORY_ALREADY_EXAMINED_FIXED_RULE_WALK_FORWARD",
+        "marks_sha256": row["marks_sha256"],
     }
 
 

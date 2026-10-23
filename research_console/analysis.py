@@ -7,8 +7,10 @@ import io
 from fractions import Fraction
 from typing import Any
 
+from research_console.data import NUMBER, POLICIES, timestamp
 from research_console.risk import LIMIT, display, require
 
+SCHEMA = "GRIDBOT_RESEARCH_SELECTION_V3"
 UNITS = {
     "nav_usdt": "USDT",
     "return": "ratio",
@@ -125,6 +127,10 @@ def distributions(rows: list[dict[str, Any]], source_kind: str) -> dict[str, Any
 def export_csv(payload: dict[str, Any]) -> bytes:
     """Only projected scalar fields; metadata travels with every CSV row."""
     fields = [
+        "schema",
+        "schema_version",
+        "dataset_id",
+        "focused_policy",
         "source_kind",
         "manifest_sha256",
         "start_utc",
@@ -132,6 +138,9 @@ def export_csv(payload: dict[str, Any]) -> bytes:
         "cost",
         "months",
         "policy",
+        "initial_usdt",
+        "final_mark",
+        "marks_sha256",
         "nav_usdt",
         "return_ratio",
         "btc_physical",
@@ -146,16 +155,87 @@ def export_csv(payload: dict[str, Any]) -> bytes:
         "delta_btc",
         "units",
     ]
+    require(
+        payload.get("source_kind") in ("ARCHIVED_RESEARCH_RESULT", "SYNTHETIC_DEMO"),
+        "Export indisponível",
+    )
+    require(bool(payload.get("accounts")), "Export indisponível")
+    require(payload.get("schema") == SCHEMA, "Export schema inválido")
+    require(
+        payload["provenance"]["dataset_id"] in ("M1_R_DAILY_MARKS_V1", "SYNTHETIC_PUBLIC_DEMO_V1"),
+        "Export dataset inválido",
+    )
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()
     comparison = payload.get("comparison") or {}
+    require(comparison.get("reference") in (*POLICIES, None), "Export referência inválida")
     differences = {r["policy"]: r for r in comparison.get("rows", [])}
     for account in payload["accounts"]:
         row = account["summary"]
+        require(row["policy"] in (*POLICIES, "round_trip", "falling_mark"), "Export inválido")
+        require(row["cost"] in ("CA", "CB", "CX2", "FICTIONAL"), "Export inválido")
+        require(
+            type(row["months"]) is int and row["months"] in (0, 6, 12, 24),
+            "Export horizonte inválido",
+        )
+        marks_hash = row.get("marks_sha256")
+        require(
+            marks_hash is None
+            or (
+                isinstance(marks_hash, str)
+                and len(marks_hash) == 64
+                and all(c in "0123456789abcdef" for c in marks_hash)
+            ),
+            "Export hash inválido",
+        )
+        timestamp(row["start"])
+        timestamp(row["end"])
+        for field in (
+            "initial_usdt",
+            "final_mark",
+            "nav_usdt",
+            "return",
+            "btc_physical",
+            "btc_equivalent",
+            "cash_usdt",
+            "max_drawdown",
+            "fees_usdt",
+            "exposure_mean",
+        ):
+            require(
+                isinstance(row[field], str) and bool(NUMBER.fullmatch(row[field])),
+                "Export numérico inválido",
+            )
         delta = differences.get(row["policy"], {})
+        for field in ("delta_nav_usdt", "delta_return_pp", "delta_btc"):
+            require(
+                field not in delta
+                or (isinstance(delta[field], str) and bool(NUMBER.fullmatch(delta[field]))),
+                "Export inválido",
+            )
+        identity = payload.get("selection", {})
+        require(
+            identity.get("focused_policy", row["policy"])
+            in (*POLICIES, "round_trip", "falling_mark"),
+            "Export foco inválido",
+        )
+        manifest = payload["provenance"].get("manifest_sha256")
+        require(
+            manifest is None
+            or (
+                isinstance(manifest, str)
+                and len(manifest) == 64
+                and all(c in "0123456789abcdef" for c in manifest)
+            ),
+            "Export hash inválido",
+        )
         writer.writerow(
             {
+                "schema": payload["schema"],
+                "schema_version": 3,
+                "dataset_id": payload["provenance"]["dataset_id"],
+                "focused_policy": identity.get("focused_policy", row["policy"]),
                 "source_kind": payload["source_kind"],
                 "manifest_sha256": payload["provenance"].get("manifest_sha256", ""),
                 "start_utc": row["start"],
@@ -163,6 +243,9 @@ def export_csv(payload: dict[str, Any]) -> bytes:
                 "cost": row["cost"],
                 "months": row["months"],
                 "policy": row["policy"],
+                "initial_usdt": row["initial_usdt"],
+                "final_mark": row["final_mark"],
+                "marks_sha256": row.get("marks_sha256", ""),
                 "nav_usdt": row["nav_usdt"],
                 "return_ratio": row["return"],
                 "btc_physical": row["btc_physical"],
@@ -179,3 +262,32 @@ def export_csv(payload: dict[str, Any]) -> bytes:
             }
         )
     return stream.getvalue().encode("utf-8-sig")
+
+
+def selection_identity(
+    accounts: list[dict[str, Any]],
+    *,
+    source: str,
+    dataset: str,
+    reference: str | None,
+    focus: str,
+    manifest: str | None = None,
+) -> dict[str, Any]:
+    """Portable identity shared by API and exports; no operator filesystem paths."""
+    first = accounts[0]["summary"]
+    require(focus in {a["summary"]["policy"] for a in accounts}, "Seleção inválida")
+    return {
+        "schema": SCHEMA,
+        "schema_version": 3,
+        "source_kind": source,
+        "dataset_id": dataset,
+        "manifest_sha256": manifest,
+        "focused_policy": focus,
+        "reference": reference,
+        "policies": [a["summary"]["policy"] for a in accounts],
+        "start": first["start"],
+        "end": first["end"],
+        "months": first["months"],
+        "cost": first["cost"],
+        "units": UNITS,
+    }
