@@ -305,12 +305,16 @@ def test_http_menus_catalog_and_selection(server: LocalServer) -> None:
         "/api/demo",
     ):
         status, body, headers = request(server, path, headers={"Cookie": cookie})
+        if path.startswith("/api/export"):
+            assert status == 403
+            assert json.loads(body)["reason"] == "EXPORT_RESTRICTED"
+            continue
         assert status == 200
         assert body
         assert b"DO_NOT_DISPLAY" not in body
         if path == "/api/catalog":
             catalog = json.loads(body)
-            assert catalog["version"] == f"G3.2 / {gridbot.__version__}"
+            assert catalog["version"] == f"G4 / {gridbot.__version__}"
             assert catalog["global_coverage"] == "LOCAL_G3_1_PASS"
             validation = catalog["local_validation"]
             assert validation["source"] == "gridbot"
@@ -319,8 +323,14 @@ def test_http_menus_catalog_and_selection(server: LocalServer) -> None:
             assert validation["remote_ci"] == "NOT_EXECUTED"
             assert validation["measured_baseline"] == "d2cdf2f"
             assert Fraction(validation["native_coverage_percent"]) == Fraction("96.52624362001981")
-        if path.startswith("/api/export"):
-            assert "attachment" in headers["Content-Disposition"]
+    query = "start=2020-01-01&months=24&cost=CA"
+    assert request(server, "/api/export.csv?" + query, headers={"Cookie": cookie})[0] == 403
+    status, body, headers = request(
+        server, "/api/export.csv?" + query, headers={"Cookie": cookie, "X-GridBot-Reviewed": "1"}
+    )
+    assert status == 200
+    assert "attachment" in headers["Content-Disposition"]
+    assert b"marks" not in body.splitlines()[0].replace(b"marks_sha256", b"")
 
 
 @pytest.mark.parametrize(

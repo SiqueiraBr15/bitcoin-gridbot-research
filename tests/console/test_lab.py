@@ -24,6 +24,7 @@ from research_console.lab.library import Library
 from research_console.lab.packs import (
     MAX_UPLOAD,
     canonical,
+    digest,
     read_pack,
     validate_manifest,
     validate_results,
@@ -163,6 +164,86 @@ def test_replay_rejects_wrong_code_data_and_unknown_account() -> None:
 def sample() -> tuple[dict[str, Any], dict[str, Any]]:
     pack = read_pack(bundled()["risk_violation"])
     return deepcopy(pack.manifest), deepcopy(pack.results)
+
+
+@pytest.mark.parametrize("control", ["\u0085", "\u202e", "\u2028", "\u2029", "\ud800", "\u200b"])
+def test_metadata_rejects_invisible_unicode_controls(control: str) -> None:
+    manifest, _ = sample()
+    manifest["title"] = "SYNTHETIC" + control + "text"
+    with pytest.raises(ValueError, match="Controle"):
+        validate_manifest(manifest)
+
+
+def test_zero_capital_is_absorbing_under_no_external_flows_contract() -> None:
+    manifest, data = sample()
+    account = data["accounts"][0]
+    account["benchmark"] = None
+    account["points"][1][2:] = ["0", "0", "0"]
+    data["accounts"] = [account]
+    with pytest.raises(ValueError, match="reaparecer"):
+        validate_results(manifest, data)
+    for point in account["points"][1:]:
+        point[2:] = ["0", "0", "0"]
+    pack = read_pack(write_pack(manifest, data))
+    assert analyze(pack)["rows"][0]["metrics"]["exact"]["max_drawdown"] == "1"
+
+
+def test_public_fixture_bytes_and_hand_derived_financial_expectations() -> None:
+    folder = Path(__file__).parents[2] / "examples" / "lab_packs"
+    index = json.loads((folder / "INDEX.json").read_text(encoding="utf-8"))
+    for entry in index["files"]:
+        raw = (folder / entry["file"]).read_bytes()
+        assert len(raw) == entry["bytes"]
+        assert digest(raw) == entry["sha256"]
+        pack = read_pack(raw)
+        assert pack.manifest["source_kind"] == "SYNTHETIC_DEMO"
+        for row in analyze(pack)["rows"]:
+            expected = entry["hand_derived_expectations"][row["policy"]]
+            actual = row["metrics"]["exact"]
+            assert [Fraction(actual[k]) for k in ("nav_final", "btc_physical", "max_drawdown")] == [
+                Fraction(v) for v in expected
+            ]
+
+
+def test_replay_identity_not_relabelled_after_source_line_ending_edits(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pack = read_pack(bundled()["favorable"])
+    expected = analysis_manifest(pack)
+    original_read = Path.read_bytes
+    monkeypatch.setattr(
+        Path,
+        "read_bytes",
+        lambda self: original_read(self).replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"),
+    )
+    assert analysis_manifest(pack) == expected
+    assert replay(pack, expected)["status"] == "EQUIVALENT"
+
+
+def test_fixtures_ignore_ambient_decimal_precision() -> None:
+    expected = bundled()
+    with localcontext() as context:
+        context.prec = 1
+        assert bundled() == expected
+
+
+def test_builtin_confirmation_is_idempotent_and_cache_selections_are_isolated(
+    tmp_path: Path,
+) -> None:
+    library = Library(tmp_path / "owned")
+    raw = bundled()["favorable"]
+    preview = library.preview(raw)
+    study = library.confirm(preview["preview_token"], True)
+    assert study["origin"] == "BUNDLED"
+    assert not library.owned_paths()
+    identity = digest(raw)
+    all_rows = library.analysis(identity)
+    subset = library.analysis(identity, ["CASH"], ["fees_usdt"])
+    assert len(all_rows["rows"]) == 3
+    assert [r["account_id"] for r in subset["rows"]] == ["CASH"]
+    assert subset["pareto"]["objectives"] == ["fees_usdt"]
+    assert library.analysis(identity) == all_rows
+    assert library.cache_hits == 1
 
 
 def container(entries: list[tuple[str, bytes]], *, mode: int = stat.S_IFREG) -> bytes:

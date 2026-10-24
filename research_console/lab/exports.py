@@ -16,16 +16,27 @@ from research_console.lab.packs import Pack, canonical, digest, keys
 from research_console.risk import require
 
 
-def implementation_hash() -> str:
+def _loaded_source_hash() -> str:
     root = Path(__file__).parent
     sources = {
-        name: digest((root / name).read_bytes())
+        name: digest((root / name).read_bytes().replace(b"\r\n", b"\n"))
         for name in ("__init__.py", "analytics.py", "packs.py", "exports.py")
     }
     sources.update(
-        {name: digest((root.parent / name).read_bytes()) for name in ("data.py", "risk.py")}
+        {
+            name: digest((root.parent / name).read_bytes().replace(b"\r\n", b"\n"))
+            for name in ("data.py", "risk.py")
+        }
     )
     return digest(canonical(sources))
+
+
+_IMPLEMENTATION_SHA256 = _loaded_source_hash()
+
+
+def implementation_hash() -> str:
+    """Identity of code loaded at startup, never relabel old execution after file edits."""
+    return _IMPLEMENTATION_SHA256
 
 
 def analysis_manifest(

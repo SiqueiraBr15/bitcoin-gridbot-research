@@ -8,6 +8,7 @@ import json
 import re
 import stat
 import struct
+import unicodedata
 import zipfile
 import zlib
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ MAX_UPLOAD = 2 * 1024 * 1024
 MAX_CONTENT = 6 * 1024 * 1024
 MAX_ACCOUNTS = 60
 MAX_MARKS = 10000
+CENTRAL_BYTES = 2 * 46 + len("manifest.json") + len("results.json")
 IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,79}\Z", re.ASCII)
 HASH = re.compile(r"[a-f0-9]{64}\Z", re.ASCII)
 SOURCES = ("SYNTHETIC_DEMO", "ARCHIVED_RESEARCH_RESULT", "AGGREGATED_RESEARCH_SUMMARY")
@@ -78,7 +80,10 @@ def identifier(value: Any) -> str:
 
 def text(value: Any) -> str:
     require(isinstance(value, str) and 0 < len(value) <= 240, "Texto inválido")
-    require(not any(ord(c) < 32 or ord(c) == 127 for c in value), "Controle em texto")
+    require(
+        not any(unicodedata.category(c)[0] == "C" or c in "\u2028\u2029" for c in value),
+        "Controle em texto",
+    )
     require(not any(c in value for c in ("\\", "/", "<", ">")), "Texto não portátil")
     require(value[0] not in "=+-@", "Texto de fórmula recusado")
     return cast(str, value)
@@ -242,6 +247,7 @@ def validate_results(manifest: dict[str, Any], value: Any) -> dict[str, Any]:
         marks += len(points)
         require(marks <= MAX_MARKS, "Pack excede limite de marcas")
         previous = None
+        exhausted = False
         for point in points:
             require(isinstance(point, list) and len(point) == 5, "Marca inválida")
             require(point[0] == utc(point[0]), "Timestamp não canônico")
@@ -253,6 +259,8 @@ def validate_results(manifest: dict[str, Any], value: Any) -> dict[str, Any]:
                 Fraction(nav) == Fraction(cash) + Fraction(btc) * Fraction(price),
                 "NAV não conserva BTC e USDT",
             )
+            require(not exhausted or nav == 0, "Capital nulo não pode reaparecer sem fluxo externo")
+            exhausted = nav == 0
         require(
             points[0][0] == account["start"] and points[-1][0] == account["end"],
             "Endpoints divergentes",
@@ -280,6 +288,18 @@ def validate_results(manifest: dict[str, Any], value: Any) -> dict[str, Any]:
 def read_pack(raw: bytes) -> Pack:
     require(isinstance(raw, bytes) and 0 < len(raw) <= MAX_UPLOAD, "Pack excede limite de upload")
     try:
+        require(len(raw) >= 22 and raw[:4] == b"PK\x03\x04", "Prefixo ZIP não permitido")
+        footer = struct.unpack_from("<4s4H2IH", raw, len(raw) - 22)
+        require(
+            footer[0] == b"PK\x05\x06" and footer[1:5] == (0, 0, 2, 2),
+            "Pack deve conter somente manifesto e resultados sem duplicatas",
+        )
+        require(
+            footer[5] == CENTRAL_BYTES
+            and footer[7] == 0
+            and footer[6] + CENTRAL_BYTES == len(raw) - 22,
+            "Conteúdo ZIP não manifestado",
+        )
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             entries = archive.infolist()
             require(

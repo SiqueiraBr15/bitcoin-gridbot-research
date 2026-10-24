@@ -1,4 +1,4 @@
-"""Loopback-only, read-only HTTP UI. No filesystem serving or exchange endpoints."""
+"""Loopback research UI; only explicitly confirmed owned imports can write data."""
 
 from __future__ import annotations
 
@@ -27,6 +27,9 @@ from research_console.analysis import (
 )
 from research_console.data import COSTS, POLICIES, Archive
 from research_console.demo import demonstration
+from research_console.lab import http as lab_http
+from research_console.lab.library import Library
+from research_console.lab.packs import MAX_UPLOAD
 from research_console.risk import display
 
 STATIC = Path(__file__).parent / "static"
@@ -39,6 +42,7 @@ class Service:
         *,
         archive_error: bool = False,
         archive_reason: str | None = None,
+        lab_root: Path | None = None,
     ) -> None:
         self.archive = archive
         self.archive_error = archive_error
@@ -46,12 +50,20 @@ class Service:
         self.demo: list[dict[str, Any]] | None = None
         self.cache: OrderedDict[tuple[Any, ...], list[dict[str, Any]]] = OrderedDict()
         self.cache_hits = 0
+        self._lab: Library | None = None
+        self.lab_root = lab_root
+
+    @property
+    def lab(self) -> Library:
+        if self._lab is None:
+            self._lab = Library(self.lab_root)
+        return self._lab
 
     def catalog(self) -> dict[str, Any]:
         if self.archive:
             self.archive.fingerprint("", 0, "")
         return {
-            "version": f"G3.2 / {__version__}",
+            "version": f"G4 / {__version__}",
             "mode": "PAPER / OFFLINE",
             "archive_status": "ARCHIVED_RESEARCH_RESULT" if self.archive else "UNAVAILABLE",
             "archive_integrity": "MATRICES_VERIFIED_CURVES_ON_SELECTION"
@@ -80,6 +92,27 @@ class Service:
             "new_distributions": "UNAVAILABLE_PUBLIC_CORPUS_NOT_DISTRIBUTED",
             "archive_reason": self.archive_reason,
         }
+
+    def lab_catalog(self) -> dict[str, Any]:
+        result = self.lab.catalog()
+        if self.archive is not None:
+            self.archive.fingerprint("", 0, "")
+        result["archive_adapter"] = {
+            "source_kind": "ARCHIVED_RESEARCH_RESULT"
+            if self.archive
+            else (
+                "DATA_INVALID"
+                if self.archive_error and self.archive_reason != "MISSING_SOURCE"
+                else "DATA_UNAVAILABLE"
+            ),
+            "wallets": len(self.archive.summaries) if self.archive else 0,
+            "marks": self.archive.index.get("marks") if self.archive else 0,
+            "manifest_sha256": self.archive.pin if self.archive else None,
+            "integrity": "MATRICES_VERIFIED_CURVES_ON_SELECTION" if self.archive else "UNAVAILABLE",
+            "redistribution": "RESTRICTED_RAW_REVIEWED_SUMMARY_CSV_ONLY",
+            "read_only": True,
+        }
+        return result
 
     def selection(self, query: dict[str, list[str]]) -> dict[str, Any]:
         if not self.archive:
@@ -249,7 +282,9 @@ class Handler(BaseHTTPRequestHandler):
             and self.headers.get("Sec-Fetch-Dest") == "document"
         )
         return (
-            self.headers.get("Host") == origin.removeprefix("http://")
+            len(self.headers.get_all("Host", [])) == 1
+            and len(self.headers.get_all("Origin", [])) <= 1
+            and self.headers.get("Host") == origin.removeprefix("http://")
             and self.headers.get("Origin", origin) == origin
             and (
                 self.headers.get("Sec-Fetch-Site", "none") in ("none", "same-origin")
@@ -266,7 +301,8 @@ class Handler(BaseHTTPRequestHandler):
         name = self.server.cookie_name
         token = cookie[name].value if name in cookie else ""
         return (
-            len(token) == 64
+            len(self.headers.get_all("Cookie", [])) == 1
+            and len(token) == 64
             and token.isascii()
             and secrets.compare_digest(token, self.server.session)
         )
@@ -280,9 +316,13 @@ class Handler(BaseHTTPRequestHandler):
         cookie: bool = False,
         export: bool = False,
         csv_export: bool = False,
+        attachment_name: str | None = None,
     ) -> None:
         self.send_response(code)
-        self.send_header("Content-Type", content_type + "; charset=utf-8")
+        self.send_header(
+            "Content-Type",
+            content_type + ("; charset=utf-8" if content_type != "application/zip" else ""),
+        )
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -299,7 +339,9 @@ class Handler(BaseHTTPRequestHandler):
                 f"{self.server.cookie_name}={self.server.session}; "
                 "HttpOnly; SameSite=Strict; Path=/",
             )
-        if export:
+        if attachment_name:
+            self.send_header("Content-Disposition", f'attachment; filename="{attachment_name}"')
+        elif export:
             self.send_header(
                 "Content-Disposition",
                 'attachment; filename="gridbot-selected-research.'
@@ -309,10 +351,55 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self) -> None:
-        self.respond(405, b'{"error":"Read only"}')
+        routes = {"/api/lab/preview", "/api/lab/confirm", "/api/lab/remove", "/api/lab/replay"}
+        if self.path not in routes:
+            self.respond(405, b'{"error":"Read only"}')
+            return
+        if (
+            not self.allowed()
+            or not self.authenticated()
+            or self.headers.get("X-GridBot-Lab") != "1"
+        ):
+            self.respond(403, b'{"error":"Local session required"}')
+            return
+        try:
+            lengths = self.headers.get_all("Content-Length", [])
+            expected_type = (
+                "application/zip" if self.path.endswith("preview") else "application/json"
+            )
+            limit = MAX_UPLOAD if self.path.endswith("preview") else 16384
+            if (
+                len(lengths) != 1
+                or not lengths[0].isascii()
+                or not lengths[0].isdigit()
+                or not 0 < int(lengths[0]) <= limit
+                or self.headers.get("Transfer-Encoding")
+                or self.headers.get("Content-Type") != expected_type
+            ):
+                raise ValueError("Corpo não permitido")
+            size = int(lengths[0])
+            raw = self.rfile.read(size)
+            if len(raw) != size:
+                raise ValueError("Corpo incompleto")
+            result = lab_http.post(self.server.service.lab, self.path, raw)
+            self.respond(200, json.dumps(result, ensure_ascii=False, sort_keys=True).encode())
+        except (ValueError, KeyError, TypeError, OSError, EOFError, OverflowError) as exc:
+            self.close_connection = True
+            self.respond(
+                422,
+                json.dumps(
+                    {
+                        "source_kind": "DATA_INVALID",
+                        "reason": lab_http.error_code(exc),
+                        "error": "Invalid or restricted evidence",
+                    }
+                ).encode(),
+            )
+        return
 
     def do_GET(self) -> None:
-        if not self.allowed() or len(self.path) > 2048:
+        path_limit = 8192 if self.path.startswith("/api/lab/") else 2048
+        if not self.allowed() or len(self.path) > path_limit:
             self.respond(403, b'{"error":"Local origin required"}')
             return
         try:
@@ -329,6 +416,7 @@ class Handler(BaseHTTPRequestHandler):
             "/style.css": ("style.css", "text/css"),
             "/charts.js": ("charts.js", "text/javascript"),
             "/state.js": ("state.js", "text/javascript"),
+            "/lab.js": ("lab.js", "text/javascript"),
         }
         if url.path in assets and not url.query:
             name, mime = assets[url.path]
@@ -343,9 +431,50 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(403, b'{"error":"Session required"}')
             return
         try:
+            if url.path in {
+                "/api/lab/library",
+                "/api/lab/analysis",
+                "/api/lab/source",
+                "/api/lab/export",
+            }:
+                query = parse_qs(
+                    url.query, keep_blank_values=True, strict_parsing=True, max_num_fields=4
+                )
+                if url.path == "/api/lab/library" and not query:
+                    self.respond(
+                        200, json.dumps(self.server.service.lab_catalog(), sort_keys=True).encode()
+                    )
+                    return
+                body, mime, attachment = lab_http.get(self.server.service.lab, url.path, query)
+                self.respond(200, body, mime, attachment_name=attachment)
+                return
+            if url.path == "/api/lab/paper" and not url.query:
+                result = {
+                    "source_kind": "SYNTHETIC_DEMO",
+                    "accounts": [
+                        {"policy": a["summary"]["policy"], "fills": lab_http.paper_trace(a)}
+                        for a in self.server.service.demonstration()["accounts"]
+                    ],
+                }
+                self.respond(200, json.dumps(result, sort_keys=True).encode())
+                return
             if url.path == "/api/catalog" and not url.query:
                 result = self.server.service.catalog()
             elif url.path in ("/api/selection", "/api/export", "/api/export.csv"):
+                if (
+                    url.path.startswith("/api/export")
+                    and self.server.service.archive is not None
+                    and (
+                        url.path != "/api/export.csv"
+                        or self.headers.get("X-GridBot-Reviewed") != "1"
+                    )
+                ):
+                    self.respond(
+                        403,
+                        b'{"reason":"EXPORT_RESTRICTED",'
+                        b'"error":"Only explicitly reviewed summary CSV is permitted"}',
+                    )
+                    return
                 result = self.server.service.selection(
                     parse_qs(
                         url.query, keep_blank_values=True, strict_parsing=True, max_num_fields=6
@@ -383,6 +512,18 @@ class Handler(BaseHTTPRequestHandler):
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             return  # A disconnected reader does not change state or trigger another response.
         except (ValueError, KeyError, TypeError, OSError, EOFError, OverflowError) as exc:
+            if url.path.startswith("/api/lab/"):
+                self.respond(
+                    422,
+                    json.dumps(
+                        {
+                            "source_kind": "DATA_INVALID",
+                            "reason": lab_http.error_code(exc),
+                            "error": "Invalid or restricted evidence",
+                        }
+                    ).encode(),
+                )
+                return
             message = str(exc)
             reason = (
                 "MISSING_SOURCE"

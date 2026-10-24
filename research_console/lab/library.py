@@ -13,6 +13,7 @@ from typing import Any
 
 from research_console.lab import ANALYTICS_VERSION
 from research_console.lab.analytics import analyze
+from research_console.lab.exports import implementation_hash
 from research_console.lab.fixtures import bundled
 from research_console.lab.packs import MAX_UPLOAD, Pack, canonical, digest, read_pack
 from research_console.risk import require
@@ -198,7 +199,11 @@ class Library:
         self, identity: str, selected: list[str] | None = None, objectives: list[str] | None = None
     ) -> tuple[Pack, dict[str, Any]]:
         pack = self.get(identity)  # revalidate bytes even on hit; never trust stat alone
-        key = identity + ":" + digest(canonical([ANALYTICS_VERSION, selected, objectives]))
+        key = (
+            identity
+            + ":"
+            + digest(canonical([ANALYTICS_VERSION, implementation_hash(), selected, objectives]))
+        )
         if key in self.cache:
             self.cache_hits += 1
             self.cache.move_to_end(key)
