@@ -1,7 +1,63 @@
 # Testes, reprodução e performance
 
 Esta validação é local em Windows/Python 3.13. Nenhuma execução Linux ou GitHub
-Actions foi demonstrada. A suíte global com cobertura permanece PENDING.
+Actions foi demonstrada.
+
+## Fechamento G3.1 — 23/10/2026
+
+Inventário atual: **3.422 casos Python**, com **3.420 PASS e dois SKIP**
+preexistentes; **19 JavaScript PASS**, sem somar reexecuções. Zero pendentes.
+Os 1.425 pendentes G3 foram concluídos; oito regressões de infraestrutura são
+novas. A evidência é uma união segmentada verificada por nodeids e hashes,
+incluindo a reutilização auditada dos resultados G3 compatíveis.
+
+Cobertura nativa consolidada sobre **264 bancos completos, 104 módulos**:
+**96,52624362001981%**, branches preservados, threshold original **85%**, exit 0.
+Não é média de percentuais nem cobertura de toda a árvore do checkout: source
+original `gridbot`; console Python dirigido 95,45% separado, testes JS separados.
+
+Campanha inicial: 5.399,53 s, 168 segmentos completos/1.348 casos e cinco
+timeouts preservados. Retomadas concorrentes: 79 casos em 1.674,67 s e seis
+propriedades/máquinas em 2.270,27 s. Não somar esses dois tempos como parede
+sequencial. PaperMachine passou em 573,69 s; TwoGenerationMachine em 1.099,24 s;
+último slot do journal em 387,37 s. Não houve redução de exemplos ou assertions.
+
+O custo medido concentra-se em validação recursiva, reconstrução e replay,
+amplificado pela cobertura. Nenhuma regra financeira foi otimizada/removida.
+O runner finito permite retomar o complemento dos casos concluídos. Linux,
+CI remoto e todas as ordens possíveis de uma sessão monolítica permanecem limites.
+
+- [Auditoria G3.1](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
+- [Manifesto com nodeids e hashes](docs/reviews/G3_1_EXECUTION_MANIFEST.json.gz).
+- [Procedimento de execução e consolidação](docs/G3_1_VALIDATION_PROTOCOL.md).
+
+As seções abaixo preservam medições históricas G1/G2/G3. Seus estados PENDING
+descrevem aquelas rodadas; o fechamento atual está documentado acima. O snapshot
+estático da interface G3 mostrava PENDING. Na G3.2, a interface passou a identificar
+explicitamente a evidência local arquivada G3.1 e a ausência de CI remoto.
+
+## Integração G3.2
+
+A coleção continua em 3.422 nodeids, sem remoções/renomes. A G3 misturava 1.987
+Python e 19 JS nos 2.006 PASS; a G3.1 acrescentou oito casos Python de tooling:
+`2.006 - 19 + 1.425 + 8 = 3.420 Python PASS`. A diferença aparente de 11 é
+`19 JS - 8 Python novos`, não omissão de testes.
+
+Regressões G3.2: 136 Python do console + 338 pertinentes = **474 PASS distintos**,
+um skip de symlink e 19 JS. Os 28 casos de tooling repetidos após o patch de
+filelock são subconjunto desses 338. Cobertura dirigida atual do console:
+**95,46079779917468%**, separada da nativa G3.1.
+
+Os 104 módulos financeiros, configuração coverage e dependências numéricas de
+runtime permanecem iguais. A medição nativa de 96,53% é evidência arquivada
+compatível com esses fontes; nenhum banco foi reescrito ou combinado com dados
+de console de outra versão. A G3.2 altera apresentação de qualidade/versão,
+assertions do catálogo e o pin de desenvolvimento filelock 4.0.12 → 4.2.1.
+Não representa nova execução monolítica nem CI remoto aprovado.
+
+Instalação limpa, wheel fora do checkout, demo e exports foram exercitados.
+Consulte a [auditoria G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md)
+para identidades, segurança, limites, falhas intermediárias e checkpoint.
 
 ## Escopos explícitos
 
@@ -108,9 +164,31 @@ localmente; sintaxe/proveniência das actions são verificadas separadamente.
 Ativação remota e validação Linux ainda dependem de aprovação e execução reais.
 
 O pacote foi instalado editable num venv novo e como wheel noutro venv; o wheel
-foi importado fora do checkout e o entrypoint testado. Somente `gridbot` é empacotado;
-examples/tools/tests devem ser usados a partir do checkout. Pins limitam resolução,
+foi importado fora do checkout e o entrypoint testado. Na publicação anterior somente `gridbot` era empacotado. O wheel G3 passa a
+incluir console/assets e exemplos sintéticos; tools/tests continuam no checkout. Pins limitam resolução,
 sem lock criptográfico completo ou promessa de identidade binária entre plataformas.
 
 Método de diagnóstico: [pytest durations](https://docs.pytest.org/en/stable/how-to/usage.html#profiling-test-execution-duration)
 e [constraints de build do pip](https://pip.pypa.io/en/stable/user_guide/#build-constraints).
+
+
+## G3: evidências novas e pendência global
+
+As contagens nas seções anteriores são históricas. A G3 repetiu uma propriedade
+com a mesma semente CI: call 2,72 s sem tracing e 8,87 s com branches, sem reduzir
+exemplos. Uma campanha segmentada teve orçamento total de 600 s (120 s para um
+grupo misto, 60 s por módulo posterior). Timeouts permanecem incompletos; não são
+PASS. O grupo misto foi depois decomposto sem storage: 1.308 PASS e um skip Windows
+em 81,75 s sob coverage. Isso não executa os módulos de storage retirados dessa
+sondagem: eles continuam listados como pendentes, sem desabilitar nenhum teste.
+
+Ressalvas: subprocessos por segmento não provam ausência de bugs dependentes da
+ordem de uma sessão global. Arquivos de coverage só são agregados de processos
+que terminaram com sucesso. O relatório parcial com limiar 85 preservado não é
+aprovação global, mesmo se sua porcentagem for alta. Nenhuma repetição monolítica
+longa foi justificada pelos tempos observados. Mudanças no custo dominante de
+validação recursiva financeira requerem autorização específica do orquestrador.
+
+A auditoria G3 documenta a contagem final, skips, tabela por módulo, cobertura
+dirigida, manifests de nodeids, comandos, comparação antes/depois e riscos.
+[Relatório G3](docs/reviews/G3_QUALITY_ENGINEERING_AND_RELEASE_CANDIDATE_AUDIT.md).

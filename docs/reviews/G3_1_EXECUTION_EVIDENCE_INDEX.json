@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "file": "G3_1_EXECUTION_MANIFEST.json.gz",
+  "sha256": "95ae29861252e6068d3684da22f06d0b168d43af5efcd54ce6ab7ee85d1eeb02",
+  "uncompressed_sha256": "34781dbe1d9fe88c72fca138e3898c88e7e0d3cece80a9acd7e8b3f54500fb01",
+  "compressed_bytes": 361462,
+  "uncompressed_bytes": 2199353,
+  "counts": {
+    "collected_python": 3422,
+    "certified_python": 3422,
+    "python": {
+      "PASS": 3420,
+      "SKIP": 2
+    },
+    "javascript_pass": 19,
+    "distinct_pass_python_and_javascript": 3439
+  },
+  "coverage_percent": 96.52624362001981,
+  "coverage_status": "PASS",
+  "tests_status": "PASS",
+  "artifact_count": 2446,
+  "certified_segments": 265,
+  "coverage_inputs": 264,
+  "pending_nodeids": []
+}

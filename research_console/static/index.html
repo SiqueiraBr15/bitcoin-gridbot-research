@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GridBot | Research Console Pro</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/state.js" defer></script>
+    <script src="/charts.js" defer></script>
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#content">Ir para a análise</a>
+    <aside>
+      <a class="brand" href="#overview"
+        ><span class="brandmark">G</span
+        ><span>GridBot<small>RESEARCH CONSOLE PRO</small></span></a
+      >
+      <div class="local">LOCAL · PAPER / OFFLINE</div>
+      <nav aria-label="Painéis">
+        <button data-page="overview" class="active">Visão geral</button
+        ><button data-page="wealth">Patrimônio</button
+        ><button data-page="btc">Acumulação de BTC</button
+        ><button data-page="risk">Risco e drawdown</button
+        ><button data-page="windows">Janelas históricas</button
+        ><button data-page="demo">Demonstração PAPER</button>
+      </nav>
+      <div class="side-note">
+        <strong>Investigar. Comparar. Entender.</strong>
+        <p>Sem ordens reais, credenciais ou coleta de mercado.</p>
+        <span id="version">G2</span>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <div class="eyebrow">ENGENHARIA & PESQUISA QUANTITATIVA</div>
+          <h1 id="title" tabindex="-1">Visão geral</h1>
+          <p id="subtitle">Evidência arquivada e limites explícitos.</p>
+        </div>
+        <span class="badge">PAPER / OFFLINE</span>
+      </header>
+      <div class="notice">
+        Experimental, sem prontidão para trading real.
+        <strong>20% de drawdown</strong> é referência analítica, não mecanismo
+        garantido de proteção.
+      </div>
+      <section class="filters" aria-label="Seleção de pesquisa">
+        <label id="source-wrap"
+          >Fonte<select id="source">
+            <option value="archive">Pesquisa arquivada · M1 / M1.R</option>
+            <option value="demo">SYNTHETIC_DEMO · PAPER</option>
+          </select></label
+        >
+        <div id="history-controls">
+          <label>Data inicial<select id="start"></select></label
+          ><label>Horizonte<select id="months"></select></label
+          ><label>Custo<select id="cost"></select></label
+          ><label>Política em foco<select id="policy"></select></label>
+        </div>
+        <label id="reference-wrap"
+          >Referência comparativa<select id="reference"></select
+        ></label>
+        <div id="demo-controls" hidden>
+          <span class="tag">SYNTHETIC_DEMO · preços fictícios</span
+          ><label>Cenário sintético<select id="demo-policy"></select></label>
+        </div>
+        <button id="reset" class="secondary" type="button">
+          Restaurar seleção
+        </button>
+      </section>
+      <div id="status" class="status" role="status">
+        Carregando catálogo local…
+      </div>
+      <div id="content" aria-live="polite" tabindex="-1"></div>
+      <footer>
+        GridBot Research Console · Resultados retrospectivos, não projeções. Sem
+        combinação de janelas independentes ou parâmetros econômicos novos.
+      </footer>
+    </main>
+  </body>
+</html>

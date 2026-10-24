@@ -30,9 +30,11 @@ dev = [
 
 [project.scripts]
 gridbot = "gridbot.cli.main:main"
+gridbot-research-console = "research_console.__main__:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/gridbot"]
+packages = ["src/gridbot", "research_console", "examples"]
+dev-mode-dirs = ["src", "."]
 
 # ---------------------------------------------------------------- ruff
 [tool.ruff]
@@ -71,7 +73,7 @@ strict = true
 warn_unreachable = true
 plugins = ["pydantic.mypy"]
 mypy_path = "src"
-files = ["src", "tests", "examples", "tools"]
+files = ["src", "tests", "examples", "tools", "research_console"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

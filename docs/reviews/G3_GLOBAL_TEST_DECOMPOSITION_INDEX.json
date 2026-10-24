@@ -1,0 +1,664 @@
+{
+  "artifact": "G3_GLOBAL_TEST_DECOMPOSITION.json.gz",
+  "compressed_sha256": "8f3790fe73c6ba7c9a22243fde86720a5ba697ab3141a495d83bb4a937bc89c9",
+  "uncompressed_sha256": "0089ae9d98272ce597043e667532f64edab6b9d19238347f1b357f16123f5075",
+  "collected": 3414,
+  "python_passed_unique": 1987,
+  "skipped": 2,
+  "pending": 1425,
+  "javascript_passed": 19,
+  "global_status": "PENDING",
+  "native_partial_percent": 70.03885122267083,
+  "threshold_unchanged": 85,
+  "segments": [
+    {
+      "name": "global_application_test_buy_lifecycle",
+      "passed": 45,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_buy_lifecycle.py"
+      ]
+    },
+    {
+      "name": "global_application_test_buy_quote_capital",
+      "passed": 34,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_buy_quote_capital.py"
+      ]
+    },
+    {
+      "name": "global_application_test_external_sell_identity",
+      "passed": 130,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_external_sell_identity.py"
+      ]
+    },
+    {
+      "name": "global_application_test_offline_terminal",
+      "passed": 39,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_offline_terminal.py"
+      ]
+    },
+    {
+      "name": "global_application_test_operational_grid",
+      "passed": 135,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_operational_grid.py"
+      ]
+    },
+    {
+      "name": "global_application_test_operational_grid_properties",
+      "passed": 10,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_operational_grid_properties.py"
+      ]
+    },
+    {
+      "name": "global_application_test_sell_evidence_gate0",
+      "passed": 9,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_sell_evidence_gate0.py"
+      ]
+    },
+    {
+      "name": "global_application_test_sell_fills",
+      "passed": 139,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_sell_fills.py"
+      ]
+    },
+    {
+      "name": "global_application_test_sell_fills_a17_review",
+      "passed": 1,
+      "skipped": 0,
+      "targets": [
+        "tests/application/test_sell_fills_a17_review.py"
+      ]
+    },
+    {
+      "name": "fast_decomposed",
+      "passed": 1308,
+      "skipped": 1,
+      "targets": [
+        "tests/domain",
+        "tests/strategy",
+        "tests/portfolio",
+        "tests/config",
+        "tests/cli",
+        "tests/observability",
+        "tests/marketdata",
+        "tests/architecture",
+        "tests/test_repo_hygiene.py",
+        "tests/test_public_demo.py",
+        "tests/test_verify_runner.py",
+        "tests/backtest/test_metrics.py"
+      ]
+    },
+    {
+      "name": "console_final",
+      "passed": 136,
+      "skipped": 1,
+      "targets": [
+        "tests/console"
+      ]
+    }
+  ],
+  "timed_out_targets": [
+    "global_fast",
+    "global_application_test_external_sell_identity_properties",
+    "global_application_test_offline_sell_evidence",
+    "global_application_test_offline_sell_properties",
+    "global_application_test_sell_economics",
+    "global_application_test_sell_economics_properties",
+    "global_application_test_sell_fills_properties"
+  ],
+  "not_started_modules": 45,
+  "coverage_by_module": {
+    "src/gridbot/__init__.py": {
+      "percent": 100.0,
+      "statements": 4,
+      "branches": 0
+    },
+    "src/gridbot/__main__.py": {
+      "percent": 0.0,
+      "statements": 3,
+      "branches": 0
+    },
+    "src/gridbot/application/__init__.py": {
+      "percent": 100.0,
+      "statements": 12,
+      "branches": 0
+    },
+    "src/gridbot/application/buy_lifecycle.py": {
+      "percent": 98.0952380952381,
+      "statements": 215,
+      "branches": 100
+    },
+    "src/gridbot/application/buy_quote_capital.py": {
+      "percent": 100.0,
+      "statements": 170,
+      "branches": 42
+    },
+    "src/gridbot/application/operational_grid.py": {
+      "percent": 99.3127147766323,
+      "statements": 219,
+      "branches": 72
+    },
+    "src/gridbot/application/operational_persistence.py": {
+      "percent": 51.724137931034484,
+      "statements": 138,
+      "branches": 36
+    },
+    "src/gridbot/application/sell_candidate.py": {
+      "percent": 71.01449275362319,
+      "statements": 65,
+      "branches": 4
+    },
+    "src/gridbot/application/sell_economics.py": {
+      "percent": 55.94405594405595,
+      "statements": 248,
+      "branches": 38
+    },
+    "src/gridbot/application/sell_evidence.py": {
+      "percent": 95.84905660377359,
+      "statements": 201,
+      "branches": 64
+    },
+    "src/gridbot/application/sell_fills.py": {
+      "percent": 99.32885906040268,
+      "statements": 244,
+      "branches": 54
+    },
+    "src/gridbot/application/sell_intents.py": {
+      "percent": 92.37288135593221,
+      "statements": 194,
+      "branches": 42
+    },
+    "src/gridbot/application/sell_inventory.py": {
+      "percent": 90.69767441860465,
+      "statements": 216,
+      "branches": 42
+    },
+    "src/gridbot/application/sell_lifecycle.py": {
+      "percent": 100.0,
+      "statements": 103,
+      "branches": 16
+    },
+    "src/gridbot/application/sell_order_binding.py": {
+      "percent": 100.0,
+      "statements": 56,
+      "branches": 4
+    },
+    "src/gridbot/application/sell_reconciliation.py": {
+      "percent": 93.31046312178388,
+      "statements": 389,
+      "branches": 194
+    },
+    "src/gridbot/application/sell_terminal.py": {
+      "percent": 66.29213483146067,
+      "statements": 209,
+      "branches": 58
+    },
+    "src/gridbot/backtest/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/backtest/__main__.py": {
+      "percent": 0.0,
+      "statements": 29,
+      "branches": 2
+    },
+    "src/gridbot/backtest/archives.py": {
+      "percent": 0.0,
+      "statements": 42,
+      "branches": 4
+    },
+    "src/gridbot/backtest/configuration.py": {
+      "percent": 26.262626262626263,
+      "statements": 89,
+      "branches": 10
+    },
+    "src/gridbot/backtest/continuity.py": {
+      "percent": 0.0,
+      "statements": 95,
+      "branches": 10
+    },
+    "src/gridbot/backtest/data.py": {
+      "percent": 73.61111111111111,
+      "statements": 130,
+      "branches": 14
+    },
+    "src/gridbot/backtest/engine.py": {
+      "percent": 86.93333333333334,
+      "statements": 295,
+      "branches": 80
+    },
+    "src/gridbot/backtest/execution.py": {
+      "percent": 85.53459119496856,
+      "statements": 133,
+      "branches": 26
+    },
+    "src/gridbot/backtest/export.py": {
+      "percent": 29.41176470588235,
+      "statements": 125,
+      "branches": 28
+    },
+    "src/gridbot/backtest/generation_codec.py": {
+      "percent": 35.84905660377358,
+      "statements": 53,
+      "branches": 0
+    },
+    "src/gridbot/backtest/interruption.py": {
+      "percent": 37.096774193548384,
+      "statements": 102,
+      "branches": 22
+    },
+    "src/gridbot/backtest/lifecycle.py": {
+      "percent": 56.81818181818182,
+      "statements": 78,
+      "branches": 10
+    },
+    "src/gridbot/backtest/metrics.py": {
+      "percent": 88.31168831168831,
+      "statements": 126,
+      "branches": 28
+    },
+    "src/gridbot/backtest/paper_bridge.py": {
+      "percent": 89.04109589041096,
+      "statements": 61,
+      "branches": 12
+    },
+    "src/gridbot/backtest/partial_grid.py": {
+      "percent": 0.0,
+      "statements": 238,
+      "branches": 66
+    },
+    "src/gridbot/backtest/partial_sources.py": {
+      "percent": 0.0,
+      "statements": 67,
+      "branches": 8
+    },
+    "src/gridbot/backtest/recenter.py": {
+      "percent": 51.08695652173913,
+      "statements": 152,
+      "branches": 32
+    },
+    "src/gridbot/cli/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/cli/doctor.py": {
+      "percent": 90.3010033444816,
+      "statements": 233,
+      "branches": 66
+    },
+    "src/gridbot/cli/main.py": {
+      "percent": 100.0,
+      "statements": 21,
+      "branches": 2
+    },
+    "src/gridbot/config/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/config/errors.py": {
+      "percent": 100.0,
+      "statements": 1,
+      "branches": 0
+    },
+    "src/gridbot/config/loader.py": {
+      "percent": 100.0,
+      "statements": 14,
+      "branches": 0
+    },
+    "src/gridbot/config/modes.py": {
+      "percent": 100.0,
+      "statements": 21,
+      "branches": 6
+    },
+    "src/gridbot/config/paths.py": {
+      "percent": 100.0,
+      "statements": 57,
+      "branches": 8
+    },
+    "src/gridbot/config/settings.py": {
+      "percent": 97.26027397260275,
+      "statements": 61,
+      "branches": 12
+    },
+    "src/gridbot/domain/__init__.py": {
+      "percent": 100.0,
+      "statements": 17,
+      "branches": 0
+    },
+    "src/gridbot/domain/assets.py": {
+      "percent": 94.44444444444444,
+      "statements": 30,
+      "branches": 6
+    },
+    "src/gridbot/domain/balances.py": {
+      "percent": 80.95238095238095,
+      "statements": 17,
+      "branches": 4
+    },
+    "src/gridbot/domain/clock.py": {
+      "percent": 100.0,
+      "statements": 23,
+      "branches": 4
+    },
+    "src/gridbot/domain/decimals.py": {
+      "percent": 100.0,
+      "statements": 36,
+      "branches": 18
+    },
+    "src/gridbot/domain/enums.py": {
+      "percent": 100.0,
+      "statements": 45,
+      "branches": 2
+    },
+    "src/gridbot/domain/errors.py": {
+      "percent": 100.0,
+      "statements": 16,
+      "branches": 0
+    },
+    "src/gridbot/domain/fees.py": {
+      "percent": 100.0,
+      "statements": 26,
+      "branches": 4
+    },
+    "src/gridbot/domain/grid.py": {
+      "percent": 88.23529411764706,
+      "statements": 13,
+      "branches": 4
+    },
+    "src/gridbot/domain/ids.py": {
+      "percent": 94.87179487179488,
+      "statements": 31,
+      "branches": 8
+    },
+    "src/gridbot/domain/market.py": {
+      "percent": 100.0,
+      "statements": 170,
+      "branches": 64
+    },
+    "src/gridbot/domain/orders.py": {
+      "percent": 98.65771812080537,
+      "statements": 117,
+      "branches": 32
+    },
+    "src/gridbot/domain/quantization.py": {
+      "percent": 94.87179487179488,
+      "statements": 33,
+      "branches": 6
+    },
+    "src/gridbot/domain/rules.py": {
+      "percent": 100.0,
+      "statements": 157,
+      "branches": 44
+    },
+    "src/gridbot/domain/time.py": {
+      "percent": 100.0,
+      "statements": 13,
+      "branches": 6
+    },
+    "src/gridbot/domain/timeframe.py": {
+      "percent": 100.0,
+      "statements": 37,
+      "branches": 10
+    },
+    "src/gridbot/domain/values.py": {
+      "percent": 90.47619047619048,
+      "statements": 87,
+      "branches": 18
+    },
+    "src/gridbot/exchange/__init__.py": {
+      "percent": 100.0,
+      "statements": 2,
+      "branches": 0
+    },
+    "src/gridbot/exchange/binance/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/exchange/binance/offline_evidence.py": {
+      "percent": 74.8663101604278,
+      "statements": 272,
+      "branches": 102
+    },
+    "src/gridbot/exchange/binance/offline_replay.py": {
+      "percent": 62.96296296296296,
+      "statements": 239,
+      "branches": 112
+    },
+    "src/gridbot/exchange/binance/offline_terminal.py": {
+      "percent": 94.0,
+      "statements": 94,
+      "branches": 56
+    },
+    "src/gridbot/exchange/errors.py": {
+      "percent": 0.0,
+      "statements": 5,
+      "branches": 0
+    },
+    "src/gridbot/exchange/ports.py": {
+      "percent": 100.0,
+      "statements": 14,
+      "branches": 0
+    },
+    "src/gridbot/exchange/simulated/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/execution/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/infra/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/infra/clock.py": {
+      "percent": 100.0,
+      "statements": 5,
+      "branches": 0
+    },
+    "src/gridbot/infra/locations.py": {
+      "percent": 95.50561797752809,
+      "statements": 65,
+      "branches": 24
+    },
+    "src/gridbot/marketdata/__init__.py": {
+      "percent": 100.0,
+      "statements": 3,
+      "branches": 0
+    },
+    "src/gridbot/marketdata/archive_contract.py": {
+      "percent": 96.42857142857143,
+      "statements": 78,
+      "branches": 6
+    },
+    "src/gridbot/marketdata/in_memory.py": {
+      "percent": 100.0,
+      "statements": 33,
+      "branches": 12
+    },
+    "src/gridbot/marketdata/ports.py": {
+      "percent": 100.0,
+      "statements": 8,
+      "branches": 0
+    },
+    "src/gridbot/marketdata/public_archives.py": {
+      "percent": 91.54929577464789,
+      "statements": 63,
+      "branches": 8
+    },
+    "src/gridbot/observability/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/observability/logs.py": {
+      "percent": 100.0,
+      "statements": 81,
+      "branches": 26
+    },
+    "src/gridbot/paper/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/paper/accounting.py": {
+      "percent": 75.0788643533123,
+      "statements": 530,
+      "branches": 104
+    },
+    "src/gridbot/paper/generations.py": {
+      "percent": 81.49606299212599,
+      "statements": 212,
+      "branches": 42
+    },
+    "src/gridbot/paper/partial_allocation.py": {
+      "percent": 0.0,
+      "statements": 132,
+      "branches": 26
+    },
+    "src/gridbot/paper/simulation.py": {
+      "percent": 80.80357142857143,
+      "statements": 212,
+      "branches": 12
+    },
+    "src/gridbot/paper/two_generation.py": {
+      "percent": 0.0,
+      "statements": 260,
+      "branches": 40
+    },
+    "src/gridbot/portfolio/__init__.py": {
+      "percent": 100.0,
+      "statements": 4,
+      "branches": 0
+    },
+    "src/gridbot/portfolio/buy_fills.py": {
+      "percent": 100.0,
+      "statements": 211,
+      "branches": 56
+    },
+    "src/gridbot/portfolio/buy_finalization.py": {
+      "percent": 99.18032786885246,
+      "statements": 202,
+      "branches": 42
+    },
+    "src/gridbot/portfolio/sell_sizing.py": {
+      "percent": 97.72727272727273,
+      "statements": 110,
+      "branches": 22
+    },
+    "src/gridbot/risk/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/storage/__init__.py": {
+      "percent": 100.0,
+      "statements": 0,
+      "branches": 0
+    },
+    "src/gridbot/storage/financial_codec.py": {
+      "percent": 21.19815668202765,
+      "statements": 155,
+      "branches": 62
+    },
+    "src/gridbot/storage/journal_backup.py": {
+      "percent": 0.0,
+      "statements": 165,
+      "branches": 60
+    },
+    "src/gridbot/storage/journal_models.py": {
+      "percent": 33.673469387755105,
+      "statements": 68,
+      "branches": 30
+    },
+    "src/gridbot/storage/journal_paths.py": {
+      "percent": 19.402985074626866,
+      "statements": 47,
+      "branches": 20
+    },
+    "src/gridbot/storage/operational_journal.py": {
+      "percent": 12.372881355932204,
+      "statements": 444,
+      "branches": 146
+    },
+    "src/gridbot/storage/paper_codec.py": {
+      "percent": 22.0,
+      "statements": 110,
+      "branches": 40
+    },
+    "src/gridbot/storage/paper_journal.py": {
+      "percent": 0.0,
+      "statements": 168,
+      "branches": 40
+    },
+    "src/gridbot/storage/sqlite.py": {
+      "percent": 84.61538461538461,
+      "statements": 44,
+      "branches": 8
+    },
+    "src/gridbot/strategy/__init__.py": {
+      "percent": 100.0,
+      "statements": 5,
+      "branches": 0
+    },
+    "src/gridbot/strategy/arithmetic_grid.py": {
+      "percent": 100.0,
+      "statements": 109,
+      "branches": 32
+    },
+    "src/gridbot/strategy/buy_intents.py": {
+      "percent": 98.75,
+      "statements": 126,
+      "branches": 34
+    },
+    "src/gridbot/strategy/grid_sizing.py": {
+      "percent": 97.92387543252595,
+      "statements": 217,
+      "branches": 72
+    },
+    "src/gridbot/strategy/grid_state.py": {
+      "percent": 100.0,
+      "statements": 145,
+      "branches": 36
+    }
+  },
+  "coverage_by_layer": {
+    "root": 57.142857142857146,
+    "application": 87.75036284470247,
+    "backtest": 48.40793724042455,
+    "cli": 90.99378881987577,
+    "config": 98.88888888888889,
+    "domain": 97.81420765027322,
+    "exchange": 73.4375,
+    "execution": 100,
+    "infra": 95.74468085106383,
+    "marketdata": 95.73459715639811,
+    "observability": 100.0,
+    "paper": 55.031847133757964,
+    "portfolio": 99.22720247295209,
+    "risk": 100,
+    "storage": 15.059116365899191,
+    "strategy": 98.96907216494846
+  }
+}
