@@ -13,6 +13,7 @@ from typing import Any
 from research_console.lab import ANALYTICS_VERSION
 from research_console.lab.analytics import analyze
 from research_console.lab.packs import Pack, canonical, digest, keys
+from research_console.lab.permissions import export_scope
 from research_console.risk import require
 
 
@@ -118,12 +119,15 @@ def export_analysis(
     objectives: list[str] | None = None,
     *,
     reviewed: bool = False,
+    permission: str | None = None,
 ) -> bytes:
     rights = pack.manifest["redistribution"]
     require(rights != "RESTRICTED", "Export bloqueado pela restrição declarada")
     require(
         rights != "AGGREGATES_ONLY" or reviewed is True, "Revisão explícita de agregados exigida"
     )
+    scope = export_scope(pack, permission)
+    require(scope is not None, "Export sem autorização independente do operador")
     result = analyze(pack, selected, objectives)
     manifest = manifest_for_result(pack, result)
     # Selection manifest contains identities, never origin paths or source data.
@@ -151,7 +155,7 @@ def export_analysis(
         )
     projected = (
         result
-        if rights == "PUBLIC"
+        if scope == "RAW_AND_DERIVED"
         else {
             **{
                 k: result[k]
@@ -196,7 +200,7 @@ def export_analysis(
         "<pre>" + html.escape(json.dumps(projected, ensure_ascii=False, indent=2)) + "</pre></html>"
     ).encode()
     # Never include raw source bytes when redistributing only aggregates.
-    if rights == "PUBLIC":
+    if scope == "RAW_AND_DERIVED":
         content["source.gbpack"] = pack.raw
     content["checksums.json"] = canonical(
         {

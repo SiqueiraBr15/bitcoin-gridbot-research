@@ -122,6 +122,16 @@ def test_end_to_end_preview_confirm_replay_export_remove(
     )
     assert status == 200
     assert json.loads(raw)["status"] == "EQUIVALENT"
+    assert call(server, cookie, "/api/lab/export?id=" + identity)[0] == 422
+    status, _, _ = call(
+        server,
+        cookie,
+        "/api/lab/authorize-export",
+        canonical(
+            {"id": identity, "scope": "RAW_AND_DERIVED", "basis": "OWN_DATA", "confirmed": True}
+        ),
+    )
+    assert status == 200
     status, raw, headers = call(server, cookie, "/api/lab/export?id=" + identity)
     assert status == 200
     assert headers["Content-Type"] == "application/zip"
@@ -207,7 +217,9 @@ def test_no_path_or_ambiguous_selection(lab_server: tuple[LocalServer, str], que
     assert b"Traceback" not in raw
 
 
-@pytest.mark.parametrize("route", ["/api/lab/confirm", "/api/lab/remove", "/api/lab/replay"])
+@pytest.mark.parametrize(
+    "route", ["/api/lab/confirm", "/api/lab/remove", "/api/lab/replay", "/api/lab/authorize-export"]
+)
 @pytest.mark.parametrize("raw", [b"[]", b"{}", b'{"path":"C:/private"}', b"{" * 40, b"\xff"])
 def test_adversarial_post_json(lab_server: tuple[LocalServer, str], route: str, raw: bytes) -> None:
     server, cookie = lab_server
@@ -240,4 +252,55 @@ def test_actual_paper_fill_before_after_trace(lab_server: tuple[LocalServer, str
     assert len(result["accounts"]) == 2
     assert all(
         f["reconciliation"] == "FRACTION_EXACT" for a in result["accounts"] for f in a["fills"]
+    )
+
+
+@pytest.mark.parametrize("header", ["X-GridBot-Lab", "Content-Type"])
+def test_duplicate_write_headers_are_rejected(
+    lab_server: tuple[LocalServer, str], header: str
+) -> None:
+    server, cookie = lab_server
+    body = canonical(
+        {"id": "a" * 64, "scope": "RAW_AND_DERIVED", "basis": "OWN_DATA", "confirmed": True}
+    )
+    connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
+    try:
+        connection.putrequest("POST", "/api/lab/authorize-export")
+        values = {
+            "Cookie": cookie,
+            "X-GridBot-Lab": "1",
+            "Content-Type": "application/json",
+            "Content-Length": str(len(body)),
+        }
+        for key, value in values.items():
+            connection.putheader(key, value)
+        connection.putheader(header, values[header])
+        connection.endheaders(body)
+        response = connection.getresponse()
+        response.read()
+        assert response.status == (403 if header == "X-GridBot-Lab" else 422)
+    finally:
+        connection.close()
+
+
+def test_authorization_endpoint_requires_local_session_and_cannot_be_forged_in_query(
+    lab_server: tuple[LocalServer, str],
+) -> None:
+    server, cookie = lab_server
+    body = canonical(
+        {"id": "a" * 64, "scope": "RAW_AND_DERIVED", "basis": "OWN_DATA", "confirmed": True}
+    )
+    assert call(server, "", "/api/lab/authorize-export", body)[0] == 403
+    assert (
+        call(
+            server,
+            cookie,
+            "/api/lab/authorize-export",
+            body,
+            extra={"Origin": "https://outside.invalid"},
+        )[0]
+        == 403
+    )
+    assert (
+        call(server, cookie, "/api/lab/export?id=" + "a" * 64 + "&scope=RAW_AND_DERIVED")[0] == 422
     )

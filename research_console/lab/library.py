@@ -7,33 +7,41 @@ import re
 import secrets
 import time
 from collections import OrderedDict
+from collections.abc import Callable
 from copy import deepcopy
+from functools import wraps
 from pathlib import Path
-from typing import Any
+from threading import RLock
+from typing import Any, Concatenate
 
 from research_console.lab import ANALYTICS_VERSION
 from research_console.lab.analytics import analyze
 from research_console.lab.exports import implementation_hash
 from research_console.lab.fixtures import bundled
 from research_console.lab.packs import MAX_UPLOAD, Pack, canonical, digest, read_pack
+from research_console.lab.permissions import BASES, SCOPES, export_scope
+from research_console.lab.storage import no_links, writer_lock
 from research_console.risk import require
 
 MARKER = b"GRIDBOT_OWNED_LAB_V1\n"
 MAX_PACKS = 32
 
 
-def no_links(path: Path) -> None:
-    require(
-        path.is_absolute() and not str(path).startswith(("\\\\", "//")),
-        "Pasta local absoluta exigida",
-    )
-    require(
-        not any(p.is_symlink() or p.is_junction() for p in (path, *path.parents)), "Links recusados"
-    )
+def locked[**P, R](
+    method: Callable[Concatenate[Library, P], R],
+) -> Callable[Concatenate[Library, P], R]:
+    @wraps(method)
+    def wrapped(self: Library, /, *args: P.args, **kwargs: P.kwargs) -> R:
+        with self._lock:
+            return method(self, *args, **kwargs)
+
+    return wrapped
 
 
 class Library:
     def __init__(self, root: Path | None = None) -> None:
+        self._lock = RLock()
+        self.grants: dict[str, dict[str, str]] = {}
         self.root = root
         self.builtin = {digest(raw): raw for raw in bundled().values()}
         self.pending: OrderedDict[str, tuple[float, Pack]] = OrderedDict()
@@ -59,6 +67,7 @@ class Library:
         with marker.open("rb") as stream:
             require(stream.read(len(MARKER) + 1) == MARKER, "Pasta sem identidade de laboratório")
 
+    @locked
     def owned_paths(self) -> list[Path]:
         if self.root is None:
             return []
@@ -70,6 +79,7 @@ class Library:
             require(bool(re.fullmatch(r"[a-f0-9]{64}\.gbpack", path.name)), "Índice local inválido")
         return paths
 
+    @locked
     def get(self, identity: str) -> Pack:
         require(bool(re.fullmatch(r"[a-f0-9]{64}", identity)), "Identidade de pack inválida")
         if identity in self.builtin:
@@ -105,8 +115,10 @@ class Library:
                 | {a["cost_scenario"] for a in pack.results["aggregates"]}
             ),
             "deletable": origin == "LOCAL_CONFIRMED",
+            "export_scope": self.export_scope(pack),
         }
 
+    @locked
     def catalog(self) -> dict[str, Any]:
         rows = [self.describe(self.get(identity), "BUNDLED") for identity in sorted(self.builtin)]
         for path in self.owned_paths():
@@ -132,6 +144,7 @@ class Library:
             "historical_source": "DATA_UNAVAILABLE_UNLESS_EXPLICIT_ARCHIVE_ADAPTER",
         }
 
+    @locked
     def preview(self, raw: bytes) -> dict[str, Any]:
         pack = read_pack(raw)
         now = time.monotonic()
@@ -147,7 +160,16 @@ class Library:
             "expires_seconds": 300,
         }
 
+    @locked
     def confirm(self, token: str, confirmed: bool) -> dict[str, Any]:
+        require(confirmed is True and token in self.pending, "Confirmação explícita exigida")
+        require(time.monotonic() - self.pending[token][0] < 300, "Prévia expirada")
+        self.check_root()
+        assert self.root is not None  # noqa: S101 - check_root establishes this
+        with writer_lock(self.root):
+            return self._confirm(token, confirmed)
+
+    def _confirm(self, token: str, confirmed: bool) -> dict[str, Any]:
         self.check_root()
         require(confirmed is True and token in self.pending, "Confirmação explícita exigida")
         created, pack = self.pending[token]
@@ -174,7 +196,20 @@ class Library:
         del self.pending[token]
         return self.describe(self.get(pack.sha256), "LOCAL_CONFIRMED")
 
+    @locked
     def remove(self, identity: str, confirmed: bool) -> None:
+        require(
+            confirmed is True
+            and identity not in self.builtin
+            and bool(re.fullmatch(r"[a-f0-9]{64}", identity)),
+            "Remoção não autorizada",
+        )
+        self.check_root()
+        assert self.root is not None  # noqa: S101
+        with writer_lock(self.root):
+            self._remove(identity, confirmed)
+
+    def _remove(self, identity: str, confirmed: bool) -> None:
         self.check_root()
         require(
             confirmed is True
@@ -186,6 +221,7 @@ class Library:
         path = self.root / (identity + ".gbpack")
         no_links(path)
         path.unlink()
+        self.grants.pop(identity, None)
         self.cache = OrderedDict(
             (k, v) for k, v in self.cache.items() if not k.startswith(identity + ":")
         )
@@ -195,6 +231,32 @@ class Library:
     ) -> dict[str, Any]:
         return self.snapshot(identity, selected, objectives)[1]
 
+    @locked
+    def export_scope(self, pack: Pack) -> str | None:
+        return export_scope(pack, self.grants.get(pack.sha256, {}).get("scope"))
+
+    @locked
+    def authorize_export(
+        self, identity: str, scope: str, basis: str, confirmed: bool
+    ) -> dict[str, Any]:
+        require(
+            confirmed is True and scope in SCOPES and basis in BASES,
+            "Confirmação de autorização independente exigida",
+        )
+        pack = self.get(identity)
+        rights = pack.manifest["redistribution"]
+        require(
+            rights != "RESTRICTED" and (rights == "PUBLIC" or scope == "DERIVED_ONLY"),
+            "Export bloqueado pela restrição declarada",
+        )
+        require(
+            identity in self.grants or len(self.grants) < MAX_PACKS + 3,
+            "Limite de autorizações excedido",
+        )
+        self.grants[identity] = {"scope": scope, "basis": basis}
+        return self.describe(pack, "BUNDLED" if identity in self.builtin else "LOCAL_CONFIRMED")
+
+    @locked
     def snapshot(
         self, identity: str, selected: list[str] | None = None, objectives: list[str] | None = None
     ) -> tuple[Pack, dict[str, Any]]:

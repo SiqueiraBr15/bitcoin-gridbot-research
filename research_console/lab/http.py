@@ -18,6 +18,7 @@ def error_code(error: BaseException) -> str:
         return "DATA_UNAVAILABLE"
     message = str(error)
     for fragments, code in [
+        (("Biblioteca ocupada",), "LIBRARY_BUSY"),
         (("SHA-256", "adulterado"), "INTEGRITY_MISMATCH"),
         (("excede", "excessiv"), "SIZE_LIMIT"),
         (("Versão",), "UNSUPPORTED_VERSION"),
@@ -27,7 +28,7 @@ def error_code(error: BaseException) -> str:
         (("desativada",), "PERSISTENCE_DISABLED"),
         (("expirada",), "PREVIEW_EXPIRED"),
         (("Confirmação",), "CONFIRMATION_REQUIRED"),
-        (("bloqueado", "Redistribuição", "Revisão explícita"), "EXPORT_RESTRICTED"),
+        (("bloqueado", "Redistribuição", "Revisão explícita", "autoriza"), "EXPORT_RESTRICTED"),
     ]:
         if any(fragment in message for fragment in fragments):
             return code
@@ -57,6 +58,7 @@ def get(library: Library, route: str, query: dict[str, list[str]]) -> tuple[byte
         require("reviewed" not in query, "Seleção inválida")
         pack, result = library.snapshot(identity, accounts, objectives)
         result["analysis_manifest"] = manifest_for_result(pack, result)
+        result["export_scope"] = library.export_scope(pack)
         # Only the selected source's validated observations; none are synthesized.
         result["accounts"] = [
             a for a in pack.results["accounts"] if accounts is None or a["account_id"] in accounts
@@ -65,13 +67,19 @@ def get(library: Library, route: str, query: dict[str, list[str]]) -> tuple[byte
     pack = library.get(identity)
     if route == "/api/lab/source":
         require(
-            set(query) == {"id"} and pack.manifest["redistribution"] == "PUBLIC",
+            set(query) == {"id"} and library.export_scope(pack) == "RAW_AND_DERIVED",
             "Redistribuição bruta não autorizada",
         )
         return pack.raw, "application/zip", "gridbot-evidence.gbpack"
     if route == "/api/lab/export":
         require(query.get("reviewed", ["0"])[0] in ("0", "1"), "Revisão inválida")
-        raw = export_analysis(pack, accounts, objectives, reviewed=query.get("reviewed") == ["1"])
+        raw = export_analysis(
+            pack,
+            accounts,
+            objectives,
+            reviewed=query.get("reviewed") == ["1"],
+            permission=library.export_scope(pack),
+        )
         return raw, "application/zip", "gridbot-analysis.zip"
     raise ValueError("Rota inválida")
 
@@ -80,6 +88,9 @@ def post(library: Library, route: str, raw: bytes) -> dict[str, Any]:
     if route == "/api/lab/preview":
         return library.preview(raw)
     data = decode(raw)
+    if route == "/api/lab/authorize-export":
+        keys(data, {"id", "scope", "basis", "confirmed"})
+        return library.authorize_export(data["id"], data["scope"], data["basis"], data["confirmed"])
     if route == "/api/lab/confirm":
         keys(data, {"preview_token", "confirmed"})
         return library.confirm(data["preview_token"], data["confirmed"])

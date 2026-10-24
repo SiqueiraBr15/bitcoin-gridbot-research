@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import random
 import stat
 import zipfile
@@ -141,7 +142,13 @@ def test_preview_expiry_eviction_and_non_owned_paths(
         library.confirm(token, True)
     with pytest.raises(ValueError, match="Identidade"):
         library.get("../../secret")
-    monkeypatch.setattr(Path, "is_symlink", lambda self: self.name == "owned")
+    original_stat = Path.lstat
+
+    def linked(path: Path) -> os.stat_result:
+        info = original_stat(path)
+        return os.stat_result((stat.S_IFLNK, *info[1:])) if path.name == "owned" else info
+
+    monkeypatch.setattr(Path, "lstat", linked)
     with pytest.raises(ValueError, match="Links"):
         library.catalog()
 
@@ -535,7 +542,9 @@ def test_decimal_context_and_export_rights_and_replay() -> None:
     aggregate = read_pack(write_pack(manifest, data))
     with pytest.raises(ValueError, match="Revisão"):
         export_analysis(aggregate)
-    with zipfile.ZipFile(io.BytesIO(export_analysis(aggregate, reviewed=True))) as archive:
+    with zipfile.ZipFile(
+        io.BytesIO(export_analysis(aggregate, reviewed=True, permission="DERIVED_ONLY"))
+    ) as archive:
         assert "source.gbpack" not in archive.namelist()
         projected = json.loads(archive.read("metrics.json"))
         assert all(

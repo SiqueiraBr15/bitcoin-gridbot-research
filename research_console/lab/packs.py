@@ -329,9 +329,21 @@ def read_pack(raw: bytes) -> Pack:
                     entry.file_size <= 100 * max(1, entry.compress_size),
                     "Razão de compressão excessiva",
                 )
-                with archive.open(entry) as stream:
-                    content = stream.read(min(MAX_CONTENT, entry.file_size) + 1)
-                require(len(content) == entry.file_size, "Entrada incompleta")
+                start = entry.header_offset + 30 + len(entry.filename)
+                compressed = raw[start : start + entry.compress_size]
+                if entry.compress_type == zipfile.ZIP_STORED:
+                    content = compressed
+                else:
+                    decoder = zlib.decompressobj(-15)
+                    content = decoder.decompress(compressed, entry.file_size + 1)
+                    require(
+                        decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail,
+                        "Fluxo comprimido incompleto ou não manifestado",
+                    )
+                require(
+                    len(content) == entry.file_size and zlib.crc32(content) == entry.CRC,
+                    "Entrada incompleta ou tamanho real divergente",
+                )
                 contents[entry.filename] = content
     except (
         struct.error,

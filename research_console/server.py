@@ -351,13 +351,20 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self) -> None:
-        routes = {"/api/lab/preview", "/api/lab/confirm", "/api/lab/remove", "/api/lab/replay"}
+        routes = {
+            "/api/lab/preview",
+            "/api/lab/confirm",
+            "/api/lab/remove",
+            "/api/lab/replay",
+            "/api/lab/authorize-export",
+        }
         if self.path not in routes:
             self.respond(405, b'{"error":"Read only"}')
             return
         if (
             not self.allowed()
             or not self.authenticated()
+            or len(self.headers.get_all("X-GridBot-Lab", [])) != 1
             or self.headers.get("X-GridBot-Lab") != "1"
         ):
             self.respond(403, b'{"error":"Local session required"}')
@@ -374,6 +381,7 @@ class Handler(BaseHTTPRequestHandler):
                 or not lengths[0].isdigit()
                 or not 0 < int(lengths[0]) <= limit
                 or self.headers.get("Transfer-Encoding")
+                or len(self.headers.get_all("Content-Type", [])) != 1
                 or self.headers.get("Content-Type") != expected_type
             ):
                 raise ValueError("Corpo não permitido")

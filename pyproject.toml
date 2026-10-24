@@ -36,6 +36,10 @@ gridbot-research-console = "research_console.__main__:main"
 packages = ["src/gridbot", "research_console", "examples"]
 dev-mode-dirs = ["src", "."]
 
+[tool.hatch.build.targets.wheel.force-include]
+"docs/G4_EVIDENCE_PACK_V1.md" = "research_console/help/EVIDENCE_PACK_V1.md"
+"docs/G4_RESEARCH_LAB.md" = "research_console/help/RESEARCH_LAB.md"
+
 # ---------------------------------------------------------------- ruff
 [tool.ruff]
 line-length = 100
@@ -91,7 +95,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["gridbot"]
+source = ["gridbot", "research_console"]
 branch = true
 
 [tool.coverage.report]
