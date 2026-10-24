@@ -6,6 +6,11 @@ Sem diretórios, duplicatas, links, ZIP64, criptografia, descritores, extras,
 comentários, prefixos ou bytes finais não manifestados. Apenas STORED/DEFLATED.
 Writer determinístico usa ordem fixa e datas ZIP fictícias de 2020.
 
+G4.1 verifica também os bytes efetivamente descomprimidos: limite aplicado ao
+decoder, EOF, ausência de unused/unconsumed data, tamanho real e CRC. Tamanhos
+plausíveis nos cabeçalhos não autorizam um fluxo que produza conteúdo adicional.
+Essa verificação não muda os hashes dos três exemplos válidos.
+
 JSON UTF-8, objeto estrito, sem chaves duplicadas, NaN/Infinity, campos adicionais
 ou conteúdo executável. Limites de bytes e estrutura são aplicados antes dos
 cálculos. Não há migração silenciosa entre versões. Use `write_pack(manifest,
@@ -102,3 +107,10 @@ recalcula resultado canônico. Os resultados carregam valores racionais em `exac
 strings decimais de apresentação não determinam dominância ou violação de risco.
 
 Veja [o guia](G4_RESEARCH_LAB.md) para fórmulas, direitos de exportação e limitações.
+
+Na G4.1, `redistribution` e `license` continuam declarações do produtor. Não são
+autorizações executáveis. Grants de exportação pertencem ao estado do operador,
+por SHA e sessão do servidor, fora do pack e do resultado matemático. Somente os
+bytes dos três fixtures do projeto recebem permissão automática. Alterar título,
+identidade ou dados cria outro pack e exige revisão independente; alegar natureza
+sintética ou licença pública não contorna esse requisito.

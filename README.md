@@ -26,13 +26,16 @@ G1–G3.2 foram integradas à main; CI remoto continua desativado.
 O console inclui navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
 
-A candidata **G4 Offline Research Lab**, na branch local
-`feat/g4-offline-research-lab`, acrescenta biblioteca, Evidence Packs com SHA-256,
+A candidata **G4 Offline Research Lab**, endurecida na branch local
+`fix/g4-research-lab-hardening`, acrescenta biblioteca, Evidence Packs com SHA-256,
 importação com confirmação, análise exata, comparação Pareto, episódios de risco,
 trilha PAPER e replay de análises. Sem novo backtest ou execução financeira.
 [Guia G4 e exemplos](docs/G4_RESEARCH_LAB.md) ·
 [Schema Evidence Pack v1](docs/G4_EVIDENCE_PACK_V1.md).
 G4 ainda não foi publicada; históricos privados não fazem parte dos exemplos.
+G4.1 valida o fluxo ZIP efetivo, serializa gravações concorrentes e exige
+autorização de exportação independente dos metadados de pacotes externos.
+[Auditoria e limites G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md).
 
 ![Console G3 em execução com dados sintéticos](docs/images/g3-paper-1280.jpg)
 
@@ -110,6 +113,17 @@ fees por ativo. O CLI oferece diagnóstico; não inicia trading e bloqueia LIVE.
 Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Evidências de engenharia
+
+A candidata local **G4.1** tem uma campanha nova em Windows/Python 3.13.16:
+**3.610 Python PASS + dois skips preexistentes**, 3.612 nodeids únicos,
+273 segmentos e zero incompletos. A cobertura consolidada de **104 módulos
+nativos + 16 do console** é **96,48%**, com linhas e branches e threshold 85%.
+Os três módulos empacotados de exemplos têm medição suplementar separada de
+**87,37%**; não se faz média dos percentuais. Os **26 testes JavaScript** são
+contabilizados separadamente. [Relatório G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md)
+e [manifesto da execução](docs/reviews/G4_1_EXECUTION_MANIFEST.json.gz).
+Esses resultados locais não equivalem a CI remoto, teste Linux/macOS ou
+prontidão para trading. As evidências G3.1 abaixo permanecem históricas.
 
 Evidência local G3.1 em Windows/Python 3.13.16, com dependências fixadas,
 inventário completo e união auditada de execuções segmentadas:

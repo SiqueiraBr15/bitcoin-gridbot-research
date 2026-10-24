@@ -1,4 +1,4 @@
-# Offline Research Lab — G4
+# Offline Research Lab — G4, endurecido na G4.1
 
 Biblioteca local para inspecionar resultados existentes, comparar patrimônio,
 BTC físico, custos e risco e reproduzir análises. Não executa estratégias
@@ -8,7 +8,7 @@ observações matemáticas fictícias, sem significado de desempenho de mercado.
 ## Abrir
 
 Instale conforme [o guia do console](RESEARCH_CONSOLE.md). Nesta candidata local,
-use a branch `feat/g4-offline-research-lab`; a G4 ainda não foi publicada.
+use a branch local `fix/g4-research-lab-hardening`; a G4 ainda não foi publicada.
 
 ```powershell
 .\.venv\Scripts\python.exe -m research_console --port 8769
@@ -30,6 +30,15 @@ O launcher Windows encaminha os mesmos argumentos:
 Não escolha pastas de outros projetos, documentos ou dados originais. A aplicação
 recusa pastas não vazias sem seu marcador de propriedade, UNC, symlinks e junctions.
 Sem `--lab-dir`, é possível validar uma prévia; confirmar sua persistência é recusado.
+
+A G4.1 também recusa aliases Windows, ADS, nomes reservados e reparse points.
+Gravações são serializadas por instância e por lock do sistema operacional na
+pasta pertencente ao lab. Se outra instância estiver gravando, a operação retorna
+`LIBRARY_BUSY`; tente novamente. O lock é liberado pelo sistema após encerramento
+do processo, inclusive abrupto. O arquivo de lock permanece; não é um serviço.
+Arquivos `.pending-*` de uma interrupção não viram estudos e não são apagados
+automaticamente. Não se garante durabilidade contra toda falha de energia/hardware
+ou isolamento contra um usuário local que pode alterar simultaneamente os diretórios.
 
 ## Biblioteca e importação
 
@@ -144,9 +153,33 @@ pode começar com apóstrofo. Consuma JSON/exact para reconciliação programát
 
 | Restrição declarada | Exportação |
 | --- | --- |
-| PUBLIC | Pack bruto, análise e SVG das séries permitidos |
-| AGGREGATES_ONLY | Exige revisão explícita; resumo sem curvas/episódios/raw pack; SVG negado |
+| Três fixtures exatos produzidos pelo projeto | Pack bruto, análise e SVG permitidos |
+| PUBLIC importado | Bloqueado até autorização independente do operador nesta sessão |
+| AGGREGATES_ONLY importado | Autorização do operador e revisão de agregados; sem curvas/episódios/raw pack; SVG negado |
 | RESTRICTED | Export de análise/raw/SVG bloqueado |
+
+**A declaração do próprio pack não concede direitos.** A G4.1 reconhece os
+fixtures do projeto pelos bytes completos, não por `source_kind`, título ou
+licença autodeclarados. Para qualquer outro pack, confira uma base fora dele:
+dados próprios, licença pública verificada ou permissão do titular. Marque a
+confirmação e escolha DERIVED_ONLY ou, quando o pack declarar PUBLIC,
+RAW_AND_DERIVED. O servidor vincula essa autorização aos bytes/SHA e ao processo;
+parâmetros de query e metadados recebidos não podem concedê-la.
+
+DERIVED_ONLY libera resumo/relatório e manifesto, sem fonte, curvas ou episódios.
+Não libera SVG das séries. RAW_AND_DERIVED permite esses dados somente quando a
+restrição declarada também permitir. RESTRICTED nunca é superado pelo operador.
+Após reiniciar o servidor, o estudo persiste, mas a autorização é perdida e deve
+ser revista. Duas abas do mesmo processo compartilham essa autorização por pack,
+mantendo seleções analíticas independentes. Uma ampliação de escopo exige outra
+confirmação explícita. Não há verificação jurídica automática ou prova de autoria.
+
+Importar/analisar autoriza consulta local no navegador, incluindo as marcas
+necessárias aos gráficos e à investigação. O JSON dessa consulta não é uma barreira
+DRM: o operador que já possui o arquivo pode salvar dados ou capturas. As restrições
+acima governam as funções de exportação da aplicação; não se promete impedir a
+recópia por quem tem acesso ao disco ou à sessão local de leitura. Páginas externas
+não recebem essa autorização: Host/origem/sessão e CSP continuam exigidos.
 
 O adaptador histórico anterior agora bloqueia JSON bruto de `/api/export`; CSV
 resumido exige revisão explícita. JSON/CSV da demonstração sintética continuam
@@ -183,6 +216,22 @@ autenticação multiusuário ou isolamento contra um usuário local malicioso co
 permissão de modificar simultaneamente o sistema de arquivos. Não exponha a porta
 por proxy. Publicação de packs históricos exige revisão de proveniência/licença.
 
+## Segurança e cancelamento na G4.1
+
+A leitura DEFLATE limita a saída efetiva, verifica término do fluxo, CRC e ausência
+de bytes comprimidos adicionais; não confia apenas no tamanho anunciado pelo ZIP.
+Arquivos STORED também têm seu tamanho real conferido. Nenhum conteúdo é extraído
+ou executado. Dados, autorização do operador e apresentação são fronteiras distintas.
+
+Trocar estudo ou sair da página cancela fetches pendentes e invalida seus resultados.
+Isso não promete rollback de uma importação já confirmada no servidor: se a conexão
+for interrompida depois do commit, consulte a biblioteca novamente. Repetir a mesma
+importação preserva uma única cópia identificada pelos bytes.
+
+O wheel inclui os guias essenciais em `research_console/help`; no checkout e na
+instalação editável, use `docs/`. A versão do schema permanece v1; a G4.1 rejeita
+contêineres malformados anteriormente tolerados, sem mudar os três fixtures válidos.
+
 ## Arquitetura e verificações
 
 `lab/packs.py` valida; `fixtures.py` gera os três fixtures; `library.py` controla
@@ -203,16 +252,23 @@ O primeiro comando mede somente o console, não toda a base. Consulte a
 [auditoria G4](reviews/G4_OFFLINE_RESEARCH_LAB_IMPLEMENTATION_AUDIT.md) para evidências,
 falhas encontradas e limites. Windows foi exercitado; Linux/macOS não foram testados.
 Não há prontidão para produção ou vantagem econômica comprovada por estes exemplos.
+Os gates atuais da candidata e a consolidação por nodeid são apresentados na
+[auditoria G4.1](reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md).
+Indicadores G3.1 exibidos no catálogo continuam identificados como históricos.
 
 Para repetir uma medição curta de análise, sem executar estratégia:
 
 ```powershell
-python -m timeit -n 3 -r 1 -s "from research_console.lab.fixtures import example; from research_console.lab.packs import read_pack; from research_console.lab.analytics import analyze; raw=example('scale_1000',['10' if i%2==0 else '9' for i in range(1000)]); pack=read_pack(raw)" "analyze(pack)"
+python -m timeit -n 1 -r 7 -s "from research_console.lab.fixtures import example; from research_console.lab.packs import read_pack; from research_console.lab.analytics import analyze; raw=example('scale_1000',['10' if i%2==0 else '9' for i in range(1000)]); pack=read_pack(raw)" "analyze(pack)"
 ```
 
-Use também 100 e 500 marcas por conta, sempre três contas e três repetições,
+Use 10, 100, 1.000 e 3.333 marcas por conta, sempre três contas e sete repetições,
 e registre versão, hash do pack/código e carga concorrente da máquina. Validação
-é `read_pack(raw)`; export é `export_analysis(pack)` de `lab.exports`. Meça memória
+é `read_pack(raw)`. Para estes fixtures fictícios criados pelo próprio operador,
+o benchmark de export usa `export_analysis(pack, permission="RAW_AND_DERIVED")`
+de `lab.exports`. Esse argumento é uma decisão do chamador confiável; metadados
+de um arquivo externo não podem fornecê-lo. Na interface, use a autorização
+independente após verificar os direitos. Meça memória
 em chamada separada com tracemalloc, sem misturá-lo ao relógio do ensaio de tempo;
 essas alocações Python não representam RSS. A medição não justifica extrapolar
 capacidade ou prometer latência. Não remova os limites para executar um teste longo.
