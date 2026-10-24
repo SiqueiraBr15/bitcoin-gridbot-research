@@ -20,11 +20,19 @@ Os eixos identificam unidades e cortes; o drawdown tem zero no topo.
 Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 **dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
-Esta funcionalidade está em revisão local; CI remoto continua desativado.
+G1–G3.2 foram integradas à main; CI remoto continua desativado.
 [Auditoria G3.1 e limites da validação](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
 [Integração e prontidão de publicação G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md).
-O candidato local acrescenta navegação voltar/avançar, timeout/cancelamento,
+O console inclui navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
+
+A candidata **G4 Offline Research Lab**, na branch local
+`feat/g4-offline-research-lab`, acrescenta biblioteca, Evidence Packs com SHA-256,
+importação com confirmação, análise exata, comparação Pareto, episódios de risco,
+trilha PAPER e replay de análises. Sem novo backtest ou execução financeira.
+[Guia G4 e exemplos](docs/G4_RESEARCH_LAB.md) ·
+[Schema Evidence Pack v1](docs/G4_EVIDENCE_PACK_V1.md).
+G4 ainda não foi publicada; históricos privados não fazem parte dos exemplos.
 
 ![Console G3 em execução com dados sintéticos](docs/images/g3-paper-1280.jpg)
 
@@ -55,8 +63,8 @@ py -3.13 -m venv .venv
 .\start_console.cmd
 ```
 
-Use o checkout que contém o console, identificado no PR/release. A candidata
-G3.2 ainda depende de publicação autorizada; a main anterior não contém a UI.
+O console G1–G3.2 está na main. Para revisar G4, use sua candidata local;
+não existe release G4 publicada.
 Abra `http://127.0.0.1:8765`, escolha **Demonstração PAPER** e clique em
 **Executar cenários sintéticos**. CSV/JSON exportam essa seleção; os gráficos
 oferecem SVG. Ctrl+C no terminal encerra o processo. Não há início automático.
