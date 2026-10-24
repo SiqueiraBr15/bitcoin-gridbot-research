@@ -35,6 +35,13 @@ esses documentos; obtenha seu identificador completo com `git rev-parse HEAD`.
 Ele é informado também na entrega e no checkpoint local externo ao Git. O
 manifesto não tenta conter o próprio hash nem prever o hash do commit que o contém.
 
+Equivalência de distribuição: `analytics.py`, `http.py` e o índice JSON dos
+exemplos tinham CRLF na cópia Windows congelada e LF nos blobs Git/archive/wheel.
+A comparação final confirmou igualdade após normalizar apenas CRLF→LF; ASTs
+Python iguais e JSON semanticamente igual. Os 295 hashes originais da campanha
+permanecem exatos para a cópia testada, sem normalização desse gate. O inventário
+publicável usa **bytes dos blobs Git**, para poder ser verificado em outro clone.
+
 ## 3. Baseline e evidências consultadas
 
 Leitura integral dos relatórios G4/G4.1, seus changelogs, guias do Lab e contrato
@@ -389,7 +396,7 @@ esse artefato. O wheel auditado aqui é exclusivamente o dev0 identificado acima
 ## 22. Arquivos publicáveis
 
 Inventário complementar: `G4_2_PUBLICATION_FILE_MANIFEST.json`, com arquivos
-A/M/D contra `88390ac`, tamanhos e SHA-256, referências e recibos selecionados.
+A/M/D contra `88390ac`, tamanhos e SHA-256 dos blobs Git, referências e recibos selecionados.
 O próprio manifesto é listado sem self-hash; seu hash final e o HEAD de entrega
 ficam no checkpoint externo. Não inclui inventário privado do original, logs
 brutos, venv, wheel, temporários ou quatro downloads nativos da pasta do usuário.
@@ -432,6 +439,9 @@ Sequência ancestral, sem reescrita:
 O commit documental de fechamento desta G4.2 é identificado pelo HEAD de entrega
 e pela lista `git log 88390ac..HEAD`; não se grava seu próprio hash dentro dele.
 Não foi criado commit duplicado de G4/G4.1 nem modificado outro repositório.
+`72aeebf134acca96284582637cba53022436ff90` adicionou os cinco entregáveis;
+o fechamento posterior explicita finais de linha e hashes de distribuição no
+relatório/inventário, sem alterar pacote ou código.
 
 ## 25. HEADs, original e congelamento
 

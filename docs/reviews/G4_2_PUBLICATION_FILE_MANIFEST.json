@@ -107,8 +107,8 @@
     {
       "status": "A",
       "path": "docs/reviews/G4_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md",
-      "bytes": 31434,
-      "sha256": "aec0dd509ee5834143c0aeb04159d50141d1eca7882b63666aafb18ee90449f6"
+      "bytes": 32151,
+      "sha256": "f2bd57faf158480552a9505f4848e0a2e94d83a3c44d0e02a1a82f16746d3c61"
     },
     {
       "status": "A",
@@ -119,14 +119,14 @@
     {
       "status": "A",
       "path": "docs/reviews/G4_VALIDATION_SUMMARY.json",
-      "bytes": 52950,
-      "sha256": "a64b667a2f0f0bc954f7860d34a8f78cf8f5246735706a93d9babe0f5a61e34c"
+      "bytes": 51283,
+      "sha256": "721217d901a905c923019c7700f6977a8b4be0af98bfbaad7f4043aa807959a0"
     },
     {
       "status": "A",
       "path": "examples/lab_packs/INDEX.json",
-      "bytes": 2105,
-      "sha256": "8aba6bdad6b1b1e0384d2bf5d51a68d554eaef20864968ba2e2bfa74bdfaaaa2"
+      "bytes": 2012,
+      "sha256": "be95f977e1e28f2d0ddc3d4196c3f9e9d0e8c3d51fb75520a30141769f5125c6"
     },
     {
       "status": "A",
@@ -167,8 +167,8 @@
     {
       "status": "A",
       "path": "research_console/lab/analytics.py",
-      "bytes": 14248,
-      "sha256": "f6c8832388a35961480a6d334821cf5226c0ab9ea0b7c4c23258d3c51f47cbed"
+      "bytes": 13905,
+      "sha256": "9611f27cca129775017c4debee1377bc2af6924c55e25ff8d1b8429b58fe23e7"
     },
     {
       "status": "A",
@@ -185,8 +185,8 @@
     {
       "status": "A",
       "path": "research_console/lab/http.py",
-      "bytes": 5981,
-      "sha256": "84e15330491c61c9d51998b305c9feb87ba7030231ee4cfc4ffcf1e6ce37b72c"
+      "bytes": 5844,
+      "sha256": "4d8cb654ec1f0803ba02ca21430fe1575a2798476103075034c6ff2d79871e4b"
     },
     {
       "status": "A",
@@ -269,14 +269,14 @@
     {
       "status": "A",
       "path": "tests/console/test_lab.py",
-      "bytes": 22408,
-      "sha256": "d51328da1bf020c52463f005c0ebe85792a4f03a0f508c591fce691037bf6dd6"
+      "bytes": 21797,
+      "sha256": "7b795274cbfb95cea2cf692640e77ce16ecdea2bfa055075eab99fd7a2a7c11e"
     },
     {
       "status": "A",
       "path": "tests/console/test_lab_hardening.py",
-      "bytes": 20334,
-      "sha256": "b31a39dfc753443d56f8f77cd91b0c55f8042b93534ad4ecc87c2c34f2c433ac"
+      "bytes": 19798,
+      "sha256": "16b137b9a984e9f759106e0a28e9575b373468cbf10129093a556aa06b8a0108"
     },
     {
       "status": "A",
@@ -741,5 +741,29 @@
     }
   ],
   "post_commit_security_receipts": "Tree, complete unpublished Git history, all newly introduced blobs and every archived unique compressed version are checked after this inventory is committed; hashes retained in the external final checkpoint. This prevents circular evidence hashes.",
-  "remote_writes_performed": false
+  "remote_writes_performed": false,
+  "hash_basis": "SHA-256 and size of candidate Git blob bytes, not platform worktree line endings; new report normalized by Git attributes.",
+  "line_ending_equivalence": [
+    {
+      "path": "research_console/lab/analytics.py",
+      "worktree_sha256": "f6c8832388a35961480a6d334821cf5226c0ab9ea0b7c4c23258d3c51f47cbed",
+      "git_archive_wheel_sha256": "9611f27cca129775017c4debee1377bc2af6924c55e25ff8d1b8429b58fe23e7",
+      "only_CRLF_to_LF": true,
+      "ast_or_json_identity_equal": true
+    },
+    {
+      "path": "research_console/lab/http.py",
+      "worktree_sha256": "84e15330491c61c9d51998b305c9feb87ba7030231ee4cfc4ffcf1e6ce37b72c",
+      "git_archive_wheel_sha256": "4d8cb654ec1f0803ba02ca21430fe1575a2798476103075034c6ff2d79871e4b",
+      "only_CRLF_to_LF": true,
+      "ast_or_json_identity_equal": true
+    },
+    {
+      "path": "examples/lab_packs/INDEX.json",
+      "worktree_sha256": "8aba6bdad6b1b1e0384d2bf5d51a68d554eaef20864968ba2e2bfa74bdfaaaa2",
+      "git_archive_wheel_sha256": "be95f977e1e28f2d0ddc3d4196c3f9e9d0e8c3d51fb75520a30141769f5125c6",
+      "only_CRLF_to_LF": true,
+      "ast_or_json_identity_equal": true
+    }
+  ]
 }
