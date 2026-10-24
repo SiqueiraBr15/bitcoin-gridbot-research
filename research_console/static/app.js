@@ -17,6 +17,7 @@ const titles = {
   risk: "Risco e drawdown",
   windows: "Janelas históricas",
   demo: "Demonstração PAPER",
+  lab: "Offline Research Lab",
 };
 const money = (v) =>
   v == null
@@ -199,12 +200,13 @@ function controls() {
   select("policy", policies, state.policy);
   select("reference", policies, state.reference);
 }
-async function api(url, signal = null, blob = false) {
+async function api(url, signal = null, blob = false, headers = {}) {
   const timeout = AbortSignal.timeout(15000);
   try {
     const response = await fetch(url, {
       credentials: "same-origin",
       cache: "no-store",
+      headers,
       signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     });
     if (!response.ok) {
@@ -809,19 +811,26 @@ function demo(parent, a) {
   );
   parent.append(p);
 }
-async function download(format) {
+async function download(format, reviewed = false) {
   if (exporting) return;
   exporting = true;
   const identity = () => (synthetic() ? "demo:" + demoPolicy : String(query()));
   const initial = identity();
   try {
+    if (!synthetic() && (format !== "csv" || !reviewed))
+      throw new Error("Somente tabela agregada CSV, após revisão explícita.");
     let url = synthetic()
       ? "/api/demo" +
         (format === "csv" ? ".csv" : "") +
         "?focus=" +
         encodeURIComponent(demoPolicy)
       : (format === "csv" ? "/api/export.csv?" : "/api/export?") + query();
-    const blob = await api(url, null, true);
+    const blob = await api(
+      url,
+      null,
+      true,
+      !synthetic() ? { "X-GridBot-Reviewed": "1" } : {},
+    );
     if (initial !== identity())
       throw new Error("Seleção mudou; exportação cancelada.");
     const link = el("a");
@@ -860,6 +869,20 @@ function renderPage() {
         ? `${synthetic() ? "SYNTHETIC_DEMO" : "ARCHIVED_RESEARCH_RESULT"} · ${payload.accounts[0].summary.start} → ${payload.accounts[0].summary.end} · ${payload.accounts.length} contas`
         : catalog.archive_integrity || "Dados indisponíveis";
   content.setAttribute("aria-busy", String(loading));
+  document.querySelector(".filters").hidden = state.page === "lab";
+  content.classList.toggle("research-lab", state.page === "lab");
+  if (state.page !== "lab") GridLab.deactivate();
+  if (state.page === "lab") {
+    $("subtitle").textContent =
+      "Biblioteca, evidências verificáveis e análise offline.";
+    $("status").textContent =
+      "Somente fontes escolhidas explicitamente · sem ordens ou coleta.";
+    GridLab.render(content, {
+      catalog,
+      openArchive: () => navigate("windows"),
+    });
+    return;
+  }
   if (loading) {
     content.append(
       panel(
@@ -967,9 +990,35 @@ function renderPage() {
       ),
     );
   const actions = el("div", null, "export-actions");
+  const review = el("input");
+  review.type = "checkbox";
+  if (!synthetic()) {
+    const label = el(
+      "label",
+      "Revisei e autorizo exportar somente as métricas agregadas permitidas",
+    );
+    label.append(review);
+    actions.append(
+      label,
+      el(
+        "p",
+        "Origem arquivada restrita: séries JSON e SVG não são redistribuídas.",
+      ),
+    );
+  }
+  const jsonButton = button(
+    "Baixar seleção JSON",
+    () => download("json"),
+    "secondary",
+  );
+  jsonButton.disabled = !synthetic();
   actions.append(
-    button("Baixar tabela CSV", () => download("csv"), "secondary"),
-    button("Baixar seleção JSON", () => download("json"), "secondary"),
+    button(
+      "Baixar tabela CSV",
+      () => download("csv", review.checked),
+      "secondary",
+    ),
+    jsonButton,
   );
   content.append(actions);
   const provenanceDetails = el("details");
