@@ -203,3 +203,16 @@ O primeiro comando mede somente o console, não toda a base. Consulte a
 [auditoria G4](reviews/G4_OFFLINE_RESEARCH_LAB_IMPLEMENTATION_AUDIT.md) para evidências,
 falhas encontradas e limites. Windows foi exercitado; Linux/macOS não foram testados.
 Não há prontidão para produção ou vantagem econômica comprovada por estes exemplos.
+
+Para repetir uma medição curta de análise, sem executar estratégia:
+
+```powershell
+python -m timeit -n 3 -r 1 -s "from research_console.lab.fixtures import example; from research_console.lab.packs import read_pack; from research_console.lab.analytics import analyze; raw=example('scale_1000',['10' if i%2==0 else '9' for i in range(1000)]); pack=read_pack(raw)" "analyze(pack)"
+```
+
+Use também 100 e 500 marcas por conta, sempre três contas e três repetições,
+e registre versão, hash do pack/código e carga concorrente da máquina. Validação
+é `read_pack(raw)`; export é `export_analysis(pack)` de `lab.exports`. Meça memória
+em chamada separada com tracemalloc, sem misturá-lo ao relógio do ensaio de tempo;
+essas alocações Python não representam RSS. A medição não justifica extrapolar
+capacidade ou prometer latência. Não remova os limites para executar um teste longo.
