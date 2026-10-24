@@ -8,7 +8,9 @@ observações matemáticas fictícias, sem significado de desempenho de mercado.
 ## Abrir
 
 Instale conforme [o guia do console](RESEARCH_CONSOLE.md). Nesta candidata local,
-use a branch local `fix/g4-research-lab-hardening`; a G4 ainda não foi publicada.
+use a branch local `release/g4-offline-research-lab`; a G4 ainda não foi publicada.
+O clone da main remota ainda contém G1–G3. A seleção dessa candidata depende do
+checkout local existente ou de uma publicação posterior explicitamente autorizada.
 
 ```powershell
 .\.venv\Scripts\python.exe -m research_console --port 8769
@@ -231,6 +233,8 @@ importação preserva uma única cópia identificada pelos bytes.
 O wheel inclui os guias essenciais em `research_console/help`; no checkout e na
 instalação editável, use `docs/`. A versão do schema permanece v1; a G4.1 rejeita
 contêineres malformados anteriormente tolerados, sem mudar os três fixtures válidos.
+Links desses guias para auditorias e demais documentos se referem ao checkout
+completo; esses relatórios não são dependências de execução do wheel.
 
 ## Arquitetura e verificações
 

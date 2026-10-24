@@ -27,7 +27,7 @@ O console inclui navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
 
 A candidata **G4 Offline Research Lab**, endurecida na branch local
-`fix/g4-research-lab-hardening`, acrescenta biblioteca, Evidence Packs com SHA-256,
+`release/g4-offline-research-lab`, acrescenta biblioteca, Evidence Packs com SHA-256,
 importação com confirmação, análise exata, comparação Pareto, episódios de risco,
 trilha PAPER e replay de análises. Sem novo backtest ou execução financeira.
 [Guia G4 e exemplos](docs/G4_RESEARCH_LAB.md) ·
@@ -68,6 +68,13 @@ py -3.13 -m venv .venv
 
 O console G1–G3.2 está na main. Para revisar G4, use sua candidata local;
 não existe release G4 publicada.
+Os comandos de clone acima obtêm a main disponível hoje. A branch candidata G4
+continua local até autorização de publicação. No checkout que já contém a
+candidata, selecione `git switch release/g4-offline-research-lab` antes de instalar.
+Após uma publicação autorizada dessa branch, será possível clonar com
+`git clone --branch release/g4-offline-research-lab https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git`.
+Esse último comando depende da existência futura da branch remota; não é uma
+instrução para publicar ou uma afirmação de que ela já está disponível.
 Abra `http://127.0.0.1:8765`, escolha **Demonstração PAPER** e clique em
 **Executar cenários sintéticos**. CSV/JSON exportam essa seleção; os gráficos
 oferecem SVG. Ctrl+C no terminal encerra o processo. Não há início automático.
