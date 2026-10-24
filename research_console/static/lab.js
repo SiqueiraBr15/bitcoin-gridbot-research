@@ -91,9 +91,23 @@
     const b = node("button", label, cls);
     b.type = "button";
     b.disabled = busy;
-    b.addEventListener("click", () =>
-      Promise.resolve().then(action).catch(showError),
-    );
+    b.addEventListener("click", () => {
+      const target = root;
+      try {
+        const pending = action(),
+          ticket = revision;
+        Promise.resolve(pending).catch((error) => {
+          if (
+            ticket === revision &&
+            root === target &&
+            error?.name !== "AbortError"
+          )
+            showError(error);
+        });
+      } catch (error) {
+        showError(error);
+      }
+    });
     return b;
   };
   const field = (label, control) => {
@@ -159,6 +173,7 @@
     focus = "";
   let message = "",
     busy = false;
+  let controller = new AbortController();
   try {
     const saved = JSON.parse(
       sessionStorage.getItem("gridbot.g4.filters") || "{}",
@@ -190,7 +205,7 @@
     const response = await fetch(url, {
       ...options,
       credentials: "same-origin",
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
     });
     if (!response.ok) {
       const problem = await response.json().catch(() => ({}));
@@ -206,6 +221,8 @@
         CONFIRMATION_REQUIRED: "É necessária confirmação explícita.",
         EXPORT_RESTRICTED: "A permissão declarada impede esta exportação.",
         DATA_UNAVAILABLE: "A cópia local está indisponível.",
+        LIBRARY_BUSY:
+          "Outra instância está gravando nesta biblioteca. Tente novamente.",
       };
       throw new Error(
         descriptions[problem.reason] ||
@@ -238,6 +255,8 @@
     return p;
   }
   async function selectStudy(s, keep = false) {
+    controller.abort();
+    controller = new AbortController();
     const ticket = ++revision;
     study = s;
     analysis = null;
@@ -275,7 +294,9 @@
     paint();
   }
   async function download(url, filename) {
+    const ticket = revision;
     const blob = await (await request(url)).blob();
+    if (ticket !== revision || !model.canPaint(root)) return;
     saveBlob(blob, filename);
   }
   function saveBlob(blob, filename) {
@@ -367,15 +388,21 @@
       const action = button("Confirmar importação local", async () => {
         if (!confirm.checked)
           throw new Error("Marque a confirmação explícita antes de persistir.");
+        const ticket = revision,
+          token = preview.preview_token;
+        busy = true;
+        paint();
         const imported = await post("/api/lab/confirm", {
-          preview_token: preview.preview_token,
+          preview_token: token,
           confirmed: true,
         });
+        if (ticket !== revision || !model.canPaint(root)) return;
         preview = null;
         await refresh();
+        if (ticket !== revision || !model.canPaint(root)) return;
         await selectStudy(imported);
       });
-      action.disabled = !context.persistence;
+      action.disabled = busy || !context.persistence;
       box.append(action);
     }
     parent.append(box);
@@ -455,7 +482,7 @@
         const b = button("Analisar " + s.title, () => selectStudy(s));
         b.disabled = s.integrity !== "VALIDATED";
         card.append(b, details(s));
-        if (s.redistribution === "PUBLIC")
+        if (s.export_scope === "RAW_AND_DERIVED")
           card.append(
             button(
               "Baixar Evidence Pack " + s.pack_id,
@@ -479,7 +506,12 @@
               async () => {
                 if (!consent.checked)
                   throw new Error("Confirme a remoção da cópia local.");
+                const ticket = revision;
+                busy = true;
+                paint();
                 await post("/api/lab/remove", { id: s.id, confirmed: true });
+                if (ticket !== revision || !model.canPaint(root)) return;
+                busy = false;
                 if (study?.id === s.id) {
                   analysis = null;
                   study = null;
@@ -809,7 +841,7 @@
         };
       });
       const chartContext = {
-        allow_series_export: analysis.redistribution === "PUBLIC",
+        allow_series_export: analysis.export_scope === "RAW_AND_DERIVED",
         dataset_id: study.dataset_identity,
         manifest_sha256: analysis.manifest_sha256,
         source_kind: analysis.source_kind,
@@ -885,6 +917,78 @@
     );
     const reviewed = node("input");
     reviewed.type = "checkbox";
+    if (
+      (!analysis.export_scope ||
+        (analysis.export_scope === "DERIVED_ONLY" &&
+          analysis.redistribution === "PUBLIC")) &&
+      analysis.redistribution !== "RESTRICTED"
+    ) {
+      exports.append(
+        node(
+          "p",
+          analysis.export_scope
+            ? "Autorização atual: somente derivados. Dados brutos e SVG continuam bloqueados. Uma ampliação exige nova confirmação dos direitos."
+            : "Exportação bloqueada: a licença declarada pelo pack não comprova direitos. Autorize somente após verificar uma base independente. A autorização vale apenas nesta sessão e para estes bytes.",
+        ),
+      );
+      const basis = node("select"),
+        scope = node("select"),
+        consent = node("input");
+      consent.type = "checkbox";
+      for (const [value, text] of [
+        ["OWN_DATA", "Dados próprios"],
+        ["VERIFIED_PUBLIC_LICENSE", "Licença pública verificada fora do pack"],
+        ["RIGHTSHOLDER_PERMISSION", "Permissão do titular dos direitos"],
+      ]) {
+        const option = node("option", text);
+        option.value = value;
+        basis.append(option);
+      }
+      for (const [value, text] of [
+        ["DERIVED_ONLY", "Somente resultados derivados"],
+        ...(analysis.redistribution === "PUBLIC"
+          ? [["RAW_AND_DERIVED", "Dados brutos e derivados"]]
+          : []),
+      ]) {
+        const option = node("option", text);
+        option.value = value;
+        scope.append(option);
+      }
+      exports.append(
+        field("Base independente dos direitos", basis),
+        field("Escopo da autorização", scope),
+        field(
+          "Verifiquei os direitos fora do pack e autorizo esta exportação",
+          consent,
+        ),
+      );
+      exports.append(
+        button("Autorizar exportação nesta sessão", async () => {
+          if (!consent.checked)
+            throw new Error(
+              "Confirme a verificação independente dos direitos.",
+            );
+          const ticket = revision,
+            id = study.id,
+            authorization = {
+              id,
+              scope: scope.value,
+              basis: basis.value,
+              confirmed: true,
+            };
+          busy = true;
+          paint();
+          const authorized = await post(
+            "/api/lab/authorize-export",
+            authorization,
+          );
+          if (ticket !== revision || !model.canPaint(root)) return;
+          await refresh();
+          if (ticket !== revision || !model.canPaint(root)) return;
+          await selectStudy(authorized, true);
+        }),
+      );
+    }
     if (analysis.redistribution === "AGGREGATES_ONLY")
       exports.append(
         field("Revisei e autorizo somente os agregados permitidos", reviewed),
@@ -898,7 +1002,7 @@
       }
       return download("/api/lab/export?" + p, "gridbot-analysis.zip");
     });
-    exportButton.disabled = analysis.redistribution === "RESTRICTED";
+    exportButton.disabled = !analysis.export_scope;
     const manifestButton = button(
       "Baixar manifesto da análise",
       () =>
@@ -910,17 +1014,19 @@
         ),
       "secondary",
     );
-    manifestButton.disabled = analysis.redistribution !== "PUBLIC";
+    manifestButton.disabled = !analysis.export_scope;
     exports.append(
       exportButton,
       manifestButton,
       button(
         "Conferir reprodução determinística",
         async () => {
+          const ticket = revision;
           const result = await post("/api/lab/replay", {
             id: study.id,
             manifest: analysis.analysis_manifest,
           });
+          if (ticket !== revision || !model.canPaint(root)) return;
           message = `Replay ${result.status} · nenhuma estratégia executada`;
           paint();
         },
@@ -937,13 +1043,18 @@
       button(
         "Validar manifesto escolhido",
         async () => {
+          const ticket = revision,
+            identity = study.id;
           const f = replayFile.files?.[0];
           if (!f || f.size > 16000)
             throw new Error("Escolha um manifesto JSON de até 16 KB.");
+          const manifest = JSON.parse(await f.text());
+          if (ticket !== revision || !model.canPaint(root)) return;
           const result = await post("/api/lab/replay", {
-            id: study.id,
-            manifest: JSON.parse(await f.text()),
+            id: identity,
+            manifest,
           });
+          if (ticket !== revision || !model.canPaint(root)) return;
           message = `Replay ${result.status}`;
           paint();
         },
@@ -975,7 +1086,10 @@
     );
     paper.append(
       button("Investigar fills da demonstração PAPER", async () => {
+        const ticket = revision;
         const trace = await json("/api/lab/paper");
+        if (ticket !== revision || !model.canPaint(root) || !paper.isConnected)
+          return;
         const fills = trace.accounts.flatMap((a) =>
           a.fills.map((f) => ({ policy: a.policy, ...f })),
         );
@@ -1006,15 +1120,21 @@
   }
   global.GridLab = {
     deactivate() {
+      controller.abort();
       revision++;
       root = null;
       busy = false;
     },
     render(target, options) {
+      if (controller.signal.aborted) controller = new AbortController();
       root = target;
       context = { ...options };
       paint();
-      refresh().catch(showError);
+      const ticket = revision;
+      refresh().catch((error) => {
+        if (ticket === revision && error?.name !== "AbortError")
+          showError(error);
+      });
     },
   };
 })(typeof window !== "undefined" ? window : globalThis);
