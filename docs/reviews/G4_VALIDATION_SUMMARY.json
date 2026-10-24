@@ -862,7 +862,8 @@
       "viewport_reset": true,
       "protected_attempts": 0,
       "svg_sha256": "20aa721fb6bef4a9796153e93b486be31314514fa33f3215d3c999952766dbb1",
-      "svg_pack_identity_verified": true
+      "svg_pack_identity_verified": true,
+      "preexisting_instance_after_resume": "NO_LISTENER_OBSERVED_CAUSE_UNKNOWN_NOT_RESTARTED"
     },
     "export_oracle": {
       "status": "PASS",
@@ -920,7 +921,8 @@
     "financial_config_diff": [],
     "old_nodeids_retained": 3422,
     "new_nodeids": 145,
-    "two_untracked_reports_hashes_preserved": true
+    "two_untracked_reports_hashes_preserved": true,
+    "fresh_recheck_after_resume": "PASS"
   },
   "security": {
     "secret_tree_and_decoded_scans": "PASS with no findings/errors/warnings; no path exclusions; G4 closing metadata also subject to hooks/history scan",
@@ -1475,8 +1477,8 @@
     },
     {
       "path": "docs/reviews/G4_OFFLINE_RESEARCH_LAB_IMPLEMENTATION_AUDIT.md",
-      "bytes_worktree": 21963,
-      "sha256": "c7d39b2b8f6d839188d16a66c733276f09ee8f06901d50e4bd8ceec6ee3bb84b",
+      "bytes_worktree": 22742,
+      "sha256": "d3cda71caee21a9dfd408088dd41f724ae522372d464ca7024562ba51ad5945a",
       "hash_convention": "UTF8_LF"
     },
     {
@@ -1654,5 +1656,12 @@
       "elapsed_ns": 637583700,
       "log_sha256": "4cae42a51041a003b918942f0c04168a1583faadcc5b837c84653bef0a43c4de"
     }
-  ]
+  ],
+  "local_refs": {
+    "main": "a28e6f35b7b0acb42cee6dc97959cdf65f6022b0",
+    "origin/main": "88390ac0b3726c50b548e5087acfa39982d76342",
+    "G4_base": "88390ac0b3726c50b548e5087acfa39982d76342",
+    "main_moved_by_G4": false,
+    "clarification": "Local main retained its older tip; branch was based on integrated published main commit."
+  }
 }

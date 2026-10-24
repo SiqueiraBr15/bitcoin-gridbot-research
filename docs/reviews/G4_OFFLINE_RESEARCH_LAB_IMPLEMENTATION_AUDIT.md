@@ -6,8 +6,12 @@ Nenhuma pesquisa econômica, otimização, coleta ou operação Binance executad
 
 ## 1. Baseline G3.4
 
-Main local/remota confirmada em `88390ac0b3726c50b548e5087acfa39982d76342`,
-merge tradicional do PR #1. A nova branch deriva desse commit. README, guias,
+Main publicada e `origin/main` confirmadas em `88390ac0b3726c50b548e5087acfa39982d76342`,
+merge tradicional do PR #1. A nova branch deriva desse commit. A referência local
+`main` continuou em `a28e6f35b7b0acb42cee6dc97959cdf65f6022b0`, sem atualização
+desde 22/10; não foi movida para forçar igualdade. Reflog e ancestralidade distinguem
+essas referências. O registro inicialmente as confundiu e foi corrigido no
+fechamento, sem alteração de código ou histórico. README, guias,
 auditorias G1–G3.4 disponíveis, contratos, PAPER, portfolio, métricas, exports,
 testes e configurações foram usados para delimitar a integração.
 3.420 testes/2 skips, 19 testes JS, 96,53% global e 162 carteiras/69.174 marcas
@@ -263,7 +267,11 @@ final. A captura full-page nativa funcionou nas quatro larguras, sem imagem gera
 ou redimensionamento posterior. Scatter foi corrigido após inspeção mobile para
 manter rótulos legíveis. Não se declara teste com leitor de tela ou todos os browsers.
 Aba própria fechada, override de viewport restaurado, processos de teste encerrados;
-instância preexistente continuou com o mesmo PID. Console JS sem warnings/errors
+instância preexistente foi observada com o mesmo PID durante esse fechamento da UI.
+Após a retomada da conversa, outra inspeção já não encontrou listener na porta
+padrão: causa não determinada, sem encerramento ou reinício dessa instância pelo
+executor. Não se afirma que ela permaneceu ativa até o fim da documentação.
+Console JS sem warnings/errors
 consultados ao fim das jornadas bem-sucedidas.
 
 ## 21. Compatibilidade
@@ -298,6 +306,8 @@ redistribuição, integridade, proveniência, autenticidade e reprodutibilidade.
 - `f47ffec`: biblioteca, comparação, risco e fixtures públicos.
 - `2a3b306`: documentação, schema e captura real.
 - Fechamento: esta auditoria, resumo sanitizado e proposta local, em commit separado.
+- Errata documental final: distinção de refs locais/remotas e estado observado
+  da instância preexistente após retomada; código medido permanece idêntico.
 
 ## 25. Arquivos e preservação
 
