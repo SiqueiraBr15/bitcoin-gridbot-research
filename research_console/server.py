@@ -29,6 +29,7 @@ from research_console.data import COSTS, POLICIES, Archive
 from research_console.demo import demonstration
 from research_console.lab import http as lab_http
 from research_console.lab.library import Library
+from research_console.lab.numeric import AnalysisError
 from research_console.lab.packs import MAX_UPLOAD
 from research_console.risk import display
 
@@ -391,6 +392,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Corpo incompleto")
             result = lab_http.post(self.server.service.lab, self.path, raw)
             self.respond(200, json.dumps(result, ensure_ascii=False, sort_keys=True).encode())
+        except AnalysisError:
+            self.respond(500, b'{"reason":"ANALYSIS_FAILED","error":"Internal analytical failure"}')
         except (ValueError, KeyError, TypeError, OSError, EOFError, OverflowError) as exc:
             self.close_connection = True
             self.respond(
@@ -423,6 +426,7 @@ class Handler(BaseHTTPRequestHandler):
             "/app.js": ("app.js", "text/javascript"),
             "/style.css": ("style.css", "text/css"),
             "/charts.js": ("charts.js", "text/javascript"),
+            "/numbers.js": ("numbers.js", "text/javascript"),
             "/state.js": ("state.js", "text/javascript"),
             "/lab.js": ("lab.js", "text/javascript"),
         }
@@ -519,6 +523,8 @@ class Handler(BaseHTTPRequestHandler):
             )
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             return  # A disconnected reader does not change state or trigger another response.
+        except AnalysisError:
+            self.respond(500, b'{"reason":"ANALYSIS_FAILED","error":"Internal analytical failure"}')
         except (ValueError, KeyError, TypeError, OSError, EOFError, OverflowError) as exc:
             if url.path.startswith("/api/lab/"):
                 self.respond(

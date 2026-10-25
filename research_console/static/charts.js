@@ -1,5 +1,9 @@
 (function (root) {
   "use strict";
+  const numbers =
+    typeof module !== "undefined" && module.exports
+      ? require("./numbers.js")
+      : root.GridNumbers;
   const colors = [
     "#8bb6ff",
     "#d4b9ff",
@@ -21,6 +25,49 @@
     return context.sampling_seconds
       ? delta !== Number(context.sampling_seconds) * 1000
       : delta > 86400000;
+  }
+  function temporalContext(accounts, context) {
+    if (
+      Number.isSafeInteger(context.sampling_seconds) &&
+      context.sampling_seconds > 0
+    )
+      return {
+        ...context,
+        cadence_note: `Cadência declarada: ${context.sampling_seconds} segundos; intervalos divergentes interrompem a curva.`,
+      };
+    let cadence = null,
+      irregular = false;
+    for (const account of accounts) {
+      let previous = null;
+      for (const point of account.series) {
+        const time = Date.parse(point.time);
+        if (!Number.isFinite(time)) irregular = true;
+        if (previous !== null) {
+          const delta = (time - previous) / 1000;
+          if (!(delta > 0) || (cadence !== null && delta !== cadence))
+            irregular = true;
+          if (cadence === null) cadence = delta;
+        }
+        previous = time;
+      }
+    }
+    if (
+      cadence !== null &&
+      Number.isSafeInteger(cadence) &&
+      cadence > 0 &&
+      !irregular
+    )
+      return {
+        ...context,
+        sampling_seconds: cadence,
+        cadence_note: `Cadência observada nos timestamps: ${cadence} segundos; não é declaração da fonte.`,
+      };
+    return {
+      ...context,
+      sampling_seconds: null,
+      cadence_note:
+        "Timestamps observados; cadência fixa não demonstrada. Lacunas acima de 86400 segundos interrompem a curva.",
+    };
   }
   function exportMetadata(context, accounts, field, unit) {
     const identity = {};
@@ -276,13 +323,10 @@
       times = accounts.flatMap((a) => a.series.map((p) => Date.parse(p.time))),
       min = Math.min(...times),
       max = Math.max(...times);
-    const f = (v) =>
-      Number(v).toLocaleString("pt-BR", {
-        maximumFractionDigits: unit === "BTC" ? 8 : 2,
-        minimumFractionDigits: unit === "BTC" ? 5 : 2,
-      });
-    const samplingSeconds = Number(context.sampling_seconds || 86400);
-    note.textContent = `Eixo Y: ${f(unit === "%" ? low * 100 : low)} a ${f(unit === "%" ? high * 100 : high)} ${unit}. ${zoom ? "Domínio ajustado explicitamente; consulte a escala." : "Domínio absoluto com zero de referência."} Segmentação na cadência de ${samplingSeconds} segundos declarados.`;
+    // Number is only for coordinates. Readouts format source strings without IEEE754 conversion.
+    const f = (v) => numbers.formatDecimal(String(v), unit === "BTC" ? 8 : 2);
+    const temporal = temporalContext(accounts, context);
+    note.textContent = `Eixo Y: ${f(unit === "%" ? low * 100 : low)} a ${f(unit === "%" ? high * 100 : high)} ${unit}. ${zoom ? "Domínio ajustado explicitamente; consulte a escala." : "Domínio absoluto com zero de referência."} ${temporal.cadence_note}`;
     let current = 0;
     function draw() {
       const started = performance.now();
@@ -337,7 +381,7 @@
       accounts.forEach((a, i) => {
         let path = "";
         a.series.forEach((p, j) => {
-          const gap = !j || samplingGap(a.series[j - 1].time, p.time, context);
+          const gap = !j || samplingGap(a.series[j - 1].time, p.time, temporal);
           path += `${gap ? "M" : "L"}${xx(p.time)} ${yy(Number(p[field]))} `;
           if (a.series.length === 1)
             shape("circle", {
@@ -384,7 +428,7 @@
         accounts.forEach((a, i) => {
           const p = a.series.find((p) => p.time === point.time),
             entry = document.createElement("span");
-          entry.textContent = `${i + 1}. ${labels[a.summary.policy] || a.summary.policy}: ${p ? f(unit === "%" ? Number(p[field]) * 100 : p[field]) + " " + unit : "sem marca nesse instante"}`;
+          entry.textContent = `${i + 1}. ${labels[a.summary.policy] || a.summary.policy}: ${p ? numbers.formatDecimal(p[field], unit === "BTC" ? 8 : 2, unit === "%" ? 100 : 1) + " " + unit : "sem marca nesse instante"}`;
           readout.append(entry);
         });
       }
@@ -529,6 +573,7 @@
     domain,
     seriesExportAllowed,
     samplingGap,
+    temporalContext,
     nearest,
     lineChart,
     histogram,

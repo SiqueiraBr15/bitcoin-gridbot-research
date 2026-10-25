@@ -276,3 +276,27 @@ independente após verificar os direitos. Meça memória
 em chamada separada com tracemalloc, sem misturá-lo ao relógio do ensaio de tempo;
 essas alocações Python não representam RSS. A medição não justifica extrapolar
 capacidade ou prometer latência. Não remova os limites para executar um teste longo.
+
+## G4.6 — Precisão, limites e cadência
+
+O [contrato numérico](G4_EVIDENCE_PACK_V1.md#g46--contrato-numérico-da-análise)
+separa cálculos Fraction exatos, strings de transporte e arredondamento visual
+half-even. O reparo admite frações derivadas longas sem desligar a proteção global
+do Python ou reduzir o número de marcas do pack. Valores muito pequenos recebem
+notação científica aproximada em vez de um zero aparentemente exato. O JSON
+completo autorizado preserva o racional; a projeção de derivados mantém seus
+limites de direitos e precisão. Nenhuma fórmula financeira ou parâmetro mudou.
+
+Na demonstração PAPER, o gráfico informa **cadência observada de 60 segundos**,
+conforme os timestamps da simulação. Uma cadência declarada no Evidence Pack é
+identificada como declaração e segmenta intervalos divergentes. Sem declaração,
+intervalos uniformes podem ser descritos como observados; séries irregulares,
+unitárias ou sem timestamps suficientes não recebem uma frequência inventada.
+Nesse caso a nota explicita somente o fallback de lacunas acima de um dia.
+Índices de eventos não são apresentados como duração. Os preços e fills PAPER
+continuam os mesmos.
+
+Falhas internas de análise são distintas de dados inválidos. A interface não
+deve conservar tabelas/gráficos de uma seleção anterior ao mostrar falha de outra.
+Nenhuma mensagem de sucesso substitui validação de conservação, autorização de
+exportação, replay ou conferência de proveniência.

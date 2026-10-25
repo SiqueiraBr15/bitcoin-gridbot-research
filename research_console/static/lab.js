@@ -1,56 +1,14 @@
 (function (global) {
   "use strict";
+  const numbers =
+    typeof module !== "undefined" && module.exports
+      ? require("./numbers.js")
+      : global.GridNumbers;
+  const { NumericFormatError } = numbers;
   const model = {
-    formatDecimal(value, places = 8) {
-      if (
-        typeof value !== "string" ||
-        value.length > 650 ||
-        !Number.isInteger(places) ||
-        places < 0 ||
-        places > 12
-      )
-        throw new Error("Formato decimal inválido");
-      let numerator, denominator;
-      const fraction = /^(-?\d{1,300})\/(\d{1,300})$/.exec(value);
-      if (fraction) {
-        numerator = BigInt(fraction[1]);
-        denominator = BigInt(fraction[2]);
-      } else {
-        const m =
-          /^(-?)(\d{1,240})(?:\.(\d{1,240}))?(?:[eE]([+-]?\d{1,3}))?$/.exec(
-            value,
-          );
-        if (!m || Math.abs(Number(m[4] || 0)) > 300)
-          throw new Error("Formato decimal inválido");
-        numerator = BigInt((m[1] || "") + m[2] + (m[3] || ""));
-        const shift = (m[3] || "").length - Number(m[4] || 0);
-        denominator = shift >= 0 ? 10n ** BigInt(shift) : 1n;
-        if (shift < 0) numerator *= 10n ** BigInt(-shift);
-      }
-      if (denominator <= 0n) throw new Error("Divisor inválido");
-      const negative = numerator < 0n;
-      if (negative) numerator = -numerator;
-      const scale = 10n ** BigInt(places),
-        scaled = numerator * scale;
-      let rounded = scaled / denominator;
-      const remainder = scaled % denominator;
-      if (
-        2n * remainder > denominator ||
-        (2n * remainder === denominator && rounded % 2n === 1n)
-      )
-        rounded++;
-      const whole = (rounded / scale)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      const tail = places
-        ? (rounded % scale).toString().padStart(places, "0").replace(/0+$/, "")
-        : "";
-      return (
-        (negative && rounded !== 0n ? "-" : "") +
-        whole +
-        (tail ? "," + tail : "")
-      );
-    },
+    maxIntegerDigits: numbers.maxIntegerDigits,
+    maxResponseBytes: numbers.maxResponseBytes,
+    formatDecimal: numbers.formatDecimal,
     canPaint(target) {
       return !!target?.isConnected && target.classList.contains("research-lab");
     },
@@ -154,7 +112,12 @@
   const present = (value, decimals = 8) => {
     if (value == null) return "Indisponível";
     const n = node("span", model.formatDecimal(value, decimals));
-    n.title = "Valor derivado antes da formatação: " + value;
+    n.title =
+      value.length <= 512
+        ? "Valor exato antes da formatação: " + value
+        : "Representação exata longa; consulte a evidência da análise. Prefixo: " +
+          value.slice(0, 240) +
+          "…";
     return n;
   };
   let root,
@@ -223,13 +186,20 @@
         DATA_UNAVAILABLE: "A cópia local está indisponível.",
         LIBRARY_BUSY:
           "Outra instância está gravando nesta biblioteca. Tente novamente.",
+        ANALYSIS_FAILED:
+          "Falha interna na análise. A evidência não foi classificada como inválida.",
       };
       throw new Error(
         descriptions[problem.reason] ||
-          "Schema ou dados inválidos. O pack exige manifesto e resultados válidos.",
+          (response.status >= 500
+            ? "Falha interna do serviço de análise. Tente novamente."
+            : "Schema ou dados inválidos. O pack exige manifesto e resultados válidos."),
       );
     }
-    if (Number(response.headers.get("Content-Length") || 0) > 12000000)
+    if (
+      Number(response.headers.get("Content-Length") || 0) >
+      model.maxResponseBytes
+    )
       throw new Error("Resposta excede limite local.");
     return response;
   }
@@ -245,6 +215,7 @@
   }
   function showError(error) {
     busy = false;
+    if (error instanceof NumericFormatError) analysis = null;
     message = error?.message || "Não foi possível validar a evidência.";
     if (model.canPaint(root)) paint();
   }

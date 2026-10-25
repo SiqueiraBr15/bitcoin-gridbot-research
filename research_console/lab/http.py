@@ -8,6 +8,7 @@ from typing import Any
 from research_console.data import decode
 from research_console.lab.exports import export_analysis, manifest_for_result, replay
 from research_console.lab.library import Library
+from research_console.lab.numeric import MAX_ANALYSIS_BYTES, AnalysisError
 from research_console.lab.packs import canonical, keys
 from research_console.risk import display, require
 
@@ -63,7 +64,13 @@ def get(library: Library, route: str, query: dict[str, list[str]]) -> tuple[byte
         result["accounts"] = [
             a for a in pack.results["accounts"] if accounts is None or a["account_id"] in accounts
         ]
-        return canonical(result), "application/json", None
+        try:
+            raw = canonical(result)
+        except (ValueError, TypeError, OverflowError) as error:
+            raise AnalysisError("Internal analytical serialization failed") from error
+        if len(raw) > MAX_ANALYSIS_BYTES:
+            raise AnalysisError("Analysis response exceeds the transport budget")
+        return raw, "application/json", None
     pack = library.get(identity)
     if route == "/api/lab/source":
         require(

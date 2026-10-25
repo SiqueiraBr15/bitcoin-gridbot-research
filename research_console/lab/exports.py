@@ -21,7 +21,7 @@ def _loaded_source_hash() -> str:
     root = Path(__file__).parent
     sources = {
         name: digest((root / name).read_bytes().replace(b"\r\n", b"\n"))
-        for name in ("__init__.py", "analytics.py", "packs.py", "exports.py")
+        for name in ("__init__.py", "analytics.py", "numeric.py", "packs.py", "exports.py")
     }
     sources.update(
         {
@@ -161,6 +161,7 @@ def export_analysis(
                 k: result[k]
                 for k in (
                     "analytics_version",
+                    "numeric_contract",
                     "pack_sha256",
                     "source_kind",
                     "data_nature",

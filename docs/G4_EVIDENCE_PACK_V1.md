@@ -114,3 +114,48 @@ por SHA e sessão do servidor, fora do pack e do resultado matemático. Somente 
 bytes dos três fixtures do projeto recebem permissão automática. Alterar título,
 identidade ou dados cria outro pack e exige revisão independente; alegar natureza
 sintética ou licença pública não contorna esse requisito.
+
+## G4.6 — Contrato numérico da análise
+
+O schema de entrada v1 e seus limites permanecem inalterados. A análise identifica
+o transporte como `numeric_contract: EXACT_RATIONAL_DECIMAL_V2`. Os campos `exact`
+continuam strings JSON: inteiro decimal ou `numerador/denominador`, normalizados
+por Fraction. Nenhum valor contábil passa por float, arredondamento ou truncamento.
+O serializer converte os inteiros exatamente por Decimal(int), sem alterar
+`sys.set_int_max_str_digits` e sem depender da precisão Decimal ambiente.
+
+Magnitude de entrada e complexidade de um resultado são limites distintos.
+Cada decimal admitido tem até 80 dígitos de coeficiente, adjusted em [-100,20];
+seus componentes racionais têm no máximo 200 dígitos. Pela conservação,
+`BTC*preço/NAV = 1-caixa/NAV`: o denominador reduzido de cada exposição tem no
+máximo 400 dígitos. Há no máximo 10.000 marcas em **todo** o pack. O produto dos
+denominadores e os fatores de tempo justificam o teto conservador de 4.000.016
+dígitos por componente derivado. Backend e formatador compartilham esse contrato;
+ele não amplia a gramática dos números de entrada. A soma exata usa uma árvore
+balanceada, evitando somar cada termo curto a um acumulador cada vez maior.
+
+A resposta analítica local tem teto de 64 MiB: contempla os dois componentes
+derivados, dados de entrada limitados a 6 MiB e projeções de risco/evidência das
+10.000 marcas. Não é autorização para JSON de entrada maior. Esse teto é uma
+proteção de transporte, não promessa de latência ou consumo máximo de RAM.
+
+Tabelas usam BigInt e half-even na precisão visual indicada (NAV: 2 casas;
+BTC: 8; razões: 6), sem converter as strings exatas em JavaScript Number.
+Valores não nulos que arredondariam para zero e valores >=10^24 são apresentados
+em notação científica com `≈`, até oito casas no coeficiente. A saída permanece
+curta; o valor exato não é substituído por essa apresentação. Tooltips de frações
+longas mostram um prefixo identificado; JSON completo autorizado preserva tudo.
+Gráficos usam Number somente para coordenadas/eixos aproximados; a consulta da
+marca formata sua string original, inclusive porcentagens, pelo mesmo formatter.
+
+Exports completos preservam `exact` em JSON e o pack fonte byte a byte; CSV
+mantém seu contrato de colunas, com NAV/BTC/fees de origem e DD decimal de até
+50 dígitos significativos. Derivados autorizados continuam deliberadamente sem
+fonte, séries, episódios e bloco `exact`, com precisão decimal declarada de 50
+dígitos. Não se amplia permissão para resolver um problema numérico.
+
+Dados realmente inválidos continuam recusados. Uma falha inesperada de cálculo
+ou serialização é HTTP 500 com `ANALYSIS_FAILED`, sem classificar o pack como
+DATA_INVALID nem expor stack/path. Replay continua exigindo a identidade do
+código carregado, agora incluindo numeric.py; manifestos antigos de outro código
+são incompatíveis de maneira explícita, sem reescrever resultados arquivados.

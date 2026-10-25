@@ -8,6 +8,7 @@ from typing import Any
 
 from research_console.data import timestamp
 from research_console.lab import ANALYTICS_VERSION
+from research_console.lab.numeric import NUMERIC_CONTRACT, balanced_sum, calculated, exact
 from research_console.lab.packs import Pack, canonical, digest
 from research_console.risk import LIMIT, display, require, seconds
 
@@ -18,6 +19,7 @@ def ratio(numerator: Fraction, denominator: Fraction) -> str | None:
     return display(numerator / denominator) if denominator else None
 
 
+@calculated
 def episodes(points: list[list[str]], cadence: int) -> dict[str, Any]:
     """Censor at gaps, restart high-water reference; never interpolate missing marks."""
     high = Fraction(points[0][4])
@@ -46,7 +48,7 @@ def episodes(points: list[list[str]], cadence: int) -> dict[str, Any]:
                 "censored": not recovered,
                 "reason": reason,
                 "magnitude": display(magnitude),
-                "magnitude_fraction": str(magnitude),
+                "magnitude_fraction": exact(magnitude),
                 "exceeds_20_percent": magnitude > LIMIT,
                 "observed_seconds": seconds(timestamp(points[peak][0]), timestamp(points[end][0])),
                 "peak_nav": points[peak][4],
@@ -77,7 +79,7 @@ def episodes(points: list[list[str]], cadence: int) -> dict[str, Any]:
     return {
         "status": "OBSERVED_SEGMENTS_ONLY" if sufficient else "INSUFFICIENT_RISK_EVIDENCE",
         "max_drawdown": display(maximum) if sufficient else None,
-        "max_drawdown_fraction": str(maximum) if sufficient else None,
+        "max_drawdown_fraction": exact(maximum) if sufficient else None,
         "distance_to_20_pp": display(100 * (LIMIT - maximum)) if sufficient else None,
         "violates_20_percent": maximum > LIMIT if sufficient else None,
         "episodes": result,
@@ -89,6 +91,7 @@ def episodes(points: list[list[str]], cadence: int) -> dict[str, Any]:
     }
 
 
+@calculated
 def comparable_key(account: dict[str, Any], source: str) -> str:
     return digest(
         canonical(
@@ -96,15 +99,16 @@ def comparable_key(account: dict[str, Any], source: str) -> str:
                 "source": source,
                 "window": account["window_id"],
                 "cost": account["cost_scenario"],
-                "initial_nav": str(Fraction(account["initial_nav"])),
+                "initial_nav": exact(Fraction(account["initial_nav"])),
                 "start": account["start"],
                 "end": account["end"],
-                "market": [(p[0], str(Fraction(p[1]))) for p in account["points"]],
+                "market": [(p[0], exact(Fraction(p[1]))) for p in account["points"]],
             }
         )
     )
 
 
+@calculated
 def metrics(account: dict[str, Any], cadence: int) -> dict[str, Any]:
     points = account["points"]
     first, last = points[0], points[-1]
@@ -113,7 +117,8 @@ def metrics(account: dict[str, Any], cadence: int) -> dict[str, Any]:
     )
     risk = episodes(points, cadence)
     elapsed = seconds(timestamp(first[0]), timestamp(last[0]))
-    exposure_time, observed_time, underwater = Fraction(0), 0, 0
+    exposure_terms: list[Fraction] = []
+    observed_time = underwater = 0
     exposure_known = True
     returns = []
     for i, (left, right) in enumerate(pairwise(points)):
@@ -123,25 +128,26 @@ def metrics(account: dict[str, Any], cadence: int) -> dict[str, Any]:
         observed_time += dt
         nav = Fraction(left[4])
         if nav:
-            exposure_time += Fraction(left[3]) * Fraction(left[1]) / nav * dt
+            exposure_terms.append(Fraction(left[3]) * Fraction(left[1]) / nav * dt)
             returns.append(Fraction(right[4]) / nav - 1)
         else:
             exposure_known = False
         if risk["drawdowns"][i] is not None and Fraction(risk["drawdowns"][i]) < 0:
             underwater += dt
+    exposure_time = balanced_sum(exposure_terms)
     return {
         "exact": {
-            "nav_initial": str(initial),
-            "nav_final": str(final),
-            "return_usdt": str(final - initial),
-            "cash_usdt": str(cash),
-            "btc_change": str(btc - Fraction(first[3])),
-            "btc_physical": str(btc),
-            "btc_equivalent": str(final / price),
-            "fees_usdt": str(Fraction(account["fees_usdt"])),
-            "return_ratio": str((final - initial) / initial) if initial else None,
+            "nav_initial": exact(initial),
+            "nav_final": exact(final),
+            "return_usdt": exact(final - initial),
+            "cash_usdt": exact(cash),
+            "btc_change": exact(btc - Fraction(first[3])),
+            "btc_physical": exact(btc),
+            "btc_equivalent": exact(final / price),
+            "fees_usdt": exact(Fraction(account["fees_usdt"])),
+            "return_ratio": exact((final - initial) / initial) if initial else None,
             "max_drawdown": risk["max_drawdown_fraction"] if risk["risk_complete"] else None,
-            "exposure_mean_left": str(exposure_time / observed_time)
+            "exposure_mean_left": exact(exposure_time / observed_time)
             if exposure_known and observed_time
             else None,
         },
@@ -323,6 +329,7 @@ def analyze(
         )
     return {
         "analytics_version": ANALYTICS_VERSION,
+        "numeric_contract": NUMERIC_CONTRACT,
         "pack_sha256": pack.sha256,
         "manifest_sha256": pack.manifest_sha256,
         "source_kind": manifest["source_kind"],
