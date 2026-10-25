@@ -51,8 +51,6 @@ def writer_lock(root: Path) -> Iterator[None]:
             stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 1,
             "Lock local inválido",
         )
-        if os.fstat(descriptor).st_size == 0:
-            os.write(descriptor, b"\0")
         os.lseek(descriptor, 0, os.SEEK_SET)
         try:
             if sys.platform == "win32":
@@ -66,9 +64,14 @@ def writer_lock(root: Path) -> Iterator[None]:
         except OSError as error:
             raise ValueError("Biblioteca ocupada. Tente novamente") from error
         try:
+            # Windows locks may cover an empty range. Initialize only after ownership:
+            # another writer can already hold that byte even while its size is zero.
+            if os.fstat(descriptor).st_size == 0:
+                os.write(descriptor, b"\0")
             no_links(root)
             yield
         finally:
+            os.lseek(descriptor, 0, os.SEEK_SET)
             if sys.platform == "win32":
                 msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
             else:
