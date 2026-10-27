@@ -762,3 +762,14 @@ footer {
   overflow-wrap: anywhere;
   min-width: 0;
 }
+/* Keep complete pack identities readable without changing data or table scroll. */
+.research-lab .lab-controls label,
+.research-lab .legend .series-label,
+.research-lab .readout > span,
+.research-lab .panel h2,
+.research-lab .panel h3,
+.research-lab .lab-study button {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
