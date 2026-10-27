@@ -288,7 +288,20 @@ def request(
         return response.status, response.read(), dict(response.getheaders())
 
 
-def test_http_menus_catalog_and_selection(server: LocalServer) -> None:
+@pytest.fixture
+def menu_server(server: LocalServer) -> LocalServer:
+    """Prepare real native data before testing the 15-second HTTP transport contract.
+
+    The cold runner plus independent replay is CPU work, multiplied by tracing.
+    Cold HTTP generation is retained separately below, never mocked or skipped.
+    Warming this function-scoped Service does not share authority across tests.
+    """
+    server.service.demonstration()
+    return server
+
+
+def test_http_menus_catalog_and_selection(menu_server: LocalServer) -> None:
+    server = menu_server
     status, body, headers = request(server, "/")
     assert status == 200
     assert b"127.0.0.1" not in body
@@ -331,6 +344,49 @@ def test_http_menus_catalog_and_selection(server: LocalServer) -> None:
     assert status == 200
     assert "attachment" in headers["Content-Disposition"]
     assert b"marks" not in body.splitlines()[0].replace(b"marks_sha256", b"")
+
+
+@pytest.mark.parametrize("with_archive", [False, True])
+def test_cold_http_demo_native_conservation_and_cache_isolation(
+    server: LocalServer, with_archive: bool
+) -> None:
+    if not with_archive:
+        server.service = Service()
+    initial_demo = server.service.demo
+    assert initial_demo is None
+    cookie = request(server, "/")[2]["Set-Cookie"].split(";")[0]
+    # Dedicated native integration budget: G4.8 measured ~13.5s traced and ~29s
+    # on one constrained CPU with a finite competing native calculation. 60s
+    # admits that verified work with margin; menu/other HTTP deadlines stay15s.
+    # The outer segment deadline and teardown/join assertions remain enforced.
+    with closing(http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=60)) as conn:
+        conn.request("GET", "/api/demo", headers={"Cookie": cookie})
+        response = conn.getresponse()
+        assert response.status == 200
+        body = response.read()
+    actual = json.loads(body)
+    assert actual["source_kind"] == "SYNTHETIC_DEMO"
+    expected = {
+        "round_trip": (Fraction("109.17147"), Fraction(0), Fraction("109.17147")),
+        "falling_mark": (Fraction("76.26013"), Fraction("0.946"), Fraction("10.04013")),
+    }
+    for account in actual["accounts"]:
+        row, final = account["summary"], account["series"][-1]
+        assert tuple(Fraction(final[k]) for k in ("nav", "btc", "cash")) == expected[row["policy"]]
+        cash, btc = Fraction(100), Fraction(0)
+        for fill in account["fills"]:
+            assert fill["side"] in ("BUY", "SELL")
+            quantity, price, fee = (Fraction(fill[k]) for k in ("btc", "price", "fee_usdt"))
+            sign = 1 if fill["side"] == "BUY" else -1
+            cash -= sign * quantity * price + fee
+            btc += sign * quantity
+        assert (cash, btc) == (Fraction(final["cash"]), Fraction(final["btc"]))
+        assert cash + btc * Fraction(final["price"]) == Fraction(final["nav"])
+        assert account["events"]
+        assert account["fills"]
+    assert server.service.demo is not None
+    actual["accounts"].clear()  # a consumer cannot mutate the Service cache
+    assert request(server, "/api/demo", headers={"Cookie": cookie})[1] == body
 
 
 @pytest.mark.parametrize(

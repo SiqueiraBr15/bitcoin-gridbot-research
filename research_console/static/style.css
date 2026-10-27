@@ -757,3 +757,8 @@ footer {
   stroke-dasharray: 5 4;
   fill: none;
 }
+.lab-risk-status,
+.research-lab .status {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

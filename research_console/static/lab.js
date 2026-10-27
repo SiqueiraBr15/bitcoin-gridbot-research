@@ -109,12 +109,16 @@
   };
   const fmt = (v, suffix = "") =>
     v == null ? "Indisponível" : String(v) + suffix;
-  const present = (value, decimals = 8) => {
+  const present = (
+    value,
+    decimals = 8,
+    origin = "Valor exato antes da formatação: ",
+  ) => {
     if (value == null) return "Indisponível";
     const n = node("span", model.formatDecimal(value, decimals));
     n.title =
       value.length <= 512
-        ? "Valor exato antes da formatação: " + value
+        ? origin + value
         : "Representação exata longa; consulte a evidência da análise. Prefixo: " +
           value.slice(0, 240) +
           "…";
@@ -135,8 +139,13 @@
     objectives = ["nav_final", "btc_physical", "max_drawdown"],
     focus = "";
   let message = "",
-    busy = false;
+    busy = false,
+    analysisState = "DATA_UNAVAILABLE",
+    importState = "IMPORT_IDLE";
   let controller = new AbortController();
+  let catalogController = new AbortController(),
+    catalogRevision = 0;
+  const capabilities = { persistence: null, archiveAdapter: null };
   try {
     const saved = JSON.parse(
       sessionStorage.getItem("gridbot.g4.filters") || "{}",
@@ -164,11 +173,11 @@
       );
     } catch {}
   }
-  async function request(url, options = {}) {
+  async function request(url, options = {}, signal = controller.signal) {
     const response = await fetch(url, {
       ...options,
       credentials: "same-origin",
-      signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
+      signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
     });
     if (!response.ok) {
       const problem = await response.json().catch(() => ({}));
@@ -189,12 +198,16 @@
         ANALYSIS_FAILED:
           "Falha interna na análise. A evidência não foi classificada como inválida.",
       };
-      throw new Error(
+      const error = new Error(
         descriptions[problem.reason] ||
           (response.status >= 500
             ? "Falha interna do serviço de análise. Tente novamente."
             : "Schema ou dados inválidos. O pack exige manifesto e resultados válidos."),
       );
+      error.reason = Object.hasOwn(descriptions, problem.reason)
+        ? problem.reason
+        : "";
+      throw error;
     }
     if (
       Number(response.headers.get("Content-Length") || 0) >
@@ -203,8 +216,8 @@
       throw new Error("Resposta excede limite local.");
     return response;
   }
-  async function json(url, options) {
-    return (await request(url, options)).json();
+  async function json(url, options, signal) {
+    return (await request(url, options, signal)).json();
   }
   function post(url, data) {
     return json(url, {
@@ -213,10 +226,19 @@
       body: JSON.stringify(data),
     });
   }
-  function showError(error) {
+  function showError(error, prefix = "") {
     busy = false;
-    if (error instanceof NumericFormatError) analysis = null;
-    message = error?.message || "Não foi possível validar a evidência.";
+    if (error instanceof NumericFormatError) {
+      analysis = null;
+      analysisState = "ANALYSIS_FAILURE";
+    }
+    const description =
+      error?.name === "TimeoutError"
+        ? "O serviço excedeu o prazo da requisição. Nenhum resultado foi concluído; tente novamente."
+        : error?.name === "SyntaxError"
+          ? "Resposta ou manifesto JSON inválido. Nenhum resultado foi concluído."
+          : error?.message || "Não foi possível validar a evidência.";
+    message = prefix + description;
     if (model.canPaint(root)) paint();
   }
   function params() {
@@ -225,14 +247,17 @@
     p.set("objectives", objectives.join(","));
     return p;
   }
-  async function selectStudy(s, keep = false) {
+  async function selectStudy(s, keep = false, afterImport = false) {
     controller.abort();
     controller = new AbortController();
     const ticket = ++revision;
     study = s;
     analysis = null;
+    analysisState = "ANALYSIS_PENDING";
     busy = true;
-    message = "Validando pack e derivando métricas…";
+    message = afterImport
+      ? "Importação concluída. Validando pack e derivando métricas…"
+      : "Validando pack e derivando métricas…";
     if (!keep) {
       chosen = null;
       focus = "";
@@ -243,11 +268,21 @@
       const result = await json("/api/lab/analysis?" + params());
       if (ticket !== revision || !model.canPaint(root)) return;
       analysis = result;
+      analysisState = "ANALYSIS_SUCCESS";
       if (!keep) availableAccounts = result.accounts.map((a) => a.account_id);
       message =
         "Integridade validada · proveniência declarada, sem autenticação de autoria.";
     } catch (error) {
-      if (ticket === revision) throw error;
+      // This operation owns its revision. The import button's earlier ticket
+      // must not swallow a current analysis failure after selectStudy increments it.
+      if (ticket === revision && error?.name !== "AbortError") {
+        analysis = null;
+        analysisState =
+          error?.reason === "DATA_UNAVAILABLE"
+            ? "DATA_UNAVAILABLE"
+            : "ANALYSIS_FAILURE";
+        showError(error, afterImport ? "Importação concluída. " : "");
+      }
     } finally {
       if (ticket === revision) {
         busy = false;
@@ -256,12 +291,26 @@
     }
   }
   async function refresh() {
-    const ticket = revision;
-    const data = await json("/api/lab/library");
-    if (ticket !== revision || !model.canPaint(root)) return;
+    // Catalog capabilities have a page lifecycle independent of study selection.
+    const target = root,
+      ticket = ++catalogRevision;
+    catalogController.abort();
+    catalogController = new AbortController();
+    const data = await json(
+      "/api/lab/library",
+      undefined,
+      catalogController.signal,
+    );
+    if (
+      ticket !== catalogRevision ||
+      root !== target ||
+      !model.canPaint(target)
+    )
+      return;
     studies = data.studies;
-    context.persistence = data.persistence_enabled;
-    context.archiveAdapter = data.archive_adapter;
+    capabilities.persistence = data.persistence_enabled === true;
+    capabilities.archiveAdapter = data.archive_adapter;
+    Object.assign(context, capabilities);
     paint();
   }
   async function download(url, filename) {
@@ -290,9 +339,11 @@
   function imports(parent) {
     const box = panel(
       "Importação controlada",
-      context.persistence
-        ? "A prévia não persiste arquivos. Confirme explicitamente a cópia local após validar os metadados."
-        : "Prévia em memória disponível. Para persistir, inicie com --lab-dir apontando para uma pasta nova ou exclusiva do laboratório.",
+      context.persistence == null
+        ? "Consultando a disponibilidade de persistência da biblioteca…"
+        : context.persistence
+          ? "A prévia não persiste arquivos. Confirme explicitamente a cópia local após validar os metadados."
+          : "Prévia em memória disponível. Para persistir, inicie com --lab-dir apontando para uma pasta nova ou exclusiva do laboratório.",
     );
     const file = node("input");
     file.type = "file";
@@ -362,18 +413,38 @@
         const ticket = revision,
           token = preview.preview_token;
         busy = true;
+        importState = "IMPORT_PENDING";
+        analysisState = "DATA_UNAVAILABLE";
+        analysis = null;
+        message = "Confirmando a persistência da cópia local…";
         paint();
-        const imported = await post("/api/lab/confirm", {
-          preview_token: token,
-          confirmed: true,
-        });
+        let imported;
+        try {
+          imported = await post("/api/lab/confirm", {
+            preview_token: token,
+            confirmed: true,
+          });
+        } catch (error) {
+          if (ticket === revision) importState = "IMPORT_FAILURE";
+          throw error;
+        }
         if (ticket !== revision || !model.canPaint(root)) return;
+        importState = "IMPORT_SUCCESS";
         preview = null;
-        await refresh();
+        try {
+          await refresh();
+        } catch (error) {
+          if (ticket === revision && error?.name !== "AbortError")
+            showError(
+              error,
+              "Importação concluída. Não foi possível atualizar a biblioteca. ",
+            );
+          return;
+        }
         if (ticket !== revision || !model.canPaint(root)) return;
-        await selectStudy(imported);
+        await selectStudy(imported, false, true);
       });
-      action.disabled = busy || !context.persistence;
+      action.disabled = busy || context.persistence !== true;
       box.append(action);
     }
     parent.append(box);
@@ -744,12 +815,23 @@
     const row = analysis.rows.find((r) => r.account_id === focus);
     if (row) {
       const risk = row.metrics.risk;
-      evidence.append(
+      const riskStatus = node(
+        "p",
+        `${risk.status} · distância para referência 20%: `,
+        "lab-risk-status",
+      );
+      riskStatus.append(
+        present(
+          risk.distance_to_20_pp,
+          2,
+          "Valor de origem antes da formatação: ",
+        ),
         node(
-          "p",
-          `${risk.status} · distância para referência 20%: ${fmt(risk.distance_to_20_pp, " pp")} · ${risk.violates_20_percent === true ? "EXCEDEU 20% observados" : "Sem violação demonstrada neste recorte"}`,
+          "span",
+          ` pp · ${risk.violates_20_percent === true ? "EXCEDEU 20% observados" : "Sem violação demonstrada neste recorte"}`,
         ),
       );
+      evidence.append(riskStatus);
       const choices = node("select");
       risk.episodes.forEach((e, i) => {
         const o = node(
@@ -1041,12 +1123,19 @@
     GridCharts.dispose(root);
     root.replaceChildren();
     root.setAttribute("aria-busy", String(busy));
+    root.dataset.analysisState = analysisState;
+    root.dataset.importState = importState;
     const status = node(
       "p",
       message || "Pesquisa offline · escolha uma evidência",
       "status",
     );
-    status.setAttribute("role", "status");
+    status.setAttribute(
+      "role",
+      analysisState === "ANALYSIS_FAILURE" || importState === "IMPORT_FAILURE"
+        ? "alert"
+        : "status",
+    );
     root.append(status);
     library(root);
     imports(root);
@@ -1092,19 +1181,38 @@
   global.GridLab = {
     deactivate() {
       controller.abort();
+      catalogController.abort();
+      catalogRevision++;
       revision++;
+      if (analysisState === "ANALYSIS_PENDING") {
+        analysisState = "DATA_UNAVAILABLE";
+        message =
+          "Análise interrompida ao navegar. Selecione o estudo para tentar novamente.";
+      }
+      if (importState === "IMPORT_PENDING") {
+        importState = "IMPORT_UNCONFIRMED";
+        message =
+          "Confirmação interrompida; verifique a biblioteca antes de tentar novamente. A cópia pode ter sido persistida.";
+      }
       root = null;
       busy = false;
     },
     render(target, options) {
       if (controller.signal.aborted) controller = new AbortController();
       root = target;
-      context = { ...options };
+      context = { ...options, ...capabilities };
       paint();
-      const ticket = revision;
-      refresh().catch((error) => {
-        if (ticket === revision && error?.name !== "AbortError")
-          showError(error);
+      const targetRoot = root;
+      const pendingCatalog = refresh(),
+        ticket = catalogRevision;
+      pendingCatalog.catch((error) => {
+        if (
+          ticket === catalogRevision &&
+          targetRoot === root &&
+          model.canPaint(root) &&
+          error?.name !== "AbortError"
+        )
+          showError(error, "Não foi possível consultar a biblioteca. ");
       });
     },
   };
