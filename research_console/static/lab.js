@@ -356,6 +356,7 @@
     const currentStudy = studies.find((s) => s.id === study?.id);
     if (study && currentStudy?.integrity !== "VALIDATED") {
       controller.abort();
+      controller = new AbortController();
       revision++;
       review?.invalidate();
       review?.fail(

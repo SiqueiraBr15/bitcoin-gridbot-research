@@ -134,6 +134,8 @@ function harness(route, guided = false) {
     sessionStorage: { getItem: () => null, setItem() {} },
     fetch: async (url, options) => {
       calls.push({ url, options });
+      if (options?.signal?.aborted)
+        throw new DOMException("Aborted", "AbortError");
       return route(url, options);
     },
   };
@@ -490,14 +492,20 @@ for (const invalid of [false, true])
     const fixture = guidedCases[0];
     let changed = false;
     const h = guidedHarness(fixture, (url) =>
-      changed && url === "/api/lab/library"
+      url === "/api/lab/preview"
         ? json({
-            studies: invalid
-              ? [{ ...fixture.study, integrity: "INVALID" }]
-              : [],
+            study: fixture.study,
+            preview_token: "synthetic",
             persistence_enabled: true,
           })
-        : null,
+        : changed && url === "/api/lab/library"
+          ? json({
+              studies: invalid
+                ? [{ ...fixture.study, integrity: "INVALID" }]
+                : [],
+              persistence_enabled: true,
+            })
+          : null,
     );
     await flush();
     h.buttons("Analisar " + fixture.study.title)[0].click();
@@ -517,6 +525,13 @@ for (const invalid of [false, true])
       h.all().some((e) => e.dataset.metric),
       false,
     );
+    h.all().find((e) => e.type === "file").files = [
+      { size: 10, arrayBuffer: async () => new ArrayBuffer(10) },
+    ];
+    h.buttons("Validar prévia do arquivo")[0].click();
+    await flush();
+    assert.match(h.status(), /Prévia validada/);
+    assert.equal(h.buttons("Confirmar importação local").length, 1);
   });
 function guidedHarness(fixture, overrides = () => null) {
   return harness(
