@@ -764,6 +764,7 @@ footer {
 }
 /* Keep complete pack identities readable without changing data or table scroll. */
 .research-lab .lab-controls label,
+.research-lab .tag,
 .research-lab .legend .series-label,
 .research-lab .readout > span,
 .research-lab .panel h2,
@@ -772,6 +773,9 @@ footer {
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+.research-lab .tag {
+  white-space: normal;
 }
 
 /* G5: one guided panel, sharing the existing Lab's data and controls. */
