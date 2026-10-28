@@ -353,13 +353,18 @@
     )
       return;
     studies = data.studies;
-    if (
-      study &&
-      !studies.some((s) => s.id === study.id && s.integrity === "VALIDATED")
-    ) {
+    const currentStudy = studies.find((s) => s.id === study?.id);
+    if (study && currentStudy?.integrity !== "VALIDATED") {
       controller.abort();
       revision++;
       review?.invalidate();
+      review?.fail(
+        review.generation,
+        currentStudy
+          ? { status: 422, reason: "INTEGRITY_MISMATCH" }
+          : { reason: "DATA_UNAVAILABLE" },
+      );
+      busy = false;
       analysis = null;
       study = null;
       reviewStep = 1;
@@ -477,8 +482,12 @@
       const action = button("Confirmar importação local", async () => {
         if (!confirm.checked)
           throw new Error("Marque a confirmação explícita antes de persistir.");
-        const ticket = revision,
+        const ticket = ++revision,
           token = preview.preview_token;
+        controller.abort();
+        controller = new AbortController();
+        review?.invalidate();
+        study = null;
         busy = true;
         importState = "IMPORT_PENDING";
         analysisState = "DATA_UNAVAILABLE";

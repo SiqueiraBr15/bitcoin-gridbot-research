@@ -485,6 +485,39 @@ test("analysis timeout is explicit and never displays an old result or a private
 });
 
 const guidedCases = require("../fixtures/g5_guided_analysis.json").cases;
+for (const invalid of [false, true])
+  test(`catalog invalidation releases the guided busy state: invalid=${invalid}`, async () => {
+    const fixture = guidedCases[0];
+    let changed = false;
+    const h = guidedHarness(fixture, (url) =>
+      changed && url === "/api/lab/library"
+        ? json({
+            studies: invalid
+              ? [{ ...fixture.study, integrity: "INVALID" }]
+              : [],
+            persistence_enabled: true,
+          })
+        : null,
+    );
+    await flush();
+    h.buttons("Analisar " + fixture.study.title)[0].click();
+    await flush();
+    changed = true;
+    h.api.deactivate();
+    h.api.render(h.root, {});
+    await flush();
+    assert.equal(h.root.getAttribute("aria-busy"), "false");
+    assert.equal(h.buttons("Validar prévia do arquivo")[0].disabled, false);
+    assert.equal(
+      h.all().find((e) => e.classList.contains("guided-review")).dataset
+        .reviewState,
+      invalid ? "INVALID" : "UNAVAILABLE",
+    );
+    assert.equal(
+      h.all().some((e) => e.dataset.metric),
+      false,
+    );
+  });
 function guidedHarness(fixture, overrides = () => null) {
   return harness(
     (url, options) =>
@@ -505,6 +538,73 @@ function guidedHarness(fixture, overrides = () => null) {
     true,
   );
 }
+
+test("confirming a new pack invalidates a replay even before persistence returns", async () => {
+  const a = guidedCases[0],
+    b = guidedCases[2];
+  let finishReplay, finishConfirm;
+  const h = harness((url) => {
+    if (url === "/api/lab/library")
+      return json({ studies: [a.study, b.study], persistence_enabled: true });
+    if (url.startsWith("/api/lab/analysis?"))
+      return json(url.includes(b.study.id) ? b.analysis : a.analysis);
+    if (url === "/api/lab/replay")
+      return new Promise((resolve) => {
+        finishReplay = () =>
+          resolve(
+            json({
+              status: "EQUIVALENT",
+              result_sha256:
+                a.analysis.analysis_manifest.expected_result_sha256,
+            }),
+          );
+      });
+    if (url === "/api/lab/preview")
+      return json({
+        study: b.study,
+        preview_token: "synthetic",
+        persistence_enabled: true,
+      });
+    if (url === "/api/lab/confirm")
+      return new Promise((resolve) => {
+        finishConfirm = () => resolve(json(b.study));
+      });
+    throw new Error("Unexpected route " + url);
+  }, true);
+  await flush();
+  h.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Conferir reprodução determinística")[0].click();
+  await flush();
+  h.buttons("1. Evidência")[0].click();
+  h.all().find((e) => e.type === "file").files = [
+    { size: 10, arrayBuffer: async () => new ArrayBuffer(10) },
+  ];
+  h.buttons("Validar prévia do arquivo")[0].click();
+  await flush();
+  h
+    .all()
+    .find(
+      (e) =>
+        e.tagName === "label" && e.textContent.startsWith("Confirmo persistir"),
+    )
+    .children.find((e) => e.tagName === "input").checked = true;
+  h.buttons("Confirmar importação local")[0].click();
+  await flush();
+  assert.equal(h.root.dataset.importState, "IMPORT_PENDING");
+  finishReplay();
+  await flush();
+  assert.match(h.status(), /Confirmando a persistência/);
+  assert.equal(h.root.getAttribute("aria-busy"), "true");
+  finishConfirm();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: NOT_RUN/);
+  assert.match(h.root.textContent, new RegExp(b.study.title));
+  assert.equal(h.root.getAttribute("aria-busy"), "false");
+});
 for (const fixture of guidedCases)
   test(`guided DOM flow, replay and real export dispatch: ${fixture.study.pack_id}`, async () => {
     const h = guidedHarness(fixture);
