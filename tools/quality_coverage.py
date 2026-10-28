@@ -33,7 +33,7 @@ def validate_measured_files(paths: list[Path], expected: set[Path]) -> None:
             raise ValueError("coverage contains foreign source files")
         measured.update(files)
     if measured != expected:
-        raise ValueError("native source inventory incomplete")
+        raise ValueError("production source inventory incomplete")
 
 
 def export_campaign(
@@ -135,7 +135,12 @@ def consolidate(inventory_path: Path, bundle_paths: list[Path], directory: Path)
     if not paths:
         raise ValueError("no completed coverage files")
     validate_measured_files(
-        paths, {path.resolve() for path in (ROOT / "src/gridbot").rglob("*.py")}
+        paths,
+        {
+            path.resolve()
+            for folder in ("src/gridbot", "research_console")
+            for path in (ROOT / folder).rglob("*.py")
+        },
     )
     directory.mkdir(parents=True, exist_ok=False)
     coverage = Coverage(

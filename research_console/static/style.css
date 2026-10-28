@@ -671,3 +671,105 @@ footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* G4: extension of the existing console, bounded panels and accessible controls. */
+.lab-controls,
+.lab-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.lab-study {
+  padding: 16px;
+  border: 1px solid var(--border, #334155);
+  border-radius: 12px;
+  min-width: 0;
+}
+.lab-study h3,
+.lab-study p {
+  overflow-wrap: anywhere;
+}
+.lab-json {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 12px;
+  font-size: 12px;
+}
+.research-lab .panel input[type="file"],
+.research-lab .panel input[type="search"],
+.research-lab .panel input[type="text"],
+.research-lab .panel input:not([type]),
+.research-lab .panel select {
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 10px;
+}
+.research-lab .panel label {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 8px 0;
+}
+.research-lab .panel fieldset {
+  min-width: 0;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px;
+}
+.research-lab .panel input[type="checkbox"] {
+  width: auto;
+  accent-color: #38bdf8;
+}
+.research-lab .panel svg {
+  width: 100%;
+  max-height: 420px;
+}
+.research-lab .panel svg text {
+  fill: currentColor;
+  font-size: 13px;
+}
+.lab-axis {
+  stroke: #94a3b8;
+  fill: none;
+}
+.lab-dot {
+  fill: #38bdf8;
+  stroke: #0f172a;
+  stroke-width: 2;
+}
+.lab-dot:focus {
+  stroke: #fbbf24;
+  stroke-width: 4;
+}
+.lab-study button,
+.research-lab .panel > button {
+  margin: 6px 8px 6px 0;
+}
+
+.lab-risk-line {
+  stroke: #ff96a2;
+  stroke-dasharray: 5 4;
+  fill: none;
+}
+.lab-risk-status,
+.research-lab .status {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+/* Keep complete pack identities readable without changing data or table scroll. */
+.research-lab .lab-controls label,
+.research-lab .legend .series-label,
+.research-lab .readout > span,
+.research-lab .panel h2,
+.research-lab .panel h3,
+.research-lab .lab-study button {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

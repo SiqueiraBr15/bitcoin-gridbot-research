@@ -1,0 +1,2892 @@
+{
+  "schema": "G4_1_VALIDATION_SUMMARY_V1",
+  "tested_head": "27a44458c12a9384334f857febc26b355567f73a",
+  "base_g4": "cc7f140be46838feccc1f543c3a64f919588aa8f",
+  "branch": "fix/g4-research-lab-hardening",
+  "new_execution": {
+    "counts": {
+      "PASS": 3610,
+      "SKIP": 2
+    },
+    "unique": 3612,
+    "property_nodes": 132,
+    "segments": 273,
+    "javascript_pass": 26,
+    "removed": 0,
+    "added": 45,
+    "old_retained": 3567,
+    "xfail": 0,
+    "wall_seconds": 3686.3056715000002,
+    "sum_segment_wall_seconds": 7319.193558200004,
+    "sum_worker_cpu_seconds": 7026.109375,
+    "pair_frozen_identity": {
+      "head": "27a44458c12a9384334f857febc26b355567f73a",
+      "head_unchanged": true,
+      "frozen_files_unchanged": true,
+      "elapsed_seconds": 3686.3056715000002,
+      "campaign_exit_codes": [
+        0,
+        0
+      ]
+    },
+    "skips": [
+      {
+        "nodeid": "tests/cli/test_doctor.py::test_env_file_posix_permissions_restricted",
+        "when": "setup",
+        "outcome": "skipped",
+        "duration": 0.00022880000005898182,
+        "reason": "('$AUDIT_WORKSPACE\\\\bitcoin-gridbot-research\\\\tests\\\\cli\\\\test_doctor.py', 310, 'Skipped: chmod 600 não se aplica ao Windows')"
+      },
+      {
+        "nodeid": "tests/console/test_quality.py::test_real_symlink_outside_archive_is_refused",
+        "when": "call",
+        "outcome": "skipped",
+        "duration": 0.0015328999998018844,
+        "reason": "('$AUDIT_WORKSPACE\\\\bitcoin-gridbot-research\\\\tests\\\\console\\\\test_quality.py', 246, 'Skipped: Windows does not permit symlink creation in this account')"
+      }
+    ]
+  },
+  "coverage": {
+    "global_percent": 96.47583040777748,
+    "threshold": 85.0,
+    "branch": true,
+    "source": [
+      "gridbot",
+      "research_console"
+    ],
+    "totals": {
+      "covered_lines": 11481,
+      "num_statements": 11784,
+      "percent_covered": 96.47583040777748,
+      "percent_covered_display": "96",
+      "missing_lines": 303,
+      "excluded_lines": 85,
+      "percent_statements_covered": 97.42871690427698,
+      "percent_statements_covered_display": "97",
+      "num_branches": 3028,
+      "num_partial_branches": 197,
+      "covered_branches": 2809,
+      "missing_branches": 219,
+      "percent_branches_covered": 92.76750330250991,
+      "percent_branches_covered_display": "93"
+    },
+    "packages": {
+      "native": {
+        "covered_lines": 10155,
+        "num_statements": 10415,
+        "covered_branches": 2516,
+        "num_branches": 2712,
+        "missing_lines": 260,
+        "missing_branches": 196,
+        "excluded_lines": 85,
+        "modules": 104,
+        "percent": 96.52624362001981
+      },
+      "console": {
+        "covered_lines": 1326,
+        "num_statements": 1369,
+        "covered_branches": 293,
+        "num_branches": 316,
+        "missing_lines": 43,
+        "missing_branches": 23,
+        "excluded_lines": 0,
+        "modules": 16,
+        "percent": 96.08308605341246
+      }
+    },
+    "examples_separate_percent": 87.36842105263158,
+    "note": "No average of percentages; primary gridbot+research_console scope and separately measured packaged examples scope are explicit. No old coverage reused."
+  },
+  "installed": {
+    "wheel": {
+      "kind": "wheel",
+      "status": "PASS",
+      "outside_checkout": true,
+      "module_location_confirmed": true,
+      "wheel_sha256": "470ca468bf5770b5af99335bb805dc20f6a2e6a107ed328d5341608de0f5f47f",
+      "essential_help_docs": 2,
+      "package_members": 142,
+      "native_modules_identical": 104,
+      "synthetic_packs_included": 3,
+      "startup_to_http_ns": 522689000,
+      "eight_reads_four_clients_elapsed_ns": 20913700,
+      "paper_trace_ns": 3041792100,
+      "original_or_corporate_attempts": 0,
+      "non_loopback_connections": 0,
+      "library": true,
+      "integrity": true,
+      "import_consent": true,
+      "persistence_restart": true,
+      "deterministic_replay": true,
+      "export_checksums": true,
+      "fill_fraction_oracle": true
+    },
+    "editable": {
+      "kind": "editable",
+      "status": "PASS",
+      "outside_checkout": true,
+      "module_location_confirmed": true,
+      "startup_to_http_ns": 521841300,
+      "eight_reads_four_clients_elapsed_ns": 26935200,
+      "paper_trace_ns": 3586132600,
+      "original_or_corporate_attempts": 0,
+      "non_loopback_connections": 0,
+      "library": true,
+      "integrity": true,
+      "import_consent": true,
+      "persistence_restart": true,
+      "deterministic_replay": true,
+      "export_checksums": true,
+      "fill_fraction_oracle": true
+    },
+    "launcher": {
+      "status": "PASS",
+      "launcher": "start_console.cmd",
+      "live_http_library": true,
+      "explicit_port_forwarded": true,
+      "default_persistence": false,
+      "user_port_8765_untouched": true
+    }
+  },
+  "preservation": {
+    "original": {
+      "timestamp_utc": "2026-10-24T17:43:53.438310+00:00",
+      "files_rehashed": 1665,
+      "changed": [],
+      "head": "528f8c40ce6f74f9440444b2e652c56fae222fb2",
+      "tracked_status": "",
+      "remote": "",
+      "six_untracked_preserved": true,
+      "v2_sha256": "44e9639554d01c13e2e0648613e7904a6f1649ca934b00b3821021aa28582249",
+      "status": "PASS"
+    },
+    "native": {
+      "native_modules_git_blob_identical": 104,
+      "native_diff_from_g4": false,
+      "lab_analytics_sha256": "f6c8832388a35961480a6d334821cf5226c0ab9ea0b7c4c23258d3c51f47cbed",
+      "fixtures": {
+        "favorable.gbpack": "e393055d5f854f47042956aa705e41f93ac03a965a7f7b9a3aa3919660a5e79e",
+        "risk_violation.gbpack": "8a7f1bb54814bbe681c1cbc4324502b24e64c0a9247b147d1f87827504a89690",
+        "unfavorable.gbpack": "a0528ebd5d15aab7f6a26e527fa60d7b2b4e1357574e73fd892f6726554f5cad"
+      }
+    },
+    "old_local_reports": [
+      {
+        "path": "docs/reviews/G3_3_GITHUB_BRANCH_AND_PR_PUBLICATION_AUDIT.md",
+        "sha256": "a620b06a7d2ea1c654862d46f69c9e5569b30cb6c48faab86434b5acc20ba9b4",
+        "preserved": true,
+        "tracked": false
+      },
+      {
+        "path": "docs/reviews/G3_4_MAIN_MERGE_COMPLETION_AUDIT.md",
+        "sha256": "e146375ce81202eaf5614b0010866db7b3ce6c65fd248b681da6a019ac3fe7ae",
+        "preserved": true,
+        "tracked": false
+      }
+    ],
+    "local_main_unchanged": "a28e6f35b7b0acb42cee6dc97959cdf65f6022b0",
+    "published_main_unchanged": "88390ac0b3726c50b548e5087acfa39982d76342",
+    "no_push": true
+  },
+  "security": {
+    "osv_source": "https://api.osv.dev/v1/querybatch",
+    "osv_timestamp": "2026-10-24T16:51:40.422105+00:00",
+    "queried_pins": 39,
+    "known_matching_advisories": 0,
+    "final_tree_history_scans": "See final audit and locally retained closing seal; no recursive self-hash assertion."
+  },
+  "browser": {
+    "screenshots": [
+      {
+        "file": "analysis-1366.jpg",
+        "bytes": 587275,
+        "sha256": "09b4cbaf0336803ce45ea7776beb0ba4b627db38c85ff07165cbdb11ee428887",
+        "native_browser_capture": true
+      },
+      {
+        "file": "analysis-1920.jpg",
+        "bytes": 648013,
+        "sha256": "eeb0654b18ad2c0e48d518de8f5434819247731130b94c1c769b8e06616fe12a",
+        "native_browser_capture": true
+      },
+      {
+        "file": "analysis-390.jpg",
+        "bytes": 439221,
+        "sha256": "332ea9087048f320cdea52fafb196ba21a14b258a2d364baa840e5db9dfaaf29",
+        "native_browser_capture": true
+      },
+      {
+        "file": "analysis-768.jpg",
+        "bytes": 502902,
+        "sha256": "82d4a96ee19bc42fe53e47ff647dbd1c2a4b0592d579026701113b8f89d25d3e",
+        "native_browser_capture": true
+      },
+      {
+        "file": "consent-1366.jpg",
+        "bytes": 615794,
+        "sha256": "10536f1d45a20d894c8276c094b9fc5936a69ee7d421cd86fe31fc8b3fdf7474",
+        "native_browser_capture": true
+      },
+      {
+        "file": "consent-1920.jpg",
+        "bytes": 684908,
+        "sha256": "8778f20d5297e587f1c0698d374ffece7f79fa98a2e502a4fd879d6f8ea4958a",
+        "native_browser_capture": true
+      },
+      {
+        "file": "consent-390.jpg",
+        "bytes": 459927,
+        "sha256": "89a7e6a11f9e0a83cc35b0ee8a048a3fd055efbfd1323e0317b9b693c68b1540",
+        "native_browser_capture": true
+      },
+      {
+        "file": "consent-768.jpg",
+        "bytes": 521239,
+        "sha256": "1bd9219f178dca4f0834818bdcce9062fc880cf7a1e4c50ee1283e1d4dece34b",
+        "native_browser_capture": true
+      },
+      {
+        "file": "library-final-1920.jpg",
+        "bytes": 217907,
+        "sha256": "e2c9e8ca5d9d604d0c5be35f1571f26057d8889e7e5484fc7b647164ef15f8cd",
+        "native_browser_capture": true
+      },
+      {
+        "file": "scale-9999-desktop.jpg",
+        "bytes": 609816,
+        "sha256": "a369858e215b7ebc2bdcc0e523ae94276af2f10e2bdc9617ec3deecb1ca19420",
+        "native_browser_capture": true
+      },
+      {
+        "file": "scale-9999-mobile.jpg",
+        "bytes": 458360,
+        "sha256": "02f8a78739a48e33081df14cce52854ec67b665cf607a1813f03264547ae978c",
+        "native_browser_capture": true
+      }
+    ],
+    "large_scale": {
+      "marks": 9999,
+      "accounts": 3,
+      "fixture": "ui_scale_3333",
+      "fictional": true,
+      "host_load": "two bounded coverage campaigns concurrently active; no unloaded-baseline comparison",
+      "measurement": "automation click to enabled replacement analysis control; includes bridge, loopback API, JS/DOM update; not GPU paint or a latency guarantee",
+      "replicates": 7,
+      "desktop": {
+        "viewport": {
+          "width": 1366,
+          "height": 768
+        },
+        "samples_ms": [
+          946,
+          508,
+          493,
+          506,
+          495,
+          470,
+          466
+        ]
+      },
+      "mobile": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "samples_ms": [
+          494,
+          478,
+          457,
+          475,
+          519,
+          458,
+          462
+        ]
+      },
+      "dom_elements": 2117,
+      "episode_options": 1666,
+      "last_episode_end_index": 3332,
+      "document_overflow": false,
+      "browser_warnings_errors": []
+    },
+    "private_paths_and_original_corpus_not_distributed": true
+  },
+  "performance": {
+    "baseline": {
+      "label": "baseline",
+      "python": "3.13.16",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "replicates": 7,
+      "source_sha256": {
+        "research_console/analysis.py": "c64bd676df5060019746c743887ad78cf6757269bb764c83cf67d67578e89f5e",
+        "research_console/data.py": "d5a94e179284f090b68dc63798014fc6062556486b141990cca5206d04c3e3e7",
+        "research_console/demo.py": "186d4e2e79e15241895ac4405b72df5c3fc11b6708cf8f76bf1b6865e911328b",
+        "research_console/risk.py": "a8614ce6679b1941804e58fb6082721f0b7c5db72c18f6bcdbfcb46a5880e8ee",
+        "research_console/server.py": "23d417ed895d4f62b715e44a8c542d3aa7b8bb999f015b9d22b7c48aa0eef86b",
+        "research_console/__init__.py": "49bda87946aa5b4b4a957d0f465ad82422ac68da32faa7316327317c97f95599",
+        "research_console/__main__.py": "b133781c8a6bb5be9215542a12db7901f4f1adb13421af8a50004e39fc466c8d",
+        "research_console/lab/analytics.py": "9611f27cca129775017c4debee1377bc2af6924c55e25ff8d1b8429b58fe23e7",
+        "research_console/lab/exports.py": "285a29005881e500e3e88436036dbb3d1ff3a9928c0dfcacbc0f2cfe419591f7",
+        "research_console/lab/fixtures.py": "6924fdcbacc7fcbaefb9245ba4658ce9508a8146aed4982b004892224bb977e8",
+        "research_console/lab/http.py": "d279a2be463c5ad86a019aa394aa43ac90f9ff5d663a1e22236d0ec5d86238f0",
+        "research_console/lab/library.py": "ce2e778bbfbe8f14887ac321186f6e215998625e07bc2843228f74b6fcbb4b8d",
+        "research_console/lab/packs.py": "4205a68e615b525ef6c78b650b774a30570cce57abde4db19c0bf83b6795a99a",
+        "research_console/lab/__init__.py": "c78ee4806abc5c4e30d68970e5aa9ccb728054d402138ea17fafe58adeb4c943"
+      },
+      "workload": "three independent cash/BTC holdings at fictional alternating marks; no strategy/backtest",
+      "sizes": [
+        {
+          "marks": 30,
+          "input_bytes": 1090,
+          "input_sha256": "119f07f1410dfd6f13f1070973e4f3f8a868b682ca1cb1ffbe8f41698523fba1",
+          "analysis_sha256": "9324d5f764430384fac5abef7b610cdc643b60d56cf842b0affb0c0b4f4c530d",
+          "hash": {
+            "samples_ns": [
+              1700,
+              1400,
+              1100,
+              1100,
+              1100,
+              1100,
+              1000
+            ],
+            "median_ns": 1100,
+            "min_ns": 1000,
+            "max_ns": 1700
+          },
+          "parse": {
+            "samples_ns": [
+              239000,
+              208600,
+              206300,
+              202400,
+              206200,
+              203900,
+              203300
+            ],
+            "median_ns": 206200,
+            "min_ns": 202400,
+            "max_ns": 239000
+          },
+          "validate": {
+            "samples_ns": [
+              994100,
+              972300,
+              988600,
+              986100,
+              957900,
+              1127200,
+              1010300
+            ],
+            "median_ns": 988600,
+            "min_ns": 957900,
+            "max_ns": 1127200
+          },
+          "analyze": {
+            "samples_ns": [
+              1513400,
+              1275700,
+              1257700,
+              1442600,
+              1259700,
+              1250300,
+              1375500
+            ],
+            "median_ns": 1275700,
+            "min_ns": 1250300,
+            "max_ns": 1513400
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              167300,
+              150300,
+              146900,
+              152600,
+              145100,
+              143600,
+              143600
+            ],
+            "median_ns": 146900,
+            "min_ns": 143600,
+            "max_ns": 167300
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              95800,
+              87800,
+              86100,
+              85600,
+              85800,
+              85500,
+              85000
+            ],
+            "median_ns": 85800,
+            "min_ns": 85000,
+            "max_ns": 95800
+          },
+          "replay": {
+            "samples_ns": [
+              1452600,
+              1617600,
+              1403200,
+              1518600,
+              1562500,
+              1603800,
+              1455800
+            ],
+            "median_ns": 1518600,
+            "min_ns": 1403200,
+            "max_ns": 1617600
+          },
+          "export": {
+            "samples_ns": [
+              2391400,
+              2444300,
+              2564700,
+              2601600,
+              2455100,
+              2430400,
+              2464400
+            ],
+            "median_ns": 2455100,
+            "min_ns": 2391400,
+            "max_ns": 2601600
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              7557100,
+              7143300,
+              7086700
+            ],
+            "median_ns": 7143300,
+            "min_ns": 7086700,
+            "max_ns": 7557100
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              1640300,
+              1677500,
+              1621400,
+              1602500,
+              1658800,
+              1614100,
+              1902100
+            ],
+            "median_ns": 1640300,
+            "min_ns": 1602500,
+            "max_ns": 1902100
+          }
+        },
+        {
+          "marks": 300,
+          "input_bytes": 1957,
+          "input_sha256": "20e8e02acf70f59766be49e5778fa79a8a8b61c112b50235b78eb73053bce0f2",
+          "analysis_sha256": "e2093cbc44edce47686b4fe9e64f807ecebf049802214b33d34f15b32db806be",
+          "hash": {
+            "samples_ns": [
+              2100,
+              1600,
+              1500,
+              1400,
+              1400,
+              1400,
+              1400
+            ],
+            "median_ns": 1400,
+            "min_ns": 1400,
+            "max_ns": 2100
+          },
+          "parse": {
+            "samples_ns": [
+              1510300,
+              1486400,
+              1621700,
+              1492400,
+              1453300,
+              1451200,
+              1464700
+            ],
+            "median_ns": 1486400,
+            "min_ns": 1451200,
+            "max_ns": 1621700
+          },
+          "validate": {
+            "samples_ns": [
+              6356500,
+              6556600,
+              6633700,
+              6809300,
+              6432000,
+              6436100,
+              6876800
+            ],
+            "median_ns": 6556600,
+            "min_ns": 6356500,
+            "max_ns": 6876800
+          },
+          "analyze": {
+            "samples_ns": [
+              9503700,
+              9109200,
+              9281300,
+              9394000,
+              9750400,
+              9222600,
+              9340700
+            ],
+            "median_ns": 9340700,
+            "min_ns": 9109200,
+            "max_ns": 9750400
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              1397900,
+              1347800,
+              1429500,
+              1926300,
+              2522900,
+              1297900,
+              1269000
+            ],
+            "median_ns": 1397900,
+            "min_ns": 1269000,
+            "max_ns": 2522900
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              101400,
+              88400,
+              86000,
+              84400,
+              84300,
+              84400,
+              83600
+            ],
+            "median_ns": 84400,
+            "min_ns": 83600,
+            "max_ns": 101400
+          },
+          "replay": {
+            "samples_ns": [
+              9899500,
+              9548600,
+              9597700,
+              9716800,
+              9742300,
+              9682100,
+              9596600
+            ],
+            "median_ns": 9682100,
+            "min_ns": 9548600,
+            "max_ns": 9899500
+          },
+          "export": {
+            "samples_ns": [
+              12877900,
+              12432000,
+              13225100,
+              12781500,
+              12467100,
+              12504100,
+              12947000
+            ],
+            "median_ns": 12781500,
+            "min_ns": 12432000,
+            "max_ns": 13225100
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              22829600,
+              22198700,
+              22753300
+            ],
+            "median_ns": 22753300,
+            "min_ns": 22198700,
+            "max_ns": 22829600
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              9337900,
+              9198500,
+              9225100,
+              9097800,
+              9720600,
+              9684700,
+              9351600
+            ],
+            "median_ns": 9337900,
+            "min_ns": 9097800,
+            "max_ns": 9720600
+          }
+        },
+        {
+          "marks": 3000,
+          "input_bytes": 10634,
+          "input_sha256": "527a2b6abd9feec02ab339fcc161aa6b19f6d259c33a4a9f920e1357e8736c95",
+          "analysis_sha256": "3d3029e552d457fd21f678e61e43aa65f7a2650ef31e4f391e581ce988170859",
+          "hash": {
+            "samples_ns": [
+              7400,
+              5600,
+              5500,
+              5400,
+              5400,
+              5300,
+              5400
+            ],
+            "median_ns": 5400,
+            "min_ns": 5300,
+            "max_ns": 7400
+          },
+          "parse": {
+            "samples_ns": [
+              14568000,
+              14778100,
+              14415200,
+              14550700,
+              14585900,
+              15150500,
+              14744000
+            ],
+            "median_ns": 14585900,
+            "min_ns": 14415200,
+            "max_ns": 15150500
+          },
+          "validate": {
+            "samples_ns": [
+              61503700,
+              60706700,
+              61245600,
+              61041600,
+              61097200,
+              61492100,
+              62341200
+            ],
+            "median_ns": 61245600,
+            "min_ns": 60706700,
+            "max_ns": 62341200
+          },
+          "analyze": {
+            "samples_ns": [
+              89914500,
+              88082000,
+              89835000,
+              99889300,
+              88698300,
+              87795100,
+              87412200
+            ],
+            "median_ns": 88698300,
+            "min_ns": 87412200,
+            "max_ns": 99889300
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              14332700,
+              13071100,
+              13524200,
+              13907700,
+              14107900,
+              13878400,
+              13845300
+            ],
+            "median_ns": 13878400,
+            "min_ns": 13071100,
+            "max_ns": 14332700
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              106900,
+              87700,
+              85600,
+              85200,
+              86100,
+              87500,
+              85500
+            ],
+            "median_ns": 86100,
+            "min_ns": 85200,
+            "max_ns": 106900
+          },
+          "replay": {
+            "samples_ns": [
+              92814000,
+              92083300,
+              94685700,
+              102220400,
+              92421200,
+              92882800,
+              96129300
+            ],
+            "median_ns": 92882800,
+            "min_ns": 92083300,
+            "max_ns": 102220400
+          },
+          "export": {
+            "samples_ns": [
+              130830200,
+              124616800,
+              128576700,
+              120063000,
+              116743700,
+              122396200,
+              118439600
+            ],
+            "median_ns": 122396200,
+            "min_ns": 116743700,
+            "max_ns": 130830200
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              179425800,
+              179183400,
+              189996100
+            ],
+            "median_ns": 179425800,
+            "min_ns": 179183400,
+            "max_ns": 189996100
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              88951100,
+              88255700,
+              93284700,
+              96451400,
+              90378500,
+              90610200,
+              93730900
+            ],
+            "median_ns": 90610200,
+            "min_ns": 88255700,
+            "max_ns": 96451400
+          }
+        },
+        {
+          "marks": 9999,
+          "input_bytes": 31567,
+          "input_sha256": "a6a8a83bb24b265dbad7aa59afdfcf6e1aa0dde9c5c0bf342f0020e8fad15ab8",
+          "analysis_sha256": "a2a689000c0e467d688225dd7860af4b616726218d2e9153e2c77ebc2f1a6273",
+          "hash": {
+            "samples_ns": [
+              21600,
+              16100,
+              15000,
+              14600,
+              14500,
+              14400,
+              14600
+            ],
+            "median_ns": 14600,
+            "min_ns": 14400,
+            "max_ns": 21600
+          },
+          "parse": {
+            "samples_ns": [
+              49541900,
+              50273700,
+              57356100,
+              49193200,
+              48774200,
+              48136200,
+              49076800
+            ],
+            "median_ns": 49193200,
+            "min_ns": 48136200,
+            "max_ns": 57356100
+          },
+          "validate": {
+            "samples_ns": [
+              210750300,
+              210946100,
+              209155300,
+              216570200,
+              210141600,
+              209380200,
+              212806400
+            ],
+            "median_ns": 210750300,
+            "min_ns": 209155300,
+            "max_ns": 216570200
+          },
+          "analyze": {
+            "samples_ns": [
+              290298900,
+              294016700,
+              292841300,
+              294565800,
+              291737500,
+              298110500,
+              307565900
+            ],
+            "median_ns": 294016700,
+            "min_ns": 290298900,
+            "max_ns": 307565900
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              47709400,
+              47780700,
+              46146500,
+              46470400,
+              46647900,
+              46728100,
+              46042500
+            ],
+            "median_ns": 46647900,
+            "min_ns": 46042500,
+            "max_ns": 47780700
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              108300,
+              91200,
+              89200,
+              87900,
+              88300,
+              88800,
+              87800
+            ],
+            "median_ns": 88800,
+            "min_ns": 87800,
+            "max_ns": 108300
+          },
+          "replay": {
+            "samples_ns": [
+              309135000,
+              310757900,
+              308503700,
+              311354400,
+              314209300,
+              310541600,
+              311493700
+            ],
+            "median_ns": 310757900,
+            "min_ns": 308503700,
+            "max_ns": 314209300
+          },
+          "export": {
+            "samples_ns": [
+              391073700,
+              376310800,
+              387857000,
+              376757700,
+              376750900,
+              384827600,
+              413954400
+            ],
+            "median_ns": 384827600,
+            "min_ns": 376310800,
+            "max_ns": 413954400
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              580025600,
+              578757500,
+              576046500
+            ],
+            "median_ns": 578757500,
+            "min_ns": 576046500,
+            "max_ns": 580025600
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              289136300,
+              285024800,
+              283060100,
+              285088000,
+              285409700,
+              288129600,
+              285968300
+            ],
+            "median_ns": 285409700,
+            "min_ns": 283060100,
+            "max_ns": 289136300
+          }
+        }
+      ],
+      "hardware": {
+        "cpu": {
+          "Name": "AMD Ryzen 5 5600X 6-Core Processor             ",
+          "NumberOfCores": 6,
+          "NumberOfLogicalProcessors": 12
+        },
+        "physical_memory_bytes": 34259087360,
+        "instrumentation": "Named hardware fields only, no hostname or identifiers"
+      },
+      "conditions": {
+        "coverage_campaigns_ended": true,
+        "other_host_load": "not controlled",
+        "order": "baseline then current, separate processes",
+        "gc": "default Python GC enabled",
+        "timing": "wall perf_counter_ns; existing valid input outside timed phases",
+        "memory": "tracemalloc separately, process peak includes instrumentation"
+      },
+      "measurement_script_sha256": "5999dc3a68815a80c5dd4eba5ab25010f80f43a0d237c3b847abadcd58102f6b",
+      "library_constructor": {
+        "samples_ns": [
+          6728900,
+          4050300,
+          4145800,
+          4023400,
+          3928600,
+          3898300,
+          3832200
+        ],
+        "median_ns": 4023400,
+        "min_ns": 3832200,
+        "max_ns": 6728900
+      },
+      "catalog_three_bundled": {
+        "samples_ns": [
+          2161400,
+          2004800,
+          2109400,
+          2013700,
+          2089600,
+          2005000,
+          2321200
+        ],
+        "median_ns": 2089600,
+        "min_ns": 2004800,
+        "max_ns": 2321200
+      },
+      "read_pack_calls_warm_adapter": 1,
+      "largest_validate_memory": {
+        "current_bytes": 119510,
+        "peak_bytes": 4291621,
+        "scope": "incremental Python allocations only, existing input held; not RSS"
+      },
+      "largest_analysis_memory": {
+        "current_bytes": 144584,
+        "peak_bytes": 3295212,
+        "scope": "incremental Python allocations only, existing input held; not RSS"
+      },
+      "pareto_scaling_abstract": [
+        {
+          "accounts": 3,
+          "samples_ns": [
+            117800,
+            90300,
+            86300,
+            85800,
+            84000,
+            82700,
+            83700
+          ],
+          "median_ns": 85800,
+          "min_ns": 82700,
+          "max_ns": 117800
+        },
+        {
+          "accounts": 15,
+          "samples_ns": [
+            2856500,
+            2893400,
+            3037800,
+            2817700,
+            2933800,
+            2863400,
+            2828500
+          ],
+          "median_ns": 2863400,
+          "min_ns": 2817700,
+          "max_ns": 3037800
+        },
+        {
+          "accounts": 30,
+          "samples_ns": [
+            12192000,
+            12837900,
+            11904200,
+            11749200,
+            12000800,
+            12108900,
+            12053500
+          ],
+          "median_ns": 12053500,
+          "min_ns": 11749200,
+          "max_ns": 12837900
+        },
+        {
+          "accounts": 60,
+          "samples_ns": [
+            48782600,
+            48636300,
+            48492700,
+            48039400,
+            48531000,
+            48867800,
+            48667900
+          ],
+          "median_ns": 48636300,
+          "min_ns": 48039400,
+          "max_ns": 48867800
+        }
+      ],
+      "catalog_35_small_packs_memory_only": {
+        "samples_ns": [
+          22803800,
+          22987800,
+          22584800,
+          23335300,
+          22703700,
+          23040000,
+          23056400
+        ],
+        "median_ns": 22987800,
+        "min_ns": 22584800,
+        "max_ns": 23335300
+      },
+      "process_memory": {
+        "WorkingSetSize": 49635328,
+        "PeakWorkingSetSize": 57970688,
+        "PagefileUsage": 35975168,
+        "PeakPagefileUsage": 45498368
+      },
+      "cache_hits": 29,
+      "cache_entries": 4
+    },
+    "current": {
+      "label": "current",
+      "python": "3.13.16",
+      "platform": "Windows-11-10.0.26300-SP0",
+      "replicates": 7,
+      "source_sha256": {
+        "research_console/analysis.py": "c64bd676df5060019746c743887ad78cf6757269bb764c83cf67d67578e89f5e",
+        "research_console/data.py": "d5a94e179284f090b68dc63798014fc6062556486b141990cca5206d04c3e3e7",
+        "research_console/demo.py": "186d4e2e79e15241895ac4405b72df5c3fc11b6708cf8f76bf1b6865e911328b",
+        "research_console/risk.py": "a8614ce6679b1941804e58fb6082721f0b7c5db72c18f6bcdbfcb46a5880e8ee",
+        "research_console/server.py": "abcf1b3f3aed609997a8f52bb63acaaccd0769cb4644b30097f5b3a1fe6aee34",
+        "research_console/__init__.py": "49bda87946aa5b4b4a957d0f465ad82422ac68da32faa7316327317c97f95599",
+        "research_console/__main__.py": "b133781c8a6bb5be9215542a12db7901f4f1adb13421af8a50004e39fc466c8d",
+        "research_console/lab/analytics.py": "9611f27cca129775017c4debee1377bc2af6924c55e25ff8d1b8429b58fe23e7",
+        "research_console/lab/exports.py": "dc3d2c4d1701e6a2b0ba222c90b77a1140fa7df00d3432d98f6461ef320d1bd4",
+        "research_console/lab/fixtures.py": "6924fdcbacc7fcbaefb9245ba4658ce9508a8146aed4982b004892224bb977e8",
+        "research_console/lab/http.py": "4d8cb654ec1f0803ba02ca21430fe1575a2798476103075034c6ff2d79871e4b",
+        "research_console/lab/library.py": "65a19bf70483d96df1913c193c7d03c45a6826af2fdba404cb04956bb47c997a",
+        "research_console/lab/packs.py": "eeb4ca83b9a94753a92cd8e86567ce2435d42620e49b4df5c02f9a0dd37f7b52",
+        "research_console/lab/permissions.py": "fec95612e64c18f646e38298bafe6ea7c4a452e85671d226311f78c01a6bab8f",
+        "research_console/lab/storage.py": "e2abf104b0b0d3976e643ce577e1c3153ba75c4c81d18ed8447936018c75316d",
+        "research_console/lab/__init__.py": "c78ee4806abc5c4e30d68970e5aa9ccb728054d402138ea17fafe58adeb4c943"
+      },
+      "workload": "three independent cash/BTC holdings at fictional alternating marks; no strategy/backtest",
+      "sizes": [
+        {
+          "marks": 30,
+          "input_bytes": 1090,
+          "input_sha256": "119f07f1410dfd6f13f1070973e4f3f8a868b682ca1cb1ffbe8f41698523fba1",
+          "analysis_sha256": "9324d5f764430384fac5abef7b610cdc643b60d56cf842b0affb0c0b4f4c530d",
+          "hash": {
+            "samples_ns": [
+              1600,
+              1400,
+              1200,
+              1000,
+              1100,
+              1100,
+              1000
+            ],
+            "median_ns": 1100,
+            "min_ns": 1000,
+            "max_ns": 1600
+          },
+          "parse": {
+            "samples_ns": [
+              224100,
+              212400,
+              210900,
+              212800,
+              209700,
+              256300,
+              210900
+            ],
+            "median_ns": 212400,
+            "min_ns": 209700,
+            "max_ns": 256300
+          },
+          "validate": {
+            "samples_ns": [
+              964200,
+              927300,
+              911400,
+              1122300,
+              957400,
+              927200,
+              907100
+            ],
+            "median_ns": 927300,
+            "min_ns": 907100,
+            "max_ns": 1122300
+          },
+          "analyze": {
+            "samples_ns": [
+              1395400,
+              1343200,
+              1275200,
+              1264100,
+              1435600,
+              1351800,
+              1263900
+            ],
+            "median_ns": 1343200,
+            "min_ns": 1263900,
+            "max_ns": 1435600
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              162600,
+              219800,
+              163800,
+              149900,
+              151900,
+              146500,
+              148800
+            ],
+            "median_ns": 151900,
+            "min_ns": 146500,
+            "max_ns": 219800
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              100900,
+              90200,
+              87600,
+              86800,
+              91000,
+              86900,
+              87300
+            ],
+            "median_ns": 87600,
+            "min_ns": 86800,
+            "max_ns": 100900
+          },
+          "replay": {
+            "samples_ns": [
+              1570800,
+              1496700,
+              1465500,
+              1401200,
+              1509500,
+              1440000,
+              1403900
+            ],
+            "median_ns": 1465500,
+            "min_ns": 1401200,
+            "max_ns": 1570800
+          },
+          "export": {
+            "samples_ns": [
+              2499700,
+              2493700,
+              2559800,
+              2470300,
+              2406800,
+              2622200,
+              2540500
+            ],
+            "median_ns": 2499700,
+            "min_ns": 2406800,
+            "max_ns": 2622200
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              6940800,
+              7277400,
+              6811000
+            ],
+            "median_ns": 6940800,
+            "min_ns": 6811000,
+            "max_ns": 7277400
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              1637200,
+              1590600,
+              1574800,
+              1634800,
+              1573000,
+              1596000,
+              1584800
+            ],
+            "median_ns": 1590600,
+            "min_ns": 1573000,
+            "max_ns": 1637200
+          }
+        },
+        {
+          "marks": 300,
+          "input_bytes": 1957,
+          "input_sha256": "20e8e02acf70f59766be49e5778fa79a8a8b61c112b50235b78eb73053bce0f2",
+          "analysis_sha256": "e2093cbc44edce47686b4fe9e64f807ecebf049802214b33d34f15b32db806be",
+          "hash": {
+            "samples_ns": [
+              2400,
+              1800,
+              1500,
+              1500,
+              1500,
+              1400,
+              1400
+            ],
+            "median_ns": 1500,
+            "min_ns": 1400,
+            "max_ns": 2400
+          },
+          "parse": {
+            "samples_ns": [
+              1530300,
+              1507500,
+              1533400,
+              1710900,
+              1567800,
+              1498700,
+              1494400
+            ],
+            "median_ns": 1530300,
+            "min_ns": 1494400,
+            "max_ns": 1710900
+          },
+          "validate": {
+            "samples_ns": [
+              6440700,
+              6454900,
+              6435000,
+              6395200,
+              6537100,
+              6397700,
+              6573400
+            ],
+            "median_ns": 6440700,
+            "min_ns": 6395200,
+            "max_ns": 6573400
+          },
+          "analyze": {
+            "samples_ns": [
+              9090200,
+              9547000,
+              9017500,
+              8977100,
+              9392500,
+              8875700,
+              9034500
+            ],
+            "median_ns": 9034500,
+            "min_ns": 8875700,
+            "max_ns": 9547000
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              1403000,
+              1301900,
+              1303400,
+              1403100,
+              1318300,
+              1300100,
+              1353000
+            ],
+            "median_ns": 1318300,
+            "min_ns": 1300100,
+            "max_ns": 1403100
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              101900,
+              90400,
+              88700,
+              87300,
+              90300,
+              88600,
+              88900
+            ],
+            "median_ns": 88900,
+            "min_ns": 87300,
+            "max_ns": 101900
+          },
+          "replay": {
+            "samples_ns": [
+              9761500,
+              9647300,
+              9457200,
+              9471400,
+              9393600,
+              9784400,
+              9715500
+            ],
+            "median_ns": 9647300,
+            "min_ns": 9393600,
+            "max_ns": 9784400
+          },
+          "export": {
+            "samples_ns": [
+              13130400,
+              12465600,
+              14459700,
+              12698900,
+              12498800,
+              12521600,
+              12712600
+            ],
+            "median_ns": 12698900,
+            "min_ns": 12465600,
+            "max_ns": 14459700
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              21990200,
+              22194700,
+              22315200
+            ],
+            "median_ns": 22194700,
+            "min_ns": 21990200,
+            "max_ns": 22315200
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              9634400,
+              9160700,
+              9233200,
+              9298100,
+              9059500,
+              9274600,
+              9189800
+            ],
+            "median_ns": 9233200,
+            "min_ns": 9059500,
+            "max_ns": 9634400
+          }
+        },
+        {
+          "marks": 3000,
+          "input_bytes": 10634,
+          "input_sha256": "527a2b6abd9feec02ab339fcc161aa6b19f6d259c33a4a9f920e1357e8736c95",
+          "analysis_sha256": "3d3029e552d457fd21f678e61e43aa65f7a2650ef31e4f391e581ce988170859",
+          "hash": {
+            "samples_ns": [
+              7800,
+              5600,
+              5400,
+              5200,
+              5300,
+              5500,
+              5400
+            ],
+            "median_ns": 5400,
+            "min_ns": 5200,
+            "max_ns": 7800
+          },
+          "parse": {
+            "samples_ns": [
+              14661500,
+              14586000,
+              14507000,
+              14567900,
+              14557200,
+              14845700,
+              14668000
+            ],
+            "median_ns": 14586000,
+            "min_ns": 14507000,
+            "max_ns": 14845700
+          },
+          "validate": {
+            "samples_ns": [
+              65169800,
+              65377000,
+              82329200,
+              77549300,
+              68960400,
+              60376300,
+              62130600
+            ],
+            "median_ns": 65377000,
+            "min_ns": 60376300,
+            "max_ns": 82329200
+          },
+          "analyze": {
+            "samples_ns": [
+              86820600,
+              86791700,
+              85299300,
+              85518200,
+              85853400,
+              85491100,
+              85288100
+            ],
+            "median_ns": 85518200,
+            "min_ns": 85288100,
+            "max_ns": 86820600
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              13497900,
+              13573400,
+              13410100,
+              13589200,
+              13320800,
+              13103800,
+              13361100
+            ],
+            "median_ns": 13410100,
+            "min_ns": 13103800,
+            "max_ns": 13589200
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              107600,
+              90500,
+              93200,
+              86400,
+              128500,
+              98800,
+              89900
+            ],
+            "median_ns": 93200,
+            "min_ns": 86400,
+            "max_ns": 128500
+          },
+          "replay": {
+            "samples_ns": [
+              90274900,
+              89781100,
+              88774300,
+              92434900,
+              103031700,
+              94967300,
+              90202200
+            ],
+            "median_ns": 90274900,
+            "min_ns": 88774300,
+            "max_ns": 103031700
+          },
+          "export": {
+            "samples_ns": [
+              112429000,
+              112253000,
+              112622400,
+              113015100,
+              113298500,
+              112419600,
+              112875800
+            ],
+            "median_ns": 112622400,
+            "min_ns": 112253000,
+            "max_ns": 113298500
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              175157800,
+              179418500,
+              176546100
+            ],
+            "median_ns": 176546100,
+            "min_ns": 175157800,
+            "max_ns": 179418500
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              97967900,
+              86189000,
+              86705300,
+              86758700,
+              87380600,
+              85622200,
+              91823400
+            ],
+            "median_ns": 86758700,
+            "min_ns": 85622200,
+            "max_ns": 97967900
+          }
+        },
+        {
+          "marks": 9999,
+          "input_bytes": 31567,
+          "input_sha256": "a6a8a83bb24b265dbad7aa59afdfcf6e1aa0dde9c5c0bf342f0020e8fad15ab8",
+          "analysis_sha256": "a2a689000c0e467d688225dd7860af4b616726218d2e9153e2c77ebc2f1a6273",
+          "hash": {
+            "samples_ns": [
+              17000,
+              14700,
+              14600,
+              14500,
+              14700,
+              14600,
+              14500
+            ],
+            "median_ns": 14600,
+            "min_ns": 14500,
+            "max_ns": 17000
+          },
+          "parse": {
+            "samples_ns": [
+              49192000,
+              49321700,
+              48666200,
+              49922700,
+              50633500,
+              48085100,
+              49584400
+            ],
+            "median_ns": 49321700,
+            "min_ns": 48085100,
+            "max_ns": 50633500
+          },
+          "validate": {
+            "samples_ns": [
+              204582400,
+              206827700,
+              205597100,
+              209458700,
+              203252500,
+              205791400,
+              206235600
+            ],
+            "median_ns": 205791400,
+            "min_ns": 203252500,
+            "max_ns": 209458700
+          },
+          "analyze": {
+            "samples_ns": [
+              283956800,
+              291696300,
+              286317600,
+              304734500,
+              285269800,
+              285406900,
+              284472300
+            ],
+            "median_ns": 285406900,
+            "min_ns": 283956800,
+            "max_ns": 304734500
+          },
+          "episodes_one_account": {
+            "samples_ns": [
+              45632500,
+              44816500,
+              44748300,
+              45997200,
+              46218900,
+              45010100,
+              45513500
+            ],
+            "median_ns": 45513500,
+            "min_ns": 44748300,
+            "max_ns": 46218900
+          },
+          "pareto_three_accounts": {
+            "samples_ns": [
+              123400,
+              94700,
+              91500,
+              96100,
+              90300,
+              89500,
+              90600
+            ],
+            "median_ns": 91500,
+            "min_ns": 89500,
+            "max_ns": 123400
+          },
+          "replay": {
+            "samples_ns": [
+              297956400,
+              298489700,
+              297906600,
+              296549400,
+              300693400,
+              305302000,
+              315638000
+            ],
+            "median_ns": 298489700,
+            "min_ns": 296549400,
+            "max_ns": 315638000
+          },
+          "export": {
+            "samples_ns": [
+              378929600,
+              375619000,
+              373232900,
+              374558500,
+              376420100,
+              375164500,
+              373993600
+            ],
+            "median_ns": 375164500,
+            "min_ns": 373232900,
+            "max_ns": 378929600
+          },
+          "cold_adapter": {
+            "samples_ns": [
+              583897400,
+              593132300,
+              572765500
+            ],
+            "median_ns": 583897400,
+            "min_ns": 572765500,
+            "max_ns": 593132300
+          },
+          "warm_adapter": {
+            "samples_ns": [
+              290867000,
+              284289800,
+              285073700,
+              285774700,
+              285307300,
+              286699900,
+              293466100
+            ],
+            "median_ns": 285774700,
+            "min_ns": 284289800,
+            "max_ns": 293466100
+          }
+        }
+      ],
+      "hardware": {
+        "cpu": {
+          "Name": "AMD Ryzen 5 5600X 6-Core Processor             ",
+          "NumberOfCores": 6,
+          "NumberOfLogicalProcessors": 12
+        },
+        "physical_memory_bytes": 34259087360,
+        "instrumentation": "Named hardware fields only, no hostname or identifiers"
+      },
+      "conditions": {
+        "coverage_campaigns_ended": true,
+        "other_host_load": "not controlled",
+        "order": "baseline then current, separate processes",
+        "gc": "default Python GC enabled",
+        "timing": "wall perf_counter_ns; existing valid input outside timed phases",
+        "memory": "tracemalloc separately, process peak includes instrumentation"
+      },
+      "measurement_script_sha256": "5999dc3a68815a80c5dd4eba5ab25010f80f43a0d237c3b847abadcd58102f6b",
+      "library_constructor": {
+        "samples_ns": [
+          4172300,
+          3817400,
+          4048900,
+          3754000,
+          3789900,
+          3785200,
+          4088800
+        ],
+        "median_ns": 3817400,
+        "min_ns": 3754000,
+        "max_ns": 4172300
+      },
+      "catalog_three_bundled": {
+        "samples_ns": [
+          2131200,
+          1942000,
+          2041600,
+          1952800,
+          2157700,
+          2327300,
+          2095900
+        ],
+        "median_ns": 2095900,
+        "min_ns": 1942000,
+        "max_ns": 2327300
+      },
+      "read_pack_calls_warm_adapter": 1,
+      "largest_validate_memory": {
+        "current_bytes": 119263,
+        "peak_bytes": 4360620,
+        "scope": "incremental Python allocations only, existing input held; not RSS"
+      },
+      "largest_analysis_memory": {
+        "current_bytes": 144634,
+        "peak_bytes": 3295326,
+        "scope": "incremental Python allocations only, existing input held; not RSS"
+      },
+      "pareto_scaling_abstract": [
+        {
+          "accounts": 3,
+          "samples_ns": [
+            114700,
+            93200,
+            86900,
+            85200,
+            85500,
+            83900,
+            97600
+          ],
+          "median_ns": 86900,
+          "min_ns": 83900,
+          "max_ns": 114700
+        },
+        {
+          "accounts": 15,
+          "samples_ns": [
+            3031200,
+            2877900,
+            2841500,
+            2947900,
+            2885400,
+            2875900,
+            2826000
+          ],
+          "median_ns": 2877900,
+          "min_ns": 2826000,
+          "max_ns": 3031200
+        },
+        {
+          "accounts": 30,
+          "samples_ns": [
+            12024200,
+            11963500,
+            12065800,
+            12055200,
+            12138300,
+            12060600,
+            12477100
+          ],
+          "median_ns": 12060600,
+          "min_ns": 11963500,
+          "max_ns": 12477100
+        },
+        {
+          "accounts": 60,
+          "samples_ns": [
+            48436100,
+            50091000,
+            49200300,
+            49581800,
+            48742300,
+            49568500,
+            48445900
+          ],
+          "median_ns": 49200300,
+          "min_ns": 48436100,
+          "max_ns": 50091000
+        }
+      ],
+      "catalog_35_small_packs_memory_only": {
+        "samples_ns": [
+          22028600,
+          22430900,
+          21612200,
+          22305300,
+          21787100,
+          22171600,
+          22241900
+        ],
+        "median_ns": 22171600,
+        "min_ns": 21612200,
+        "max_ns": 22430900
+      },
+      "process_memory": {
+        "WorkingSetSize": 49852416,
+        "PeakWorkingSetSize": 58376192,
+        "PagefileUsage": 36904960,
+        "PeakPagefileUsage": 46469120
+      },
+      "cache_hits": 29,
+      "cache_entries": 4
+    }
+  },
+  "evidence": {
+    "path": "docs/reviews/G4_1_EXECUTION_MANIFEST.json.gz",
+    "sha256": "24777b50a1930c7db6ca856a62760fdbfc0c658e9a7665d9230fba9825474eca",
+    "compressed_bytes": 414992,
+    "uncompressed_bytes": 4016453
+  },
+  "attempts": [
+    {
+      "name": "backend_commit",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3412537400,
+      "timeout_seconds": 90,
+      "command": [
+        "git",
+        "commit",
+        "-m",
+        "fix(lab): harden ZIP streams, export consent and atomic storage concurrency"
+      ],
+      "receipt_sha256": "69fbdfdd19e24448e7a08c5e942dd50fd8684d2c821db35a16de0639c5109bea",
+      "log_sha256": "4d109b5c2d7995547c704c09e89edf764ddbc4960508bd56ef449ec8e061748c"
+    },
+    {
+      "name": "backend_stage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 66853200,
+      "timeout_seconds": 90,
+      "command": [
+        "git",
+        "add",
+        "pyproject.toml",
+        "research_console/lab/packs.py",
+        "research_console/lab/exports.py",
+        "research_console/lab/http.py",
+        "research_console/lab/library.py",
+        "research_console/lab/permissions.py",
+        "research_console/lab/storage.py",
+        "research_console/server.py",
+        "tools/quality_coverage.py",
+        "tests/console/test_lab.py",
+        "tests/console/test_lab_http.py",
+        "tests/console/test_lab_hardening.py"
+      ],
+      "receipt_sha256": "0a236d7e2a608b5a5bef571f7a187a8f37c7561872db80ec00a08269ceb7a261",
+      "log_sha256": "e23169c33bcd4d89b86a5695123a2a75ecd001f0a7ee879a512484f34980fcc2"
+    },
+    {
+      "name": "baseline_inventory",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 6227251700,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "tools.quality_gate",
+        "inventory",
+        "--out",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\baseline-inventory"
+      ],
+      "receipt_sha256": "5f24d52757b2b9441bf70a9d5471b7414b1fb54f0b674f4a37e5cacaadb6672f",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "close_fresh_global",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 14203902900,
+      "timeout_seconds": 300,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\close_global.py"
+      ],
+      "receipt_sha256": "c673ce18ed2ecf0ec1daa52e23444afe2e9b66ddbea5545859a54a0ab4e94fbe",
+      "log_sha256": "a4f050f1aa69059df41ede02761f8998b77e9d6be2aaab5c8e914a60063f0bac"
+    },
+    {
+      "name": "closing_diff",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 55242400,
+      "timeout_seconds": 30,
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "receipt_sha256": "43d5eaef49245ecac1ff9f92683b2426288b82c383f88ee0d2578b06a6be74b9",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "closing_format",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 140470400,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "receipt_sha256": "57615672fbe0ba130f5fa8bb0ec96ee37cf3f2d05d34a7d01327e472c4644776",
+      "log_sha256": "d534f2fbd06a778b07e8eda1c49ca39fbe3c89ed56b8a4fe3785a17fc4e081f4"
+    },
+    {
+      "name": "closing_javascript",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 146875300,
+      "timeout_seconds": 30,
+      "command": [
+        "C:/Program Files/nodejs/node.exe",
+        "--test",
+        "tests/console/chart_state.test.cjs",
+        "tests/console/lab_state.test.cjs"
+      ],
+      "receipt_sha256": "94eb4d523b352d6eda7a2b0bdc8285ef85acedb17615025b74041b6778541bf4",
+      "log_sha256": "802000fa4e0aed8745203c33704d5608f4532e88d6b3d7951f01e005270afe50"
+    },
+    {
+      "name": "closing_js_format",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1690976000,
+      "timeout_seconds": 60,
+      "command": [
+        "C:/Program Files/nodejs/npm.cmd",
+        "exec",
+        "--offline",
+        "--yes",
+        "--cache",
+        "$AUDIT_WORKSPACE\\.tool-cache\\npm",
+        "--package=prettier@3.6.2",
+        "--",
+        "prettier",
+        "--check",
+        "research_console/static/*.js"
+      ],
+      "receipt_sha256": "a50499f3c68517200cc20c6a6d135f9b684e4412c38b04d29ce8895743b6f18d",
+      "log_sha256": "ca5377906fd0ffda6d29ee8936dfcafa993a83294b8d399e9676448fabaa8bfb"
+    },
+    {
+      "name": "closing_mypy",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 536436900,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "receipt_sha256": "076507d76bdf0671dcee57d94d9603669b6559c7340afc9b81a46d3c49dc09ae",
+      "log_sha256": "b67730497f9a99989a593cbfad929552bd6bf0edc452ebc479ff867b8913ca16"
+    },
+    {
+      "name": "closing_precommit",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3129628400,
+      "timeout_seconds": 180,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "pre_commit",
+        "run",
+        "--all-files"
+      ],
+      "receipt_sha256": "a0016ebf4de0cefc39a6d3a607b9689455c93b0373c4227e83938efca7e91900",
+      "log_sha256": "823f73816e6b9d5951577e5e0115543b90ae3ca573b5106765bd9e8dfe13a928"
+    },
+    {
+      "name": "closing_ruff",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 127120000,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "receipt_sha256": "9665197f7273ea67038ff3b5f342b99094bac2a753d806de7331323370a362be",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "code_format_final_candidate",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 143939400,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "receipt_sha256": "8e6757b86c6e17110fd0af64fc15e6af670380763a30350df9a0196857176f72",
+      "log_sha256": "0beb92815a83401fd4abecd0a456e7a77e49eddf21ff85ed48b60de171354362"
+    },
+    {
+      "name": "code_ruff_final_candidate",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 149953900,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "receipt_sha256": "6453a3b997bc5376fa7322f07239d5d085a6782962db0680f1b3e7ca2b090c79",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "crash_and_atomic_tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3194785300,
+      "timeout_seconds": 45,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/console/test_lab_hardening.py",
+        "-q",
+        "--junitxml=$AUDIT_WORKSPACE\\audit\\g4_1\\atomic-and-crash.xml"
+      ],
+      "receipt_sha256": "4dcbd53b481642a647bc88757cbd1b75d48af6d4425835f172dec4d66a01d585",
+      "log_sha256": "e75dbbe741b9dac28564829697409aa5939cb15fb319267b9f778d40bb4324c3"
+    },
+    {
+      "name": "directed_after_storage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 29976837400,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/console/test_lab_hardening.py",
+        "tests/console/test_lab.py",
+        "tests/console/test_lab_http.py",
+        "tests/test_quality_coverage.py",
+        "-q",
+        "--junitxml=$AUDIT_WORKSPACE\\audit\\g4_1\\directed-storage.xml"
+      ],
+      "receipt_sha256": "4f78ffabc1c4455b5a7a34d98895ceb4bc7ba703508d1a491bdfc3f8e655bb45",
+      "log_sha256": "8fc181653b8acf601c4e357330e9cfcb482448b633ad5735bf5cc5aa40c2b9b0"
+    },
+    {
+      "name": "directed_hardening_second",
+      "status": "FAIL",
+      "exit_code": 1,
+      "elapsed_ns": 29995903800,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/console/test_lab_hardening.py",
+        "tests/console/test_lab.py",
+        "tests/console/test_lab_http.py",
+        "tests/test_quality_coverage.py",
+        "-q",
+        "--junitxml=$AUDIT_WORKSPACE\\audit\\g4_1\\directed-second.xml"
+      ],
+      "receipt_sha256": "4b40886277354ffdc26c8175cf4f92ba1e3923ec442e30a8b911b8969851ead4",
+      "log_sha256": "dcbde19e780de97d11cb8b826bcf9b2f7980357b6ff6ed40a581e7fc5a062a43"
+    },
+    {
+      "name": "editable_install",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 7506971500,
+      "timeout_seconds": 180,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--index-url",
+        "https://pypi.org/simple",
+        "-c",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\constraints.txt",
+        "--build-constraint",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\build-constraints.txt",
+        "-e",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á"
+      ],
+      "receipt_sha256": "d08029bf2c38276d854f119aa91cf7a661f13283fe092ee18eee676284b2a5ac",
+      "log_sha256": "ca076ad10cf8031ff3799f3391061e043bf14cee67d92236f6f7d0ce7ed2887e"
+    },
+    {
+      "name": "final_installed_wheel_http",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 5349030700,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\installed_smoke.py",
+        "wheel",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist-final\\gridbot-0.1.0.dev0-py3-none-any.whl"
+      ],
+      "receipt_sha256": "5e784ecfc406d9408b126c1c0de5ed1ef6fa72b40771acf14617b37e36b69e15",
+      "log_sha256": "b3e2899996cb249e61fd0fe09abbb122a8f1b9112c45b402db03e2a5466a2efa"
+    },
+    {
+      "name": "final_wheel_build",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3381065900,
+      "timeout_seconds": 180,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "wheel",
+        "--no-deps",
+        "--index-url",
+        "https://pypi.org/simple",
+        "--build-constraint",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\build-constraints.txt",
+        "--wheel-dir",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist-final",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á"
+      ],
+      "receipt_sha256": "3de5ba5383f3cbdf44f2182a60371f25632e4a162930424c4ba06c7c5651a656",
+      "log_sha256": "1c5a82d3688baa313637b0b3a52e17bd2ea0a7e8317f420b959b7e3ca973cffd"
+    },
+    {
+      "name": "final_wheel_install",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1773628800,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--force-reinstall",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist-final\\gridbot-0.1.0.dev0-py3-none-any.whl"
+      ],
+      "receipt_sha256": "35aa752349fde0ba62a49eb70e4b93f3466e9269caa4028fe2a5854b7e2ccd93",
+      "log_sha256": "9c005c22dd0b7c0efd44539c1b1e352715bb1f1a56b80bdaddc952cf51d932a7"
+    },
+    {
+      "name": "final_wheel_pip_check",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 541743500,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "receipt_sha256": "ddea4b60eb44f3584b232e9060d04d1adc4938776364a7f0d8fd62015f248034",
+      "log_sha256": "672aec65a45bed50e70229c70934a7eebf0462595c459b83023027645d57cccf"
+    },
+    {
+      "name": "format_crash_tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 132560700,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "tests/console/test_lab_hardening.py"
+      ],
+      "receipt_sha256": "a3465c6d69702a544a388cbf6d0bb8fde141de4fbb0c08315089fce28296f519",
+      "log_sha256": "413a709001976657cb743636fd34e48fc41d8d302d665460d3f874b3313da127"
+    },
+    {
+      "name": "format_hardening_complete",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 133860800,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "research_console",
+        "tests/console",
+        "tools/quality_coverage.py"
+      ],
+      "receipt_sha256": "dbdbfa43b9035e149a9bfbabd8a4e2b857701212506b03dd859883a63f52cdc8",
+      "log_sha256": "015775e286c974e705d3c864d845d39fc7655bbacaf4fca99acdb979e02519d4"
+    },
+    {
+      "name": "frozen_format",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 134310800,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "research_console",
+        "tests/console",
+        "tools/quality_coverage.py"
+      ],
+      "receipt_sha256": "d9ab0783490808fb55643210562ef560b756aba3052f6f21331be6f57dd5e5d3",
+      "log_sha256": "8548a2eb66b720028f4698e500fab8b82fabbe0340c3708d7b3979dadea82629"
+    },
+    {
+      "name": "frozen_mypy",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 595455800,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "receipt_sha256": "e95d55fee2256cda09f8faef3a9db88cb7654e5e44cb01ea365c94530a96a04a",
+      "log_sha256": "b67730497f9a99989a593cbfad929552bd6bf0edc452ebc479ff867b8913ca16"
+    },
+    {
+      "name": "frozen_ruff",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 139377100,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "."
+      ],
+      "receipt_sha256": "1cbbf45e4b3442abee2bfc4afac4e9e86375753bcbdafe179c8fadb812412114",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "g41_marker_inventory",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3799580000,
+      "timeout_seconds": 45,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\collect_marks.py",
+        "$AUDIT_WORKSPACE\\bitcoin-gridbot-research",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\current-collected-marks.json"
+      ],
+      "receipt_sha256": "e2082b82c6d0d5f6bf92906d507a61706b25fd7f262bfafff81592f1de05df18",
+      "log_sha256": "3b3a0d142a50b6b630a4d891bae61af5645ec7a5d935fef484b35e5ec6a7643b"
+    },
+    {
+      "name": "g4_baseline_recollection",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 6383888900,
+      "timeout_seconds": 45,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\collect_marks.py",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\baseline public source",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\g4-baseline-collected-marks.json"
+      ],
+      "receipt_sha256": "2f6d0f807afe8e1adde1ddcbb396f55bfc777ec65bfa1654353d15a6d97501b3",
+      "log_sha256": "f51fe062e312689c85a650ec63916186645ca87c63fa39f2183858e45fd8442f"
+    },
+    {
+      "name": "g4_quota_race_reproduction",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 304685400,
+      "timeout_seconds": 20,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\reproduce_old_quota.py"
+      ],
+      "receipt_sha256": "d69582ae82e4fd8e4490903cc46dd3586f402b1b2412e322169533d2e97ff3f0",
+      "log_sha256": "e2e42a4f2be1d94fbd4773106e058c043493593baff0889e6f566e5093e4a014"
+    },
+    {
+      "name": "global_bundle_0",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1490437700,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "tools.quality_coverage",
+        "bundle",
+        "--inventory",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\global-inventory\\inventory.json",
+        "--campaign",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\campaign-0",
+        "--out",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\bundle-0"
+      ],
+      "receipt_sha256": "032cba6ddc5afde6f5a3c6ef75d313628786926a6becd5495d4a2b51f5cb0de8",
+      "log_sha256": "e3a755d60e51ff90dae7856c1a3bf8996f40735f4393425fea7acedb4c27f623"
+    },
+    {
+      "name": "global_bundle_1",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1358753500,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "tools.quality_coverage",
+        "bundle",
+        "--inventory",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\global-inventory\\inventory.json",
+        "--campaign",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\campaign-1",
+        "--out",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\bundle-1",
+        "--bundle",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\bundle-0\\bundle.json"
+      ],
+      "receipt_sha256": "bd786a2fc7483a253c109861c1e75a4156bf55f35276b274edac17fc38ee980e",
+      "log_sha256": "56808710aa77c7f95b6f3f234ce141617c88df59a9a46d27f50edb22e7abf280"
+    },
+    {
+      "name": "global_consolidated_coverage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 11162892600,
+      "timeout_seconds": 180,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "tools.quality_coverage",
+        "combine",
+        "--inventory",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\global-inventory\\inventory.json",
+        "--bundle",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\bundle-0\\bundle.json",
+        "--bundle",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\bundle-1\\bundle.json",
+        "--out",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\global-combined"
+      ],
+      "receipt_sha256": "eb4f7b2600e6bf0f347c438955e9ae12c4aa29a941d2cdb61c974ac860359a03",
+      "log_sha256": "7ff4ace73b79686c19342a21a176acd14e06dd01242aa2c8bd661cc0656ace9d"
+    },
+    {
+      "name": "global_inventory",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3964907900,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "tools.quality_gate",
+        "inventory",
+        "--out",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\global-inventory"
+      ],
+      "receipt_sha256": "15ca14ce1687956e7e836624165e151e7fbb74d095b3a21121c4b14d49b41f95",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "hardening_mypy",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 708247000,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "receipt_sha256": "e27fe79f2ad67607a470ebfc35e7c13a0c9e247821ae85f26f2963cacce57183",
+      "log_sha256": "b67730497f9a99989a593cbfad929552bd6bf0edc452ebc479ff867b8913ca16"
+    },
+    {
+      "name": "hardening_ruff",
+      "status": "FAIL",
+      "exit_code": 1,
+      "elapsed_ns": 131209900,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "--fix",
+        "research_console",
+        "tools/quality_coverage.py",
+        "tests/console"
+      ],
+      "receipt_sha256": "8e8f78702eac1259f23a7c509620b6192ed711f6f77197c8860fc62bf839628d",
+      "log_sha256": "528e388aa2d50354a2863def577e327fb03d65b8928a5e07640d4d106e73fc2d"
+    },
+    {
+      "name": "hardening_ruff_format",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 127135800,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "research_console",
+        "tools/quality_coverage.py",
+        "tests/console"
+      ],
+      "receipt_sha256": "3fc4716e91ec6b68845d31e9b2d6661615d815f15ec1fc2fbac0a7b09efa6311",
+      "log_sha256": "015775e286c974e705d3c864d845d39fc7655bbacaf4fca99acdb979e02519d4"
+    },
+    {
+      "name": "independent_gap_zero_cache_oracles",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 205295600,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\edge_oracles.py"
+      ],
+      "receipt_sha256": "3164fdb16ec0f71a8c4099df33729e6ea96e9700bbb1c68b6f8f9a74d71e8c17",
+      "log_sha256": "81a7584e08c86c51f94546de7f517ccde2a86e44b727d33408e07055409cf27c"
+    },
+    {
+      "name": "initial_adversarial_reproductions",
+      "status": "FAIL",
+      "exit_code": 1,
+      "elapsed_ns": 1996510700,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/console/test_lab_hardening.py",
+        "-q",
+        "--junitxml=$AUDIT_WORKSPACE\\audit\\g4_1\\initial-adversarial.xml"
+      ],
+      "receipt_sha256": "afdd90d64f98516a09f75f60a98923bb633d2679c3c2989263ca1d050ee0918e",
+      "log_sha256": "05817a9790a7e74485cc4c1448c70b24c81f0a7a2f5145373a4f9e5de3ed0ffe"
+    },
+    {
+      "name": "installed_http_editable",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 6633093100,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\installed_smoke.py",
+        "editable",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\.venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á"
+      ],
+      "receipt_sha256": "b4c837edfac6633ecada5e1baedf3a0bdb0b3172cce15ef5ffc61033e4bec749",
+      "log_sha256": "4237553f5d3e0039b0ee48a15c259311558269cd8fd8833ee1110bb8d2740ae5"
+    },
+    {
+      "name": "installed_http_wheel",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 6052204900,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\installed_smoke.py",
+        "wheel",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist\\gridbot-0.1.0.dev0-py3-none-any.whl"
+      ],
+      "receipt_sha256": "b7f1ef4ee1fd7bd859d6d0e2ef7f35ff4de0c323606225fe54f6f286b856c39a",
+      "log_sha256": "c679a47c33945b659294d1e8aa60c90cc44cdc742512afeb69a2c7d4a8ecf89e"
+    },
+    {
+      "name": "javascript_candidate",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 152003300,
+      "timeout_seconds": 30,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "tests/console/chart_state.test.cjs",
+        "tests/console/lab_state.test.cjs"
+      ],
+      "receipt_sha256": "e2c6766f777f7ca21fe0ea0cce3924995868bc8bc935d6e52794d641f9005b40",
+      "log_sha256": "4100adf968689016b988fa72e98d5a4f1762a4690d27e93f120276bfbbebaed4"
+    },
+    {
+      "name": "launcher_clean_windows",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 891619400,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\launcher_smoke.py"
+      ],
+      "receipt_sha256": "779240edb5bda020a2e71b0aabf304b0ea1a13b9b5e3bf6fc0e08ec89e8c26a2",
+      "log_sha256": "753e1e5c5b2b876d42d61fef9c2a50f3736a1378dcdad26a6e854ffa3ac1f3b4"
+    },
+    {
+      "name": "mypy_after_storage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 677470200,
+      "timeout_seconds": 90,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "receipt_sha256": "42641d37b1cd3a29f6f743a457b5297930c44a84fcbbea9e3d9845ef680b4b56",
+      "log_sha256": "b67730497f9a99989a593cbfad929552bd6bf0edc452ebc479ff867b8913ca16"
+    },
+    {
+      "name": "mypy_crash_tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 629550200,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "receipt_sha256": "d27ad58fed791c1d9e5045b523a3c09d02f22afb2e24d2d346240933dc9d3be9",
+      "log_sha256": "b67730497f9a99989a593cbfad929552bd6bf0edc452ebc479ff867b8913ca16"
+    },
+    {
+      "name": "original_final_readonly_rehash",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1697772300,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\preserve_final.py"
+      ],
+      "receipt_sha256": "8ba5453c3e770c10c93dac716217f0bbb486c9ef974970724fba3610eac61b82",
+      "log_sha256": "3a33244933f39deecc1344e3118791283c799e5a2493b835fa8f1c4e28c0b1e8"
+    },
+    {
+      "name": "original_readonly_rehash",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 10720006400,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\preserve.py"
+      ],
+      "receipt_sha256": "108c13fa00e3bd0e23dda57e55a7ffe7d861dbfe778fe82a04fdbd0ef2bedbee",
+      "log_sha256": "e99443070e011d7599ee046d0087900480ff70e6beffd30cc08e9bc521070735"
+    },
+    {
+      "name": "packaged_example_coverage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 32070881500,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\examples_supplement.py"
+      ],
+      "receipt_sha256": "4a08400598ba2b06a0f4641e2593d4c72122c0ef46bc0901de3d2d450a950330",
+      "log_sha256": "99caea46d263d7f3407d78ff10ea0ee64b68384dee6d2724e4758a9132f29cd9"
+    },
+    {
+      "name": "pip_check_editable",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 673390700,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "receipt_sha256": "2796f1b1d89d4b1e647001bbc90f1b1d90039b029be10228476cdadf52eb0108",
+      "log_sha256": "672aec65a45bed50e70229c70934a7eebf0462595c459b83023027645d57cccf"
+    },
+    {
+      "name": "pip_check_wheel",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 725282300,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "receipt_sha256": "179a19105dfde8fdc879bc35ce1efc84ebc3f1b5c9e4895ea4424e8aa8ef0a19",
+      "log_sha256": "672aec65a45bed50e70229c70934a7eebf0462595c459b83023027645d57cccf"
+    },
+    {
+      "name": "pip_upgrade_editable",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1155508600,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--index-url",
+        "https://pypi.org/simple",
+        "pip==26.2.1"
+      ],
+      "receipt_sha256": "23b5f05f6f1e487359b48c12403b495a802e349adad98aadcd999fdcaf76d2fe",
+      "log_sha256": "7e1a013a759410dade2c27e849cca5cca5f692fd7196177c3b17fff1659cf24e"
+    },
+    {
+      "name": "pip_upgrade_wheel",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1202336200,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--index-url",
+        "https://pypi.org/simple",
+        "pip==26.2.1"
+      ],
+      "receipt_sha256": "e417e865d9ee2c618c6ae8815834c0374299e0e9ab759923f83b95f0a4f6ff7e",
+      "log_sha256": "0c9dcb1073bae97963fc40c7c4a5aece72a35bf45d45e24f0b7c623ba70027c3"
+    },
+    {
+      "name": "preliminary_decoded_secrets",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1254903900,
+      "timeout_seconds": 75,
+      "command": [
+        "gitleaks",
+        "dir",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\scan-preliminary-text.txt",
+        "--config",
+        "$AUDIT_WORKSPACE\\audit\\g3_2\\GITLEAKS_NO_PATH_EXCLUSIONS.toml",
+        "--ignore-gitleaks-allow",
+        "--max-target-megabytes",
+        "64",
+        "--max-archive-depth",
+        "1",
+        "--timeout",
+        "60",
+        "--redact",
+        "--no-banner",
+        "--report-format",
+        "json",
+        "--report-path",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\preliminary_decoded_secrets-findings.json"
+      ],
+      "receipt_sha256": "4b578132ae4dec9d692917ebc2bcb67dd2edb1b08b68a554e74b3de333914aad",
+      "log_sha256": "775d4484cd1ae64605cd2df8238d17655dc51e5a1aa4b0e34cee5bed7df96363"
+    },
+    {
+      "name": "preliminary_public_scan_inputs",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 3118581700,
+      "timeout_seconds": 45,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\seal_scan.py",
+        "preliminary"
+      ],
+      "receipt_sha256": "a2a10fbf61a0238e38ae39327f93645f037c71f0346c3e86f4b9cfb1a2cb9536",
+      "log_sha256": "b7bf08e8b3a679872e1f8114bc85f115c664b04b128e634f715b623c36f669f5"
+    },
+    {
+      "name": "preliminary_tree_secrets",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 900629200,
+      "timeout_seconds": 75,
+      "command": [
+        "gitleaks",
+        "dir",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\scan-preliminary-tree",
+        "--config",
+        "$AUDIT_WORKSPACE\\audit\\g3_2\\GITLEAKS_NO_PATH_EXCLUSIONS.toml",
+        "--ignore-gitleaks-allow",
+        "--max-target-megabytes",
+        "64",
+        "--max-archive-depth",
+        "1",
+        "--timeout",
+        "60",
+        "--redact",
+        "--no-banner",
+        "--report-format",
+        "json",
+        "--report-path",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\preliminary_tree_secrets-findings.json"
+      ],
+      "receipt_sha256": "b705c395d1e67518ad5b07b74f3ee58a7a43ded621715645ebc235e8c875c3dc",
+      "log_sha256": "3b1a59874462d45407952707c67eb3493c221f271ee0b0d312158039cbda83e5"
+    },
+    {
+      "name": "profile_baseline",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 23621819400,
+      "timeout_seconds": 240,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\profile_lab.py",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\baseline public source",
+        "baseline"
+      ],
+      "receipt_sha256": "8e1aca4cb2e7efcd9ba92c6e610b27d9b10646f386b0c5c5217433db018c07f4",
+      "log_sha256": "baf742fe6326d5e6bcb78b520b4f49d832467ec5f06b2a4d96f83e5e741a2ba1"
+    },
+    {
+      "name": "profile_current",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 23209678700,
+      "timeout_seconds": 240,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\profile_lab.py",
+        "$AUDIT_WORKSPACE\\bitcoin-gridbot-research",
+        "current"
+      ],
+      "receipt_sha256": "bea17394618f494a9ccb5549ef83ff34b8a29ff7fdd50aed132ea1050b25af8a",
+      "log_sha256": "c00b57bfc4710c9d3a77e2f1566b395569b14ab5d8947f07c0ed02275ab61448"
+    },
+    {
+      "name": "public_factual_evidence",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1779056900,
+      "timeout_seconds": 45,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\build_public_evidence.py"
+      ],
+      "receipt_sha256": "348eaf8c83f1c08a838650f01ad35e6cf99b549cac4936e45c29804c408aa937",
+      "log_sha256": "9df9890cd6b87910dc01791192a61082cd457cfdc0b1ffb04c15c85f51e0bc43"
+    },
+    {
+      "name": "ruff_crash_tests",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 130384000,
+      "timeout_seconds": 30,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "--fix",
+        "tests/console/test_lab_hardening.py"
+      ],
+      "receipt_sha256": "d7c9f68a183c9e8cae483ead88dccf0ab6f02e69e0acc9a1fd1e8702d961978d",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "ruff_hardening_complete",
+      "status": "FAIL",
+      "exit_code": 1,
+      "elapsed_ns": 138154600,
+      "timeout_seconds": 60,
+      "command": [
+        "$AUDIT_WORKSPACE\\.tool-cache\\pro2026-venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "research_console",
+        "tests/console",
+        "tools/quality_coverage.py"
+      ],
+      "receipt_sha256": "b118427985cd93972826347214a770ad7dd4cb05df0d06b881d616b39d68a458",
+      "log_sha256": "9d611fd59dffd7d3ef423c955ec7b8a81a0a70fa7838a4fd88171ff384fe366e"
+    },
+    {
+      "name": "ui_commit",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1769753600,
+      "timeout_seconds": 90,
+      "command": [
+        "git",
+        "commit",
+        "-m",
+        "fix(console): bind export consent and async results to the active lab context"
+      ],
+      "receipt_sha256": "7d4991b50093b6acd0ac0796ea32eb144633132dad278ca5ce84b7f3e2c0c6c2",
+      "log_sha256": "033fe9ba3c63ebd4cce64f1087bfe5d0eace93e6125c175a0448423f3a76ee5f"
+    },
+    {
+      "name": "ui_prettier_candidate",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 1746235600,
+      "timeout_seconds": 30,
+      "command": [
+        "C:\\Program Files\\nodejs\\npm.cmd",
+        "exec",
+        "--offline",
+        "--yes",
+        "--cache",
+        "$AUDIT_WORKSPACE\\.tool-cache\\npm",
+        "--package=prettier@3.6.2",
+        "--",
+        "prettier",
+        "--write",
+        "research_console/static/lab.js"
+      ],
+      "receipt_sha256": "b2904a76e8ddbe6d8290d929805c9b9e9895d33faa12a5cca4cca1bd7160f4fa",
+      "log_sha256": "11aeebc91dd75e1f707ee96e1b5d4ba3637680167e4db09388f8374734dadc5b"
+    },
+    {
+      "name": "ui_stage",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 36095500,
+      "timeout_seconds": 90,
+      "command": [
+        "git",
+        "add",
+        "research_console/static/lab.js"
+      ],
+      "receipt_sha256": "c985205d849c90bea979b69b3270901641864fb7b18a4581cf2874508d96c4f1",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wheel_build",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 5208518100,
+      "timeout_seconds": 180,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "wheel",
+        "--no-deps",
+        "--index-url",
+        "https://pypi.org/simple",
+        "--build-constraint",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\build-constraints.txt",
+        "--wheel-dir",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á"
+      ],
+      "receipt_sha256": "23650434ec854137ddd99c8d15fd44a30f2ca7bcb61d7cbc6076982482bbaf58",
+      "log_sha256": "83ae4a08826371216b17fcb56f9366eed24579eeda054c2cedcf27a6af62c773"
+    },
+    {
+      "name": "wheel_install",
+      "status": "PASS",
+      "exit_code": 0,
+      "elapsed_ns": 5458970300,
+      "timeout_seconds": 120,
+      "command": [
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\wheel environment á\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--index-url",
+        "https://pypi.org/simple",
+        "-c",
+        "$AUDIT_WORKSPACE\\tmp\\g4_1\\clean source Unicode á\\constraints.txt",
+        "$AUDIT_WORKSPACE\\audit\\g4_1\\wheel-dist\\gridbot-0.1.0.dev0-py3-none-any.whl"
+      ],
+      "receipt_sha256": "c98e648728ecf26f386b0c7ee221b8ec424d83089ce5d3f8c2376026c77cd74e",
+      "log_sha256": "4992e4b938ab69497bad024b0f729fb5e4918b2d6fb02021b1cfee0fc3678544"
+    }
+  ],
+  "verdict_note": "Gate conclusions are in the final audit; preserved development failures are not relabeled PASS."
+}

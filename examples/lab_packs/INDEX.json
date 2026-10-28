@@ -1,0 +1,93 @@
+{
+  "schema": "G4_EXAMPLE_PACK_INDEX_V1",
+  "files": [
+    {
+      "file": "favorable.gbpack",
+      "sha256": "e393055d5f854f47042956aa705e41f93ac03a965a7f7b9a3aa3919660a5e79e",
+      "bytes": 1035,
+      "source_kind": "SYNTHETIC_DEMO",
+      "data_nature": "SYNTHETIC",
+      "expected_columns": [
+        "nav_final_USDT",
+        "BTC_physical",
+        "drawdown_fraction"
+      ],
+      "hand_derived_expectations": {
+        "BTC_HOLD": [
+          "130",
+          "10",
+          "0"
+        ],
+        "CASH": [
+          "100",
+          "0",
+          "0"
+        ],
+        "MIX": [
+          "115",
+          "5",
+          "0"
+        ]
+      }
+    },
+    {
+      "file": "unfavorable.gbpack",
+      "sha256": "a0528ebd5d15aab7f6a26e527fa60d7b2b4e1357574e73fd892f6726554f5cad",
+      "bytes": 1047,
+      "source_kind": "SYNTHETIC_DEMO",
+      "data_nature": "SYNTHETIC",
+      "expected_columns": [
+        "nav_final_USDT",
+        "BTC_physical",
+        "drawdown_fraction"
+      ],
+      "hand_derived_expectations": {
+        "BTC_HOLD": [
+          "85",
+          "10",
+          "3/20"
+        ],
+        "CASH": [
+          "100",
+          "0",
+          "0"
+        ],
+        "MIX": [
+          "92.5",
+          "5",
+          "3/40"
+        ]
+      }
+    },
+    {
+      "file": "risk_violation.gbpack",
+      "sha256": "8a7f1bb54814bbe681c1cbc4324502b24e64c0a9247b147d1f87827504a89690",
+      "bytes": 1076,
+      "source_kind": "SYNTHETIC_DEMO",
+      "data_nature": "SYNTHETIC",
+      "expected_columns": [
+        "nav_final_USDT",
+        "BTC_physical",
+        "drawdown_fraction"
+      ],
+      "hand_derived_expectations": {
+        "BTC_HOLD": [
+          "60",
+          "10",
+          "2/5"
+        ],
+        "CASH": [
+          "100",
+          "0",
+          "0"
+        ],
+        "MIX": [
+          "80",
+          "5",
+          "1/5"
+        ]
+      }
+    }
+  ],
+  "purpose": "Fictional observations only, not execution strategies or historical market prices"
+}

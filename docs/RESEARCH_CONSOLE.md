@@ -12,9 +12,8 @@ git clone https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git
 cd bitcoin-gridbot-research
 ```
 
-Antes do merge autorizado, a main pública anterior não inclui o console.
-Use a branch/commit indicada no PR quando ela estiver publicada. A preparação
-local G3.2 não realizou push. Dentro desse checkout:
+G1–G3.2 foram integradas à main pelo PR #1. O laboratório G4 permanece candidato
+na branch local `feat/g4-offline-research-lab`, sem push. Dentro do checkout:
 
 ```powershell
 py -3.13 -m venv .venv
@@ -22,6 +21,14 @@ py -3.13 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
 .\start_console.cmd
 ```
+
+Na candidata G4, consulte [o guia do Offline Research Lab](G4_RESEARCH_LAB.md)
+para biblioteca, importação confirmada, métricas e replay, e
+[o contrato de packs](G4_EVIDENCE_PACK_V1.md) para produzir evidências compatíveis.
+Exports históricos brutos JSON são bloqueados; CSV de resumo exige revisão
+explícita e SVG de séries restritas fica indisponível. A demonstração sintética
+continua permitindo JSON/CSV/SVG. Essa restrição evita redistribuição automática
+de uma origem autorizada apenas para consulta local.
 
 Abra **http://127.0.0.1:8765**. Mantenha o terminal aberto; Ctrl+C encerra.
 Equivalente: `.\.venv\Scripts\python.exe -m research_console`.

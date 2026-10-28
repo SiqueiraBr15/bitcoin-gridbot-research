@@ -216,7 +216,7 @@ def test_external_navigation_shell_only_and_strict_api(server: LocalServer) -> N
 
 def test_new_exports_assets_and_public_errors(server: LocalServer) -> None:
     cookie = request(server, "/")[2]["Set-Cookie"].split(";")[0]
-    headers = {"Cookie": cookie}
+    headers = {"Cookie": cookie, "X-GridBot-Reviewed": "1"}
     for name in ("/state.js", "/charts.js", "/api/export.csv?start=2020-01-01&months=24&cost=CA"):
         status, body, response_headers = request(server, name, headers=headers)
         assert status == 200

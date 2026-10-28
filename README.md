@@ -20,11 +20,22 @@ Os eixos identificam unidades e cortes; o drawdown tem zero no topo.
 Histórico depende de origem local explicitamente autorizada; sem ela, mostra
 **dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
 [Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
-Esta funcionalidade está em revisão local; CI remoto continua desativado.
+G1–G3.2 foram integradas à main; CI remoto continua desativado.
 [Auditoria G3.1 e limites da validação](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
 [Integração e prontidão de publicação G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md).
-O candidato local acrescenta navegação voltar/avançar, timeout/cancelamento,
+O console inclui navegação voltar/avançar, timeout/cancelamento,
 marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
+
+A candidata **G4 Offline Research Lab**, endurecida na branch local
+`release/g4-offline-research-lab`, acrescenta biblioteca, Evidence Packs com SHA-256,
+importação com confirmação, análise exata, comparação Pareto, episódios de risco,
+trilha PAPER e replay de análises. Sem novo backtest ou execução financeira.
+[Guia G4 e exemplos](docs/G4_RESEARCH_LAB.md) ·
+[Schema Evidence Pack v1](docs/G4_EVIDENCE_PACK_V1.md).
+G4 ainda não foi publicada; históricos privados não fazem parte dos exemplos.
+G4.1 valida o fluxo ZIP efetivo, serializa gravações concorrentes e exige
+autorização de exportação independente dos metadados de pacotes externos.
+[Auditoria e limites G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md).
 
 ![Console G3 em execução com dados sintéticos](docs/images/g3-paper-1280.jpg)
 
@@ -55,8 +66,15 @@ py -3.13 -m venv .venv
 .\start_console.cmd
 ```
 
-Use o checkout que contém o console, identificado no PR/release. A candidata
-G3.2 ainda depende de publicação autorizada; a main anterior não contém a UI.
+O console G1–G3.2 está na main. Para revisar G4, use sua candidata local;
+não existe release G4 publicada.
+Os comandos de clone acima obtêm a main disponível hoje. A branch candidata G4
+continua local até autorização de publicação. No checkout que já contém a
+candidata, selecione `git switch release/g4-offline-research-lab` antes de instalar.
+Após uma publicação autorizada dessa branch, será possível clonar com
+`git clone --branch release/g4-offline-research-lab https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git`.
+Esse último comando depende da existência futura da branch remota; não é uma
+instrução para publicar ou uma afirmação de que ela já está disponível.
 Abra `http://127.0.0.1:8765`, escolha **Demonstração PAPER** e clique em
 **Executar cenários sintéticos**. CSV/JSON exportam essa seleção; os gráficos
 oferecem SVG. Ctrl+C no terminal encerra o processo. Não há início automático.
@@ -102,6 +120,17 @@ fees por ativo. O CLI oferece diagnóstico; não inicia trading e bloqueia LIVE.
 Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Evidências de engenharia
+
+A candidata local **G4.1** tem uma campanha nova em Windows/Python 3.13.16:
+**3.610 Python PASS + dois skips preexistentes**, 3.612 nodeids únicos,
+273 segmentos e zero incompletos. A cobertura consolidada de **104 módulos
+nativos + 16 do console** é **96,48%**, com linhas e branches e threshold 85%.
+Os três módulos empacotados de exemplos têm medição suplementar separada de
+**87,37%**; não se faz média dos percentuais. Os **26 testes JavaScript** são
+contabilizados separadamente. [Relatório G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md)
+e [manifesto da execução](docs/reviews/G4_1_EXECUTION_MANIFEST.json.gz).
+Esses resultados locais não equivalem a CI remoto, teste Linux/macOS ou
+prontidão para trading. As evidências G3.1 abaixo permanecem históricas.
 
 Evidência local G3.1 em Windows/Python 3.13.16, com dependências fixadas,
 inventário completo e união auditada de execuções segmentadas:

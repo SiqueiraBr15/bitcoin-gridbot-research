@@ -73,9 +73,15 @@
   }
   function routePage(hash) {
     const page = String(hash).replace(/^#/, "");
-    return ["overview", "wealth", "btc", "risk", "windows", "demo"].includes(
-      page,
-    )
+    return [
+      "overview",
+      "wealth",
+      "btc",
+      "risk",
+      "windows",
+      "demo",
+      "lab",
+    ].includes(page)
       ? page
       : null;
   }

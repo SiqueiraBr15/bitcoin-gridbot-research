@@ -1,0 +1,318 @@
+{
+  "schema": "G46_VALIDATION_SUMMARY_V1",
+  "timestamp_utc": "2026-10-26T17:33:42.760934+00:00",
+  "tested_head": "e0ba226f31ff5aae2d253ebf0bafe20e2ae3c437",
+  "published_unchanged_head": "bff062beea10bd0ccc614e852797b643aa887497",
+  "branch": "fix/g4-numeric-contract-and-paper-cadence",
+  "verdicts": [
+    "G4_6_NUMERIC_CONTRACT_REPAIR_PASS",
+    "G4_5_FINDINGS_RESOLVED",
+    "NUMERIC_EXACTNESS_PRESERVED",
+    "VALID_EVIDENCE_PACKS_ACCEPTED",
+    "PAPER_CADENCE_CORRECTED",
+    "INDEPENDENT_AUDIT_REGRESSIONS_PASS",
+    "GLOBAL_TESTS_PASS",
+    "GLOBAL_COVERAGE_PASS",
+    "PUBLIC_WHEEL_INSTALLATION_PASS",
+    "EVIDENCE_PACK_SECURITY_PRESERVED",
+    "ORIGINAL_GRIDBOT_PRESERVED",
+    "FROZEN_V2_PRESERVED",
+    "REAL_TRADING_DISABLED",
+    "GITHUB_PUSH_NOT_PERFORMED",
+    "G4_6_PR_UPDATE_READY_FOR_REVIEW"
+  ],
+  "global": {
+    "status": "PASS",
+    "head": "e0ba226f31ff5aae2d253ebf0bafe20e2ae3c437",
+    "counts": {
+      "PASS": 3631,
+      "SKIP": 2
+    },
+    "nodes": 3633,
+    "skips": [
+      "tests/console/test_quality.py::test_real_symlink_outside_archive_is_refused",
+      "tests/cli/test_doctor.py::test_env_file_posix_permissions_restricted"
+    ],
+    "campaign_names": ["console", "0", "1", "native-codec-retry"],
+    "segments": [30, 211, 212, 1],
+    "total_segments": 454,
+    "campaign_seconds": [
+      232.05974609999976, 4172.1702406999975, 4265.223994600001,
+      16.28171509999811
+    ],
+    "longest_segment_seconds": 783.3183443999988,
+    "coverage_modules": 121,
+    "totals": {
+      "covered_lines": 11531,
+      "num_statements": 11836,
+      "percent_covered": 96.46987627756859,
+      "percent_covered_display": "96",
+      "missing_lines": 305,
+      "excluded_lines": 85,
+      "percent_statements_covered": 97.4231159175397,
+      "percent_statements_covered_display": "97",
+      "num_branches": 3036,
+      "num_partial_branches": 198,
+      "covered_branches": 2816,
+      "missing_branches": 220,
+      "percent_branches_covered": 92.7536231884058,
+      "percent_branches_covered_display": "93"
+    },
+    "all_frozen_hashes_unchanged": true,
+    "no_first_campaign_or_historical_coverage_inputs": true,
+    "failed_codec_segment_excluded": true,
+    "failed_codec_segment_log_sha256": "880227616b9415523021df7630defe68fd6fb55ad68044861aa447240ff30de7",
+    "retry_environment": {
+      "codepage": 65001,
+      "PYTHONUTF8": 1,
+      "same_source_and_test_hashes": true,
+      "same_assertions_and_warning_errors": true,
+      "own_hidden_console_only": true
+    },
+    "native_codec_controlled_proof": {
+      "source_head": "e0ba226f31ff5aae2d253ebf0bafe20e2ae3c437",
+      "cases": [
+        {
+          "codepage": 850,
+          "exit_code": 1,
+          "log_sha256": "4b3fc10ac14d60045ce0ab4a187c72c3232555469d5ea4870ce3a5177c22af51",
+          "UTF8_mode": 1,
+          "all_assertions_and_warning_errors_enabled": true,
+          "owned_hidden_console": true
+        },
+        {
+          "codepage": 65001,
+          "exit_code": 0,
+          "log_sha256": "c94f2add614de805d49dc30834f4f3a7b7a290a796a0367ac258887f78c1e786",
+          "UTF8_mode": 1,
+          "all_assertions_and_warning_errors_enabled": true,
+          "owned_hidden_console": true
+        }
+      ],
+      "user_console_settings_unchanged": true,
+      "no_source_or_test_changes": true,
+      "cause": "cmd localized output uses console codepage; subprocess text=True uses Python UTF8 mode; mismatch causes thread decoder failure even with mklink exit0"
+    },
+    "timestamp_utc": "2026-10-26T17:30:24.000486+00:00"
+  },
+  "coverage": {
+    "percent": 96.46987627756859,
+    "threshold": 85,
+    "source_modules": 121,
+    "combined_sha256": "a9883e6db6350c2e7d9453a35f33a15e95f4ced881908c2f2bbd556ef099d08f",
+    "report_sha256": "95981907cc24d98ec243797e242c0f97c46d5f3b750915a489e556585bd83d74"
+  },
+  "independent": {
+    "pytest": {
+      "zip_json": 76,
+      "math": 26,
+      "persistence_export": 15,
+      "supplement": 9
+    },
+    "http": 46,
+    "raw_http": 17,
+    "total_unique": 189,
+    "failed": 0
+  },
+  "holdouts": {
+    "cases": [
+      {
+        "marks_per_account": 37,
+        "accounts": 2,
+        "cadence_seconds": 60,
+        "gap": false,
+        "pack_sha256": "0f823d888242515cec355e3ae96f5210eadf5a893a00bdaa79567bfdeef9d5fb",
+        "pack_bytes": 3248,
+        "exact_exposure_chars": 5641,
+        "analysis_http": 200,
+        "repeated_http": true,
+        "cold_warm_equal": true,
+        "all_financial_oracles_equal": true,
+        "pareto": ["CASH", "HOLD"],
+        "replay": "EQUIVALENT",
+        "both_export_projections_verified": true,
+        "seconds": 0.06963360000008834
+      },
+      {
+        "marks_per_account": 173,
+        "accounts": 2,
+        "cadence_seconds": 61,
+        "gap": true,
+        "pack_sha256": "f8144a58e9f2c0b1dae644cefa1a08fc4d28c6a0a135cdcdbc9a396386e6ed0a",
+        "pack_bytes": 19679,
+        "exact_exposure_chars": 26617,
+        "analysis_http": 200,
+        "repeated_http": true,
+        "cold_warm_equal": true,
+        "all_financial_oracles_equal": true,
+        "pareto": [],
+        "replay": "EQUIVALENT",
+        "both_export_projections_verified": true,
+        "seconds": 0.3057596000035119
+      },
+      {
+        "marks_per_account": 1301,
+        "accounts": 2,
+        "cadence_seconds": 86400,
+        "gap": false,
+        "pack_sha256": "bd2a5a6e14f1a4ee42e8590a4c555f66fc30c7941e956dd1113df802ea6306ad",
+        "pack_bytes": 132806,
+        "exact_exposure_chars": 199433,
+        "analysis_http": 200,
+        "repeated_http": true,
+        "cold_warm_equal": true,
+        "all_financial_oracles_equal": true,
+        "pareto": ["CASH", "HOLD"],
+        "replay": "EQUIVALENT",
+        "both_export_projections_verified": true,
+        "seconds": 5.219736800001556
+      },
+      {
+        "marks_per_account": 4093,
+        "accounts": 2,
+        "cadence_seconds": 60,
+        "gap": false,
+        "pack_sha256": "ef5c13cf2e1e4427d04b126941e88b80ca585e6a22d9996eb87209e8aa1d1220",
+        "pack_bytes": 412629,
+        "exact_exposure_chars": 624365,
+        "analysis_http": 200,
+        "repeated_http": true,
+        "cold_warm_equal": true,
+        "all_financial_oracles_equal": true,
+        "pareto": ["CASH", "HOLD"],
+        "replay": "EQUIVALENT",
+        "both_export_projections_verified": true,
+        "seconds": 39.78543890000219
+      }
+    ],
+    "count": 4,
+    "boundary_attempts": [],
+    "post_freeze_new_scenarios": true
+  },
+  "javascript": {
+    "pass": 33,
+    "fail": 0,
+    "new": 7
+  },
+  "numeric_contract": "EXACT_RATIONAL_DECIMAL_V2",
+  "wheel": {
+    "name": "gridbot-0.1.0.dev0-py3-none-any.whl",
+    "sha256": "3f55247c96ff0975bb573ac62f94c46428467ce19c527cec62f0ab589c6f3383",
+    "bytes": 344345,
+    "members": 144
+  },
+  "additional_lock_finding": {
+    "severity": "P2",
+    "status": "RESOLVED",
+    "preexisting_before_numeric_repair": true,
+    "before": "PermissionError while empty byte range owned",
+    "after": "ValueError/Biblioteca ocupada; no write; retry succeeds"
+  },
+  "security": {
+    "timestamp_utc": "2026-10-25T20:14:42.606118+00:00",
+    "head": "e0ba226f31ff5aae2d253ebf0bafe20e2ae3c437",
+    "fresh_scans": [
+      "gitleaks_repaired_tree",
+      "gitleaks_repair_commit",
+      "gitleaks_repaired_decoded"
+    ],
+    "decoded_fixture_records": [
+      {
+        "path": "tests\\fixtures\\g45_prime_100.gbpack",
+        "sha256": "3591b23214a05051fabe632d764fe002981055e0fe252b2dfa9221848ec1f6d1"
+      },
+      {
+        "path": "tests\\fixtures\\g45_prime_1200.gbpack",
+        "sha256": "8150d310a5ff6fd04ddbb50ba85a13e80638bc2c67f3ea1b57d818631b04cede"
+      }
+    ],
+    "gitleaks_findings": 0,
+    "osv_queries": 39,
+    "osv_known_findings": 0,
+    "unchanged_dependency_files": [
+      "constraints.txt",
+      "build-constraints.txt",
+      "pyproject.toml"
+    ],
+    "no_financial_network_operations": true
+  },
+  "preservation": {
+    "original_files_rehashed": 1665,
+    "original_changed": 0,
+    "original_untracked_preserved": 6,
+    "V2_FINAL_sha256": "44e9639554d01c13e2e0648613e7904a6f1649ca934b00b3821021aa28582249",
+    "old_G45_files_rehashed": 7682,
+    "prior_reports_preserved": 12,
+    "frozen_files_rehashed": 306,
+    "main_local_unchanged": true
+  },
+  "remote": {
+    "pr": 2,
+    "state": "open",
+    "published_head": "bff062beea10bd0ccc614e852797b643aa887497",
+    "main": "88390ac0b3726c50b548e5087acfa39982d76342",
+    "actions_enabled": false,
+    "no_remote_writes": true
+  },
+  "execution_manifest": {
+    "path": "docs/reviews/G4_6_EXECUTION_MANIFEST.json.gz",
+    "bytes": 303131,
+    "sha256": "a28e03a68d5629dc58a2f1700f255849ed37ea461c7f85a337463a9e31b6331e"
+  },
+  "captures": {
+    "connection-interrupted.jpg": {
+      "bytes": 109882,
+      "sha256": "65ff6418e4e0571fe2e2e947fda02f28278770ef6913044f000fc1c3103af474"
+    },
+    "corrected-100.jpg": {
+      "bytes": 528625,
+      "sha256": "993c22f79af00a4aaa15e05ae7be4cf531dc378f2c79a916a31504ffecbfa77b"
+    },
+    "corrected-1200.jpg": {
+      "bytes": 545647,
+      "sha256": "454ed5c37bd24d4afb2d8433920446eb033dc1d4bda857a4f57568570f2bf936"
+    },
+    "corrected-3000.jpg": {
+      "bytes": 566044,
+      "sha256": "682f79163d681301bb8f2baa72e64b73846f985924b86987c1f1097f8e4f5a0a"
+    },
+    "corrected-9999.jpg": {
+      "bytes": 596821,
+      "sha256": "be2893e4fe85850132ed5d0634ef7cb129c2426db31613ace4a46341c0488031"
+    },
+    "corrected-paper.jpg": {
+      "bytes": 303842,
+      "sha256": "de30abc82b5d15b1620ddf326228e084eadbcee0b15ebfec53526329b4e26af7"
+    },
+    "internal-error.jpg": {
+      "bytes": 109846,
+      "sha256": "f32890d5a5ca65f280601c9c735d4b28991c9ea774b2ccf006b803db646cdf66"
+    },
+    "ledger-1366.jpg": {
+      "bytes": 92022,
+      "sha256": "ac94c8e503335f14f965346865ef4ccfe3b42e5317cb5b8418d52c11a5e01575"
+    },
+    "ledger-1920.jpg": {
+      "bytes": 136603,
+      "sha256": "d745dc05d221ba5c9dfb0d3a7769e3394fb5c222f1f4bccfac74eebc2f283db5"
+    },
+    "ledger-390.jpg": {
+      "bytes": 31665,
+      "sha256": "253a8b4adb3f2524e7a3115e059597954dd2dc2f3c40c552047b46f4582889ec"
+    },
+    "ledger-768.jpg": {
+      "bytes": 73312,
+      "sha256": "80a238c3c5c21c6c22c41f5eb9b8f89bab196a39c227f9742855e9ae353f8129"
+    },
+    "restarted-replay.jpg": {
+      "bytes": 641530,
+      "sha256": "4f82f0658852095eab2315fb6d1ae3fd409c4d8cc3d660e0d24e605041c5df6b"
+    }
+  },
+  "limits": [
+    "No worst-case latency promise",
+    "No external-human independent review",
+    "CSV/DERIVED_ONLY keep documented decimal50 precision",
+    "No financial/economic strategy validation or real trading readiness"
+  ]
+}
