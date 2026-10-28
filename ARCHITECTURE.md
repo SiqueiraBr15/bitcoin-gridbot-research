@@ -48,7 +48,7 @@ reais continuam sujeitos a contratos/autorização separados.
 
 ## Console G2/G3: consulta local fora do núcleo
 
-`research_console` é uma camada separada do núcleo financeiro; o wheel G3 inclui
+`research_console` é uma camada separada do núcleo financeiro; o wheel atual inclui
 console, assets e exemplos sintéticos para execução fora do checkout. `data.py` admite somente o
 contrato M1.R congelado, verifica conteúdo e projeta campos permitidos. `risk.py`
 mantém o contrato G1/M1.R. `analysis.py` calcula somente diferenças entre resultados
@@ -60,8 +60,9 @@ validadas em LRU. A chave inclui versão, origem, seleção e hashes; cada acess
 inclusive cache hit, verifica novamente o conteúdo relevante. Respostas são cópias.
 `state.js` normaliza preferências da sessão; `charts.js` determina domínios e
 coordenadas e consulta marcas existentes; `app.js` organiza as seis páginas.
-Não há cálculo de NAV ou decisão de risco financeiro no JavaScript. BigInt só
-ordena strings decimais sem perda de precisão; Number só formata e desenha.
+Não há cálculo de NAV ou decisão de risco financeiro no JavaScript. O
+formatador G4.6 usa BigInt/half-even; Number participa somente da geometria
+aproximada dos gráficos.
 
 O histórico autorizado continua local e separado da distribuição. Novas
 estatísticas multidatas desse corpus não são promovidas a resultados públicos:
@@ -86,3 +87,15 @@ tabelas detalhadas são preenchidas sob demanda e paginadas. Timings DOM medem
 somente criação/renderização síncrona, não paint de GPU ou tempo até pixels.
 O novo oráculo de auditoria é uma ferramenta de desenvolvimento fora do wheel;
 sua leitura e cálculo racional não executam políticas ou campanhas históricas.
+
+## Research Lab G4 integrado
+
+A main inclui o Lab desde o PR #2. lab/packs valida o contêiner e observações;
+analytics/numeric calculam e transportam Fraction; library/storage controlam
+biblioteca, revalidação, cache e gravação; permissions/exports mantêm direitos
+e replay; http traduz rotas fixas. O núcleo financeiro não foi alterado.
+
+O HTML atual de export e os hashes analíticos permanecem os existentes. A
+Revisão Guiada é somente proposta: veja o contrato em
+[docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md](docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md).
+Nenhuma camada adicional de cálculo, endpoint ou worker foi implementada.

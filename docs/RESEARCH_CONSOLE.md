@@ -5,24 +5,25 @@ estratégias, ordens reais, coleta de mercado ou ajustes econômicos.
 
 ## Instalar e abrir
 
-No PowerShell, obtenha o checkout que contém a candidata aprovada:
+No PowerShell, clone a main pública, que já contém o Research Lab G4:
 
 ```powershell
 git clone https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git
 cd bitcoin-gridbot-research
 ```
 
-G1–G3.2 foram integradas à main pelo PR #1. O laboratório G4 permanece candidato
-na branch local `feat/g4-offline-research-lab`, sem push. Dentro do checkout:
+G1–G3.2 foram integradas pelo PR #1 e G4 pelo PR #2, merge
+`acaa6879877c8a081a127f3ea8a0cdbb840b88cd`. Dentro do checkout:
 
 ```powershell
 py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install pip==26.2.1
-.\.venv\Scripts\python.exe -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
+.\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple pip==26.2.1
+.\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -c constraints.txt --build-constraint build-constraints.txt .
 .\start_console.cmd
 ```
 
-Na candidata G4, consulte [o guia do Offline Research Lab](G4_RESEARCH_LAB.md)
+Para começar, abra **http://127.0.0.1:8765/#lab** e escolha Analisar em um dos
+três packs sintéticos. Não é necessário autorizar um arquivo histórico. Consulte [o guia do Offline Research Lab](G4_RESEARCH_LAB.md)
 para biblioteca, importação confirmada, métricas e replay, e
 [o contrato de packs](G4_EVIDENCE_PACK_V1.md) para produzir evidências compatíveis.
 Exports históricos brutos JSON são bloqueados; CSV de resumo exige revisão
@@ -131,14 +132,16 @@ dia quebram a linha. Cursor/toque/setas/Home/End consultam marcas observadas;
 série ausente naquele instante é indicada. Legendas numeradas, traços e ênfase
 complementam cores. BTC não negativo começa em zero; exposição usa 0–100%.
 
-Backend mantém Decimal/Fraction e strings exatas. Number somente desenha/formata;
-BigInt ordena decimais sem perda. Frontend não recalcula NAV, DD ou fees.
+Backend mantém Decimal/Fraction e strings exatas. O formatador G4.6 usa BigInt
+e half-even; Number é usado para coordenadas/eixos aproximados. Frontend não
+recalcula NAV, DD ou fees.
 
 Downloads iniciados pelo usuário, sem escrita automática na origem:
 
 - **CSV:** resumos do subconjunto, valores exatos, unidades, fonte, período,
   custo, manifesto, referência e diferenças; não é export da página do explorador.
-- **JSON:** projeção validada completa da seleção e metadados permitidos.
+- **JSON:** demonstrações sintéticas e projeções permitidas; JSON bruto do
+  adaptador histórico não é exportado. No Lab, vale o escopo autorizado do pack.
 - **SVG:** gráfico com fonte/unidade/legenda e descrição da seleção; sem scripts
   ou recursos externos. Imagem de apresentação, não ledger exato.
 
@@ -155,11 +158,12 @@ mesmo em hit. Servidor local de desenvolvimento, não produção/multiusuário.
 Host/Origin validados. APIs exigem cookie efêmero HttpOnly/SameSite=Strict e
 mesma origem; frames/APIs cross-site bloqueados. Somente GET da raiz em navegação
 de documento pode entrar de outro site, permitindo abrir o console legitimamente.
-CSP limita recursos/conexões à origem e impede framing. Sem CORS/escrita HTTP,
-rotas de trading ou leitura arbitrária. Nomes fixos, limites de leitura e
+CSP limita recursos/conexões à origem e impede framing. Sem CORS, rotas de
+trading ou leitura arbitrária. POSTs do Lab são limitados a prévia, confirmação,
+remoção, replay e autorização de export, com sessão/origem/header específico. Nomes fixos, limites de leitura e
 descompressão, recusa de links/junctions/origens de rede. Não é sandbox contra
 usuário local capaz de adulterar processo; não exponha via proxy público.
-O wheel G3 inclui núcleo, console, exemplos sintéticos e assets. Nenhum corpus
+O wheel atual inclui núcleo, console, exemplos sintéticos, assets e dois guias G4. Nenhum corpus
 privado é empacotado. Testes/tools continuam no checkout.
 
 ## Verificar
@@ -268,10 +272,9 @@ ou de toda a máquina. Nenhum push/Actions/release remoto foi autorizado na G3.
 ## Versão e primeiro uso público
 
 O pacote permanece em **0.1.0.dev0**, coerente com pyproject, CLI e metadados
-instalados. G3.2 identifica a integração técnica; não é uma tag publicada.
-**0.1.0rc1** é proposta para eventual pré-release. Um bump futuro precisa
-atualizar/testar os metadados e a regressão de versão antes de criar a tag;
-nenhuma release ou mudança de versão foi feita automaticamente.
+instalados. A G4 está na main; isso não é tag ou release formal. Qualquer
+bump de versão ou release depende de decisão separada; esta revisão não
+altera a versão e não anuncia pré-release.
 
 Sem a pasta original, o modo público mostra DATA_UNAVAILABLE para pesquisa
 histórica. A demo funciona por si. Os 4.266 resultados arquivados descrevem o
@@ -279,3 +282,29 @@ contrato de um acervo privado opcional, não simulações incluídas no download
 Exemplos públicos: `examples.paper_cycle` e `examples.offline_grid`, sintéticos.
 O comparador histórico exige o contrato admitido e contas equivalentes; na demo,
 os cenários têm trajetórias distintas e não recebem um benchmark pareado fictício.
+
+## Uso atual e qualidade G4
+
+O comando mínimo acima instala o pacote, sem ferramentas de desenvolvimento.
+Para contribuir, substitua . por -e ".[dev]" na instalação. Não é preciso
+ativar o venv nem mudar a política global do PowerShell.
+
+O launcher CMD repassa --lab-dir ao console. O launcher PowerShell aceita
+somente -Port, -ArchiveRoot e -Python: ele não possui parâmetro -LabDir.
+Para persistência, use python -m research_console --lab-dir ou o CMD com
+--lab-dir e uma pasta absoluta nova/vazia, com pai existente.
+
+G4.8, 27/10/2026 UTC: 3.633 Python PASS/dois skips; coverage global histórica
+96,46987628%, threshold de 85%. G4.10, 27–28/10/2026 UTC: 171 Python PASS/um skip,
+46 JavaScript PASS e wheel independente aprovado. G4.12, 28/10/2026 UTC:
+merge/397 blobs, instalação limpa e oito verificações HTTP aprovados. Não são
+novas execuções deste guia. As seções G3 anteriores são históricas.
+
+Servidor sequencial e CPU após cancelamento continuam limites. O P3
+Windows10053 pode tentar enviar 422 redundantemente após desconexão, sem
+entrega e com recuperação previamente verificada. Actions continua
+desativado; nenhuma aprovação de CI ou Linux/macOS é afirmada.
+
+O modo G5 proposto ainda não existe. Seu contrato e UX estão em revisão nos
+documentos G5 do checkout. Replay/export disponíveis são os da G4, sem
+novas rotas ou permissões introduzidas pela proposta.

@@ -1,214 +1,133 @@
-# GridBot · Bitcoin Spot Research
+# GridBot — Offline Research Lab
 
-Um projeto Python de engenharia e pesquisa quantitativa: contabilidade exata,
-reservas de ativos, simulação de GRID Spot e análise de risco.
-**Demonstração offline/PAPER, sem operações reais.**
+Laboratório local de engenharia de software e pesquisa quantitativa para
+investigar patrimônio, BTC e risco com evidências verificáveis.
+**PAPER/OFFLINE, sem operações reais.**
 
-**English.** Exact asset accounting and reproducible Bitcoin spot simulations in
-Python. The active strategies studied did not demonstrate a robust advantage
-over simple benchmarks. This is an engineering/research portfolio, not a live
-trading system.
+**English.** Exact Bitcoin spot accounting and an offline research console.
+Inspect evidence, compare portfolio value and physical BTC, and reproduce
+analyses. The active strategies studied did not demonstrate a robust advantage
+over simple benchmarks. Experimental research/engineering software.
 
-## Console local de pesquisa
+## Disponível na main
 
-Após a instalação abaixo, execute `python -m research_console` no checkout e abra
-**http://127.0.0.1:8765**. No Windows, `start_console.cmd` usa o ambiente `.venv`.
-O console inclui patrimônio, BTC, drawdown, janelas e a demo PAPER determinística.
-G2 acrescenta seleção persistente na sessão, referência comparativa, diferenças
-exatas em USDT/pp/BTC, consulta por teclado e downloads CSV/JSON/SVG.
-Os eixos identificam unidades e cortes; o drawdown tem zero no topo.
-Histórico depende de origem local explicitamente autorizada; sem ela, mostra
-**dados indisponíveis**. Nenhum dataset interno é distribuído ou copiado automaticamente.
-[Instalação, uso, segurança e métricas](docs/RESEARCH_CONSOLE.md).
-G1–G3.2 foram integradas à main; CI remoto continua desativado.
-[Auditoria G3.1 e limites da validação](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
-[Integração e prontidão de publicação G3.2](docs/reviews/G3_2_RELEASE_INTEGRATION_AND_PUBLICATION_AUDIT.md).
-O console inclui navegação voltar/avançar, timeout/cancelamento,
-marcas exatas acessíveis, metadados de export e isolamento de portas/sessões.
+A **G4 Offline Research Lab está integrada à main**, pelo
+[PR #2](https://github.com/SiqueiraBr15/bitcoin-gridbot-research/pull/2), merge
+`acaa6879877c8a081a127f3ea8a0cdbb840b88cd`. Não é necessário trocar para uma
+branch candidata para usar o laboratório. A versão permanece **0.1.0.dev0**.
+Código integrado e pacote instalado localmente não constituem uma release
+formal do GitHub; nenhuma tag/release foi criada nesse checkpoint.
 
-A candidata **G4 Offline Research Lab**, endurecida na branch local
-`release/g4-offline-research-lab`, acrescenta biblioteca, Evidence Packs com SHA-256,
-importação com confirmação, análise exata, comparação Pareto, episódios de risco,
-trilha PAPER e replay de análises. Sem novo backtest ou execução financeira.
-[Guia G4 e exemplos](docs/G4_RESEARCH_LAB.md) ·
-[Schema Evidence Pack v1](docs/G4_EVIDENCE_PACK_V1.md).
-G4 ainda não foi publicada; históricos privados não fazem parte dos exemplos.
-G4.1 valida o fluxo ZIP efetivo, serializa gravações concorrentes e exige
-autorização de exportação independente dos metadados de pacotes externos.
-[Auditoria e limites G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md).
+- Biblioteca com três Evidence Packs sintéticos e importação local confirmada.
+- Validação de ZIP/JSON, hashes, unidades e conservação de patrimônio.
+- NAV em USDT, BTC físico/equivalente, caixa, custos e exposição.
+- Comparações e Pareto dentro de grupos compatíveis, sem vencedor universal.
+- Drawdown observado, episódios, lacunas e limitações de risco explícitas.
+- Replay analítico e exports condicionados aos direitos de cada evidência.
+- Demonstração PAPER determinística com fills e reconciliação racional.
 
-![Console G3 em execução com dados sintéticos](docs/images/g3-paper-1280.jpg)
+[Instalação e uso](docs/RESEARCH_CONSOLE.md) · [Guia do Lab](docs/G4_RESEARCH_LAB.md) ·
+[Evidence Pack v1](docs/G4_EVIDENCE_PACK_V1.md)
 
-## O que você encontra aqui
+## Instalar e abrir no Windows
 
-- Geometria em ticks inteiros, sizing quantizado e valores financeiros em Decimal.
-- Coordenação BUY/SELL, inventário, reservas, deduplicação e reconciliação.
-- Liquidação virtual PAPER, journal local e recuperação verificável.
-- Backtest com custos, latência e ambiguidade intrabar explícitos.
-- Testes adversariais, propriedades Hypothesis e restrições de arquitetura.
-- Uma demonstração sintética com fills, NAV, replay e oráculo racional independente.
-
-Python 3.13 · Decimal/Fraction · dataclasses · Pydantic · pytest/Hypothesis · Ruff/Mypy.
-Os 104 módulos nativos preservam os blobs do projeto original. O histórico deste
-snapshot começa na curadoria pública, sem simular o histórico de desenvolvimento.
-
-## Execute uma demonstração segura
-
-A instalação requer acesso ao PyPI; depois, a demonstração usa apenas dados
-sintéticos em memória. Não requer chaves, contas ou dados de mercado.
+Pré-requisitos: Git e Python 3.13 com o launcher `py`. No PowerShell:
 
 ```powershell
 git clone https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git
 cd bitcoin-gridbot-research
 py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install pip==26.2.1
-.\.venv\Scripts\python.exe -m pip install -c constraints.txt --build-constraint build-constraints.txt -e ".[dev]"
-.\start_console.cmd
+.\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple pip==26.2.1
+.\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -c constraints.txt --build-constraint build-constraints.txt .
+.\.venv\Scripts\python.exe -m research_console --port 8765
 ```
 
-O console G1–G3.2 está na main. Para revisar G4, use sua candidata local;
-não existe release G4 publicada.
-Os comandos de clone acima obtêm a main disponível hoje. A branch candidata G4
-continua local até autorização de publicação. No checkout que já contém a
-candidata, selecione `git switch release/g4-offline-research-lab` antes de instalar.
-Após uma publicação autorizada dessa branch, será possível clonar com
-`git clone --branch release/g4-offline-research-lab https://github.com/SiqueiraBr15/bitcoin-gridbot-research.git`.
-Esse último comando depende da existência futura da branch remota; não é uma
-instrução para publicar ou uma afirmação de que ela já está disponível.
-Abra `http://127.0.0.1:8765`, escolha **Demonstração PAPER** e clique em
-**Executar cenários sintéticos**. CSV/JSON exportam essa seleção; os gráficos
-oferecem SVG. Ctrl+C no terminal encerra o processo. Não há início automático.
-O exemplo JSON sem navegador é `.\.venv\Scripts\python.exe -m examples.paper_cycle`.
+A instalação usa o PyPI; os exemplos públicos não requerem conexão,
+credenciais ou dados históricos. Abra **http://127.0.0.1:8765/#lab** e escolha
+**Analisar** em um estudo fictício. Ctrl+C no terminal encerra o servidor.
+Outra porta livre pode ser usada com `--port`. No checkout,
+`start_console.cmd --port 8765` usa esse mesmo ambiente `.venv`.
 
-Em Linux/macOS: `python3.13 -m venv .venv` e `source .venv/bin/activate`,
-seguindo os mesmos comandos `python`. Essa plataforma ainda não foi executada
-nesta validação local. Os exemplos são executados a partir do checkout.
+Os packs `favorable`, `unfavorable` e `risk_violation` mostram cenários
+matemáticos, incluindo perda e violação de risco. Não são candles históricos
+ou evidência de retorno de mercado. A página **PAPER** executa os dois cenários
+sintéticos do motor somente após clique explícito.
 
-O JSON mostra duas contas independentes, com três candles fictícios cada:
-intenções/fills, fees em USDT, caixa disponível/reservado, BTC físico e NAV.
-Inclui uma trajetória de perda. O oráculo em Fraction reconstrói os saldos a partir
-dos fills e verifica todas as marcações; o replay nativo reproduz o estado final.
-**Não são preços históricos nem evidência de retorno de uma estratégia.**
-Veja [o exemplo explicado](examples/README.md). A geometria isolada continua em
-`python -m examples.offline_grid`.
+Para persistir importações, acrescente `--lab-dir "<pasta absoluta nova/vazia>"`,
+com pai local existente. Sem esse argumento, a biblioteca embutida e a análise
+funcionam; confirmar persistência é recusado. A origem não é sobrescrita.
+Desenvolvimento: substitua `.` por `-e ".[dev]"` no comando de instalação.
+Node é ferramenta de testes JavaScript, não dependência do produto.
+Linux/macOS têm orientações no guia, ainda sem validação demonstrada.
 
-## Arquitetura e invariantes
+![Console G3 sintético; captura histórica, não interface G5](docs/images/g3-paper-1280.jpg)
 
-```mermaid
-flowchart LR
-    Domain["Tipos e aritmética Decimal"] --> Strategy["Geometria e ciclos"]
-    Domain --> Portfolio["Fills e inventário"]
-    Strategy --> App["Coordenação BUY/SELL e reservas"]
-    Portfolio --> App
-    App --> Paper["Liquidação virtual PAPER"]
-    Backtest["Candles e execução modelada"] --> Paper
-    Paper --> Journal["Journal e recuperação local"]
-    Backtest --> Metrics["NAV, risco e benchmarks"]
-```
-
-BTC CORE é separado do inventário operacional: **GRID CANNOT SELL CORE BTC**.
-Reservas são subconjuntos de fundos, nunca patrimônio adicional.
+## Interpretação e limites
 
 ```text
-NAV = USDT líquido + BTC físico líquido × preço de marcação
+NAV = caixa USDT líquido + BTC físico líquido × preço de marcação
 BTC equivalente = NAV / preço de marcação
 ```
 
-BTC equivalente mede poder de compra; não são moedas adicionais em custódia.
-A demonstração usa fees em USDT. Os contratos e testes nativos também tratam
-fees por ativo. O CLI oferece diagnóstico; não inicia trading e bloqueia LIVE.
-Mais detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
+BTC equivalente não são moedas adicionais. Reservas são subconjuntos dos
+fundos, nunca patrimônio extra. Fees declaradas já estão refletidas nos
+saldos. Pack v1 não é ledger: não comprova custos em terceiro ativo, passivos,
+fluxos externos ou separação CORE. O núcleo preserva a regra
+**GRID CANNOT SELL CORE BTC** e não habilita trading real.
 
-## Evidências de engenharia
+A análise usa Fraction/Decimal e transporte exato. Pareto respeita grupos e
+objetivos selecionados. Janelas sobrepostas são dependentes; contas separadas
+não formam execução contínua. **20% é referência indicativa, sem stop-loss
+ou garantia de drawdown futuro.**
 
-A candidata local **G4.1** tem uma campanha nova em Windows/Python 3.13.16:
-**3.610 Python PASS + dois skips preexistentes**, 3.612 nodeids únicos,
-273 segmentos e zero incompletos. A cobertura consolidada de **104 módulos
-nativos + 16 do console** é **96,48%**, com linhas e branches e threshold 85%.
-Os três módulos empacotados de exemplos têm medição suplementar separada de
-**87,37%**; não se faz média dos percentuais. Os **26 testes JavaScript** são
-contabilizados separadamente. [Relatório G4.1](docs/reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md)
-e [manifesto da execução](docs/reviews/G4_1_EXECUTION_MANIFEST.json.gz).
-Esses resultados locais não equivalem a CI remoto, teste Linux/macOS ou
-prontidão para trading. As evidências G3.1 abaixo permanecem históricas.
+SHA-256 comprova igualdade de bytes, não autoria. Proveniência é declarada.
+PUBLIC no pack não concede direitos: arquivos externos exigem autorização
+independente de export, por bytes/sessão; RESTRICTED continua bloqueado.
+O histórico privado R1/M1 não é distribuído nem convertido automaticamente.
 
-Evidência local G3.1 em Windows/Python 3.13.16, com dependências fixadas,
-inventário completo e união auditada de execuções segmentadas:
+## Engenharia e evidências
 
-| Verificação | Resultado e alcance |
+Python 3.13 · Decimal/Fraction · Pydantic · pytest/Hypothesis · Ruff/Mypy.
+104 módulos nativos preservados e console separado.
+[Arquitetura](ARCHITECTURE.md) · [Testes e performance](TESTING_AND_PERFORMANCE.md)
+
+| Evidência histórica | Escopo e resultado |
 | --- | --- |
-| Testes Python | **3.420 PASS + dois skips preexistentes**, 3.422 nodeids, zero pendentes |
-| JavaScript | **19 PASS**, separados de pytest |
-| Cobertura nativa | **96,53%**; source `gridbot`, linhas + branches, threshold **85%**, exit 0 |
-| Console Python | Cobertura dirigida própria, separada da nativa; consultar auditorias |
-| Ruff e Mypy | Verificações locais aprovadas, incluindo exemplos e ferramentas |
-| Demonstração | Conservação racional, replay, determinismo e bloqueio de rede testado |
+| G4.8, 27/10/2026 UTC | 3.633 Python PASS, dois skips; cobertura global 96,46987628%, linhas/branches, threshold 85% |
+| G4.10, 27–28/10/2026 UTC | Auditoria independente local aprovada: 171 Python PASS, um skip Windows preexistente, 46 JavaScript PASS; wheel/regressões verificados |
+| G4.12, 28/10/2026 UTC | Merge e 397 blobs conferidos; wheel reconstruído, instalação limpa, pip check e oito verificações HTTP locais aprovados |
 
-As contagens anteriores e tentativas com timeout permanecem nos relatórios.
-O número de cobertura identifica os 104 módulos nativos, não toda a árvore do
-checkout. A interface o apresenta como evidência arquivada, sem badge de CI.
+Esses resultados são arquivados, não uma suíte nova nesta revisão documental.
+[G4.8](docs/reviews/G4_8_FINAL_QUALITY_GATE_AND_UX_REPAIR_AUDIT.md) e
+[G4.9](docs/reviews/G4_9_FINAL_UX_AND_RELEASE_FREEZE_AUDIT.md) preservam evidências
+públicas; recibos locais G4.10/G4.12 não integram o wheel.
+Actions está desativado, sem CI remoto aprovado. Windows foi exercitado;
+Linux/macOS não foram validados.
 
-```text
-python -m tools.verify --profile smoke
-python -m tools.verify --profile unit
-python -m tools.verify --profile integration
-python -m tools.verify --profile extended
-python -m tools.test_catalog
-python -m ruff check .
-python -m ruff format --check .
-python -m mypy
-```
+O servidor é sequencial. Cancelamento HTTP pode deixar CPU ocupada até concluir.
+Permanece o P3 diagnóstico Windows10053: tentativa redundante de HTTP422 após
+desconexão, sem entrega e com recuperação anteriormente verificada. Tempos
+amostrais não são SLA. Não exponha o servidor por proxy público.
 
-O runner usa limites finitos por alvo; falha/timeout retorna código não zero.
-Nenhum teste foi desabilitado e o perfil Hypothesis CI permanece com 300 exemplos.
-O fechamento local G3.1 contabilizou **3.420 Python PASS + dois skips** e
-**19 JavaScript PASS**, sem pendentes. A cobertura nativa consolidada foi
-**96,53%**, com branches e threshold original de 85%, exit 0. O inventário e a
-união segmentada foram verificados por nodeids e hashes; os timeouts anteriores
-permanecem registrados. Isso não demonstra execução Linux/CI remoto nem todas
-as ordens monolíticas. Leia [TESTING_AND_PERFORMANCE.md](TESTING_AND_PERFORMANCE.md)
-e a [auditoria G3.1](docs/reviews/G3_1_GLOBAL_QUALITY_GATE_CLOSURE_AUDIT.md).
+## Pesquisa e continuidade
 
-A [proposta de CI](ci/github-actions-proposal.yml) é inativa, fora de
-`.github/workflows`. Não há execução remota aprovada ou badges de CI/cobertura.
+GRID e rebalanceamentos ativos estudados **não demonstraram vantagem robusta**
+sobre benchmarks simples. Nenhuma política com BTC respeitou 20% em todas as
+janelas examinadas. Capital dos estudos é hipotético.
+[Síntese e limitações](RESEARCH.md).
 
-## Pesquisa: o que foi aprendido
+O protocolo prospectivo permanece congelado; coleta e avaliação precisam de
+autorizações separadas. O coletor histórico opt-in do núcleo não é usado pelos
+exemplos. Não há nova pesquisa econômica nesta entrega documental.
 
-GRID tradicional, GRID persistente e rebalanceamento por bandas **não demonstraram
-vantagem robusta suficiente** sobre benchmarks simples nas campanhas examinadas. Houve resultados locais positivos e negativos e compromissos
-entre patrimônio, BTC físico, risco e custos. Nenhuma política com BTC respeitou
-uma tolerância indicativa de drawdown de 20% em todas as janelas avaliadas.
-Caixa preservou valor nominal no modelo, sem crescimento ou acumulação de BTC.
+A direção G5 é **Revisão Guiada de Evidências**:
+[contrato](docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md),
+[UX](docs/G5_GUIDED_EVIDENCE_REVIEW_UX.md) e
+[aceitação](docs/G5_IMPLEMENTATION_ACCEPTANCE_MATRIX.md).
+**Contrato aguardando aprovação do orquestrador; interface não implementada.**
+[Roadmap](ROADMAP.md) · [Contribuição](CONTRIBUTING.md) · [Segurança](SECURITY.md)
 
-Datas de entrada e janelas sobrepostas limitam a inferência estatística. OHLC não
-revela toda a trajetória intrabar; execução, fees e slippage são hipóteses.
-A análise diária não garante limite de perdas futuro ou intradiário.
-[RESEARCH.md](RESEARCH.md) documenta a síntese e suas limitações. Os corpus e
-runners internos das campanhas R1/M1 não são redistribuídos; a reprodução pública
-integral desses resultados não é afirmada. O protocolo prospectivo permanece
-congelado e sua coleta depende de autorização separada.
-
-## Limites e continuidade
-
-Este snapshot é experimental e **não está pronto para dinheiro real**. Não inclui
-adaptador ativo de ordens, credenciais ou datasets pessoais. Há um coletor opt-in
-de arquivos públicos oficiais no núcleo preservado; ele não foi executado nesta
-missão e não participa das demonstrações. Nenhuma coleta prospectiva foi autorizada.
-O wheel G3 distribui `gridbot`, `research_console` e os exemplos sintéticos,
-incluindo os assets locais. Testes e ferramentas de auditoria ficam no checkout.
-Após instalar/ativar o ambiente, `gridbot-research-console` funciona fora do clone.
-As versões fixadas restringem dependências, sem prometer builds binariamente
-idênticos em toda plataforma ou disponibilidade permanente do PyPI.
-
-O [roadmap](ROADMAP.md) prioriza testes, documentação e revisão dos gargalos,
-sem reabrir otimização retrospectiva das políticas congeladas.
-[Contribuição](CONTRIBUTING.md) · [Segurança](SECURITY.md) ·
-[Proveniência](docs/PUBLIC_SOURCE_MANIFEST.json).
-
-Projeto conduzido por **Leonardo Siqueira Ribeiro dos Santos / SiqueiraBr15**,
-com assistência de IA em implementação, testes, documentação e revisão.
-Essa assistência não constitui auditoria externa certificada.
-
-Licenciado sob a [MIT](LICENSE). Copyright © 2026 Leonardo Siqueira Ribeiro dos Santos.
-As dependências preservam suas próprias licenças; seus fontes não são vendorizados.
-Veja [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) para o escopo e atribuições.
+Projeto de **Leonardo Siqueira Ribeiro dos Santos / SiqueiraBr15**, com assistência
+de IA em implementação, testes e revisão; não é auditoria externa certificada.
+[Proveniência pública](docs/PUBLIC_SOURCE_MANIFEST.json).
+Licença [MIT](LICENSE); [atribuições de terceiros](THIRD_PARTY_NOTICES.md).
