@@ -61,8 +61,19 @@ class Element {
     (this.listeners[name] ||= []).push(listener);
   }
   querySelector(tag) {
-    return walk(this).find((e) => e !== this && e.tagName === tag) || null;
+    return (
+      walk(this).find(
+        (e) =>
+          e !== this &&
+          (tag.startsWith("#")
+            ? e.id === tag.slice(1)
+            : tag.startsWith(".")
+              ? e.classList.contains(tag.slice(1))
+              : e.tagName === tag),
+      ) || null
+    );
   }
+  focus() {}
   click() {
     if (!this.disabled)
       for (const listener of this.listeners.click || [])
@@ -100,7 +111,7 @@ const result = () => ({
 const flush = async () => {
   for (let i = 0; i < 8; i++) await new Promise(setImmediate);
 };
-function harness(route) {
+function harness(route, guided = false) {
   const calls = [],
     root = new Element("main");
   root.connected = true;
@@ -116,6 +127,8 @@ function harness(route) {
     AbortController,
     AbortSignal,
     URLSearchParams,
+    URL,
+    Blob,
     performance,
     setTimeout,
     sessionStorage: { getItem: () => null, setItem() {} },
@@ -125,6 +138,16 @@ function harness(route) {
     },
   };
   context.window = context;
+  if (guided) {
+    for (const file of ["review_model.js", "review_view.js"])
+      vm.runInNewContext(
+        fs.readFileSync(
+          path.join(__dirname, "../../research_console/static", file),
+          "utf8",
+        ),
+        context,
+      );
+  }
   vm.runInNewContext(
     fs.readFileSync(
       path.join(__dirname, "../../research_console/static/lab.js"),
@@ -459,4 +482,188 @@ test("analysis timeout is explicit and never displays an old result or a private
     h.all().some((e) => e.tagName === "table"),
     false,
   );
+});
+
+const guidedCases = require("../fixtures/g5_guided_analysis.json").cases;
+function guidedHarness(fixture, overrides = () => null) {
+  return harness(
+    (url, options) =>
+      overrides(url, options) ||
+      (url === "/api/lab/library"
+        ? json({ studies: [fixture.study], persistence_enabled: true })
+        : url.startsWith("/api/lab/analysis?")
+          ? json(fixture.analysis)
+          : url === "/api/lab/replay"
+            ? json({
+                status: "EQUIVALENT",
+                result_sha256:
+                  fixture.analysis.analysis_manifest.expected_result_sha256,
+              })
+            : url.startsWith("/api/lab/export?")
+              ? new Response("synthetic zip sentinel")
+              : Promise.reject(new Error("Unexpected endpoint: " + url))),
+    true,
+  );
+}
+for (const fixture of guidedCases)
+  test(`guided DOM flow, replay and real export dispatch: ${fixture.study.pack_id}`, async () => {
+    const h = guidedHarness(fixture);
+    await flush();
+    h.buttons("Analisar " + fixture.study.title)[0].click();
+    await flush();
+    assert.equal(h.root.dataset.analysisState, "ANALYSIS_SUCCESS");
+    for (let step = 2; step <= 7; step++) {
+      h.buttons("Próxima")[0].click();
+      await flush();
+      assert.equal(
+        h
+          .all()
+          .find((e) => e.id === "review-step-heading")
+          .textContent.startsWith(step + "."),
+        true,
+      );
+      if (step === 2) assert.match(h.root.textContent, /NAV inicial.*100/);
+      if (step === 3) assert.match(h.root.textContent, /BTC equivalente/);
+      if (step === 6) {
+        h.buttons("Conferir reprodução determinística")[0].click();
+        await flush();
+        assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+      }
+    }
+    const before = h.calls.length;
+    h.buttons("Baixar pacote de análise")[0].click();
+    await flush();
+    assert.equal(
+      h.calls.slice(before).filter((c) => c.url.startsWith("/api/lab/export?"))
+        .length,
+      1,
+    );
+    assert.doesNotMatch(h.status(), /not a function|falhou/i);
+    assert.equal(
+      h.calls.some((c) => c.url.startsWith("/api/lab/paper")),
+      false,
+    );
+  });
+
+test("guided HTTP error clears values, exposes alert, and can recover with the same evidence", async () => {
+  const fixture = guidedCases[0];
+  let fail = false;
+  const h = guidedHarness(fixture, (url) =>
+    fail && url.startsWith("/api/lab/analysis?")
+      ? json({ error: "Opaque failure", reason: "ANALYSIS_FAILED" }, 500)
+      : null,
+  );
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /NAV final/);
+  h.buttons("1. Evidência")[0].click();
+  fail = true;
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.doesNotMatch(h.root.textContent, /NAV final/);
+  assert.equal(
+    h
+      .all()
+      .find((e) => e.className === "status")
+      .getAttribute("role"),
+    "alert",
+  );
+});
+
+test("guided pack declaration alone cannot enable an export", async () => {
+  const f = structuredClone(guidedCases[0]);
+  f.analysis.export_scope = null;
+  f.study.export_scope = null;
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("7. Resumo")[0].click();
+  await flush();
+  assert.equal(h.buttons("Baixar pacote de análise")[0].disabled, true);
+  assert.match(h.root.textContent, /Exportação: BLOQUEADA/);
+});
+
+test("guided incomplete risk and aggregate-only states never invent complete metrics", async () => {
+  const f = structuredClone(guidedCases[0]);
+  for (const r of f.analysis.rows) {
+    r.metrics.exact.max_drawdown = null;
+    r.metrics.risk.risk_complete = false;
+    r.metrics.risk.violates_20_percent = null;
+  }
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("4. Risco")[0].click();
+  await flush();
+  assert.match(
+    h.root.textContent,
+    /evidência de risco incompleta.*violação indisponível/,
+  );
+  assert.equal(
+    h.all().find((e) => e.dataset.metric === "Drawdown máximo da janela")
+      .textContent,
+    "Indisponível",
+  );
+  h.buttons("5. Comparação")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Inelegível: métrica indisponível/);
+  const a = structuredClone(f);
+  a.analysis.rows = [];
+  a.analysis.accounts = [];
+  a.analysis.analysis_manifest.accounts = [];
+  a.analysis.status = "AGGREGATE_ONLY_NO_CURVES";
+  a.analysis.aggregates = [
+    {
+      policy: "CASH",
+      cost_scenario: "SYNTHETIC",
+      observations: 3,
+      losses: 1,
+      violations: 0,
+    },
+  ];
+  const aggregate = guidedHarness(a);
+  await flush();
+  aggregate.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  aggregate.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.match(aggregate.root.textContent, /somente contagens declaradas/);
+  assert.equal(
+    aggregate.all().some((e) => e.dataset.metric),
+    false,
+  );
+});
+
+test("guided exact values survive display rounding without altering export selection", async () => {
+  const f = structuredClone(guidedCases[0]);
+  f.analysis.rows[0].metrics.exact.btc_physical = "1/" + "1" + "0".repeat(100);
+  f.analysis.rows[0].metrics.exact.btc_equivalent = "115/13";
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("3. BTC")[0].click();
+  await flush();
+  assert.match(
+    h.all().find((e) => e.dataset.metric === "BTC físico").textContent,
+    /e-100/,
+  );
+  assert.equal(
+    h.all().find((e) => e.dataset.metric === "BTC equivalente").textContent,
+    "8,84615385",
+  );
+  h.buttons("7. Resumo")[0].click();
+  await flush();
+  h.buttons("Baixar pacote de análise")[0].click();
+  await flush();
+  const query = h.calls.find((c) => c.url.startsWith("/api/lab/export?")).url;
+  assert.equal(new URLSearchParams(query.split("?")[1]).get("id"), f.study.id);
+  assert.equal(query.includes("8,846"), false);
 });

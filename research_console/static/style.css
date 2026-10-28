@@ -773,3 +773,83 @@ footer {
   max-width: 100%;
   overflow-wrap: anywhere;
 }
+
+/* G5: one guided panel, sharing the existing Lab's data and controls. */
+.review-mode,
+.review-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.review-mode button[aria-pressed="true"],
+.review-steps button[aria-current="step"] {
+  border-color: var(--green);
+  background: #173e39;
+  color: var(--text);
+}
+.guided-review .review-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+  gap: 8px;
+  margin: 12px 0 24px;
+}
+.review-steps button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 10px;
+}
+.review-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.review-metric {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 0;
+}
+.review-metric h4 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.review-amount {
+  font-size: 25px;
+  font-weight: 650;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.review-context,
+.review-step-title,
+.review-risk-state,
+.review-replay-state,
+.review-export-state {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.review-step-title {
+  font-size: 24px;
+  scroll-margin-top: 20px;
+}
+.guided-review :focus-visible,
+.review-mode :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+.review-navigation button {
+  min-height: 44px;
+}
+@media (max-width: 420px) {
+  .review-mode > button,
+  .review-navigation > button {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .guided-review .review-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
