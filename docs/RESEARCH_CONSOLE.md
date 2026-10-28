@@ -305,6 +305,6 @@ Windows10053 pode tentar enviar 422 redundantemente após desconexão, sem
 entrega e com recuperação previamente verificada. Actions continua
 desativado; nenhuma aprovação de CI ou Linux/macOS é afirmada.
 
-O modo G5 proposto ainda não existe. Seu contrato e UX estão em revisão nos
-documentos G5 do checkout. Replay/export disponíveis são os da G4, sem
-novas rotas ou permissões introduzidas pela proposta.
+O modo guiado G5.2 está implementado localmente no Research Lab.
+Consulte [o guia](G5_GUIDED_REVIEW.md). Replay/export são os da G4, sem novas
+rotas ou permissões; a auditoria G5.2 discrimina validação atual e pendências.

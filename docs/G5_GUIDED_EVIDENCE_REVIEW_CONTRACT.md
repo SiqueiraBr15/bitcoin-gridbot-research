@@ -1,9 +1,11 @@
 # G5 — Contrato de Revisão Guiada de Evidências
 
-**Status: G5_CONTRACT_AWAITING_ORCHESTRATOR_APPROVAL.** Proposta G5.1 de
-28/10/2026, baseada na G4 integrada por PR #2, main
-`acaa6879877c8a081a127f3ea8a0cdbb840b88cd`. A interface não está implementada.
-Este contrato não autoriza G5.2, operações remotas ou avaliação econômica nova.
+**Contrato G5.1 inspecionado e implementação G5.2 autorizada pelo orquestrador.**
+Contrato de 28/10/2026, baseado na G4 integrada por PR #2, main
+`acaa6879877c8a081a127f3ea8a0cdbb840b88cd`. Os requisitos abaixo são preservados;
+o estado anterior de proposta está no histórico Git G5.1. Consulte o
+[guia implementado](G5_GUIDED_REVIEW.md) e a auditoria G5.2 para resultados e
+limitações de validação. Não autoriza operações remotas ou avaliação econômica nova.
 
 ## Objetivo e alcance
 

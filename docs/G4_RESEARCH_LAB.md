@@ -315,8 +315,7 @@ O P3 diagnóstico Windows10053 permanece: tentativa redundante de 422 depois de
 desconexão, sem entrega e com recuperação já verificada. Cancelar HTTP não
 interrompe necessariamente CPU no servidor sequencial. Sem promessa de latência.
 
-Revisão Guiada G5 é contrato pendente, não funcionalidade disponível. Consulte
-no checkout docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md, sua proposta UX e matriz.
-O wheel inclui apenas os dois guias G4 em research_console/help, com nomes
-RESEARCH_LAB.md e EVIDENCE_PACK_V1.md; auditorias, guia de instalação e contratos
-G5 pertencem ao checkout completo, não são recursos de execução faltantes.
+Revisão Guiada G5.2 está implementada localmente, sujeita à revisão independente.
+Consulte [o guia](G5_GUIDED_REVIEW.md), o contrato G5.1 e a matriz preservada.
+O wheel G5.2 inclui os dois guias G4 e os quatro documentos G5 de uso/contrato/UX/
+matriz em research_console/help. Auditorias completas continuam no checkout.

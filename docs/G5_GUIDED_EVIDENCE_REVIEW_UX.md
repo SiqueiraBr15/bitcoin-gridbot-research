@@ -1,7 +1,7 @@
 # G5 — Proposta visual da Revisão Guiada
 
-**G5_CONTRACT_AWAITING_ORCHESTRATOR_APPROVAL.** Desenho G5.1,28/10/2026.
-Nenhum componente, rota ou tela G5 foi implementado. Ver
+**Desenho G5.1 adotado pela implementação local G5.2.** Os wireframes abaixo
+continuam conceituais; capturas e limitações reais pertencem à auditoria G5.2. Ver
 [contrato](G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md) e
 [aceitação](G5_IMPLEMENTATION_ACCEPTANCE_MATRIX.md).
 

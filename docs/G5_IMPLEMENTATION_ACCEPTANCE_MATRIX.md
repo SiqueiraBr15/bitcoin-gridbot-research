@@ -1,9 +1,9 @@
 # G5 — Matriz de aceitação futura
 
-**G5_CONTRACT_AWAITING_ORCHESTRATOR_APPROVAL.** Critérios G5.1,28/10/2026.
-Todos os casos abaixo estão **PLANNED / NÃO EXECUTADOS PARA G5**. Testes G4
-preexistentes ajudam a definir oráculos, mas não aprovam componentes ainda
-inexistentes. [Contrato](G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md) ·
+**Critérios G5.1 preservados, 28/10/2026.** As linhas abaixo mantêm a especificação
+original, sem convertê-la em evidência de execução. A avaliação por ID e seus
+resultados estão na auditoria G5.2; testes G4 históricos não aprovam componentes
+novos por inferência. [Contrato](G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md) ·
 [UX](G5_GUIDED_EVIDENCE_REVIEW_UX.md)
 
 G5.2 proposta: modelo/render e integração do percurso após aprovação do

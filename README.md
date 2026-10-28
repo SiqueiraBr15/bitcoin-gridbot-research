@@ -120,11 +120,13 @@ O protocolo prospectivo permanece congelado; coleta e avaliação precisam de
 autorizações separadas. O coletor histórico opt-in do núcleo não é usado pelos
 exemplos. Não há nova pesquisa econômica nesta entrega documental.
 
-A direção G5 é **Revisão Guiada de Evidências**:
+A implementação local G5.2 oferece **Revisão Guiada de Evidências**:
 [contrato](docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md),
 [UX](docs/G5_GUIDED_EVIDENCE_REVIEW_UX.md) e
 [aceitação](docs/G5_IMPLEMENTATION_ACCEPTANCE_MATRIX.md).
-**Contrato aguardando aprovação do orquestrador; interface não implementada.**
+Sete etapas no Research Lab, usando análise, replay e exports existentes.
+[Como usar e limitações](docs/G5_GUIDED_REVIEW.md). Candidata local sujeita à
+revisão independente; sem publicação ou prontidão para trading.
 [Roadmap](ROADMAP.md) · [Contribuição](CONTRIBUTING.md) · [Segurança](SECURITY.md)
 
 Projeto de **Leonardo Siqueira Ribeiro dos Santos / SiqueiraBr15**, com assistência
