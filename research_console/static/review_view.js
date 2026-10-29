@@ -61,6 +61,15 @@
       select.value = row.account_id;
       select.addEventListener("change", () => hooks.focus(select.value));
       frame.append(field("Conta em foco nesta seleção", select));
+      const selected = node(
+        "p",
+        `Conta selecionada: ${row.account_id}`,
+        "review-context",
+      );
+      selected.id = "review-selected-account";
+      // The select already exposes the complete identity to assistive technology.
+      selected.setAttribute("aria-hidden", "true");
+      frame.append(selected);
       frame.append(
         node(
           "p",

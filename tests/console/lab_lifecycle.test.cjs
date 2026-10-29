@@ -991,3 +991,120 @@ test("guided exact values survive display rounding without altering export selec
   assert.equal(new URLSearchParams(query.split("?")[1]).get("id"), f.study.id);
   assert.equal(query.includes("8,846"), false);
 });
+
+test("selected account identity stays visible and exact across accounts, steps and modes", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ["A".repeat(79) + "0", "A".repeat(79) + "1", "CASH._-0"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = [...ids];
+  const before = JSON.stringify(fixture.analysis);
+  const h = guidedHarness(fixture);
+  const visible = () => h.all().find((e) => e.id === "review-selected-account");
+  await flush();
+  assert.equal(visible(), undefined);
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  const check = (id) => {
+    assert.equal(visible().tagName, "p");
+    assert.equal(visible().textContent, "Conta selecionada: " + id);
+    assert.equal(visible().getAttribute("aria-hidden"), "true");
+    assert.equal(visible().getAttribute("tabindex"), null);
+    assert.equal(visible().getAttribute("aria-live"), null);
+    assert.equal(visible().children.length, 0);
+    assert.equal(
+      h.all().find((e) => e.id === "review-account-focus").value,
+      id,
+    );
+  };
+  check(ids[0]);
+  let select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = ids[1];
+  select.listeners.change[0]();
+  check(ids[1]);
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  for (const label of ["2. Patrimônio", "3. BTC", "7. Resumo"]) {
+    h.buttons(label)[0].click();
+    check(ids[1]);
+    assert.equal(h.document.activeElement.id, "review-step-heading");
+  }
+  h.buttons("Modo detalhado")[0].click();
+  check(ids[1]);
+  select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = ids[2];
+  select.listeners.change[0]();
+  check(ids[2]);
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  h.buttons("Revisão Guiada de Evidências")[0].click();
+  check(ids[2]);
+  assert.equal(JSON.stringify(fixture.analysis), before);
+});
+
+test("selected account identity clears while loading, on failure and without series", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  let fail = false,
+    finish;
+  const h = guidedHarness(fixture, (url) =>
+    fail && url.startsWith("/api/lab/analysis?")
+      ? new Promise((resolve) => {
+          finish = () => resolve(json({}, 500));
+        })
+      : null,
+  );
+  const visible = () => h.all().find((e) => e.id === "review-selected-account");
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  assert.ok(visible());
+  fail = true;
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  assert.equal(visible(), undefined);
+  finish();
+  await flush();
+  assert.equal(visible(), undefined);
+  const aggregate = structuredClone(fixture);
+  aggregate.analysis.rows = [];
+  aggregate.analysis.accounts = [];
+  aggregate.analysis.analysis_manifest.accounts = [];
+  aggregate.analysis.status = "AGGREGATE_ONLY_NO_CURVES";
+  const empty = guidedHarness(aggregate);
+  await flush();
+  empty.buttons("Analisar " + aggregate.study.title)[0].click();
+  await flush();
+  assert.equal(
+    empty.all().some((e) => e.id === "review-selected-account"),
+    false,
+  );
+});
+
+test("selected account copy treats a hostile transport identifier only as text", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ['A<img src=x onerror="alert(1)">', "B", "C"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = ids;
+  const h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  for (const mode of [null, "Modo detalhado"]) {
+    if (mode) h.buttons(mode)[0].click();
+    const copy = h.all().find((e) => e.id === "review-selected-account");
+    assert.equal(copy.textContent, "Conta selecionada: " + ids[0]);
+    assert.equal(copy.children.length, 0);
+    assert.equal(
+      h.all().some((e) => e.tagName === "img"),
+      false,
+    );
+  }
+});

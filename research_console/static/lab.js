@@ -866,6 +866,14 @@
     evidence.append(field("Conta para investigar", select));
     const row = analysis.rows.find((r) => r.account_id === focus);
     if (row) {
+      const selected = node(
+        "p",
+        `Conta selecionada: ${row.account_id}`,
+        "review-context",
+      );
+      selected.id = "review-selected-account";
+      selected.setAttribute("aria-hidden", "true");
+      evidence.append(selected);
       const risk = row.metrics.risk;
       const riskStatus = node(
         "p",
