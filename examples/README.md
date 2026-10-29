@@ -23,4 +23,7 @@ histórica. O exemplo não grava journal em disco, não consulta relógio, não 
 credenciais e não calcula novas evidências econômicas de mercado.
 
 `python -m examples.offline_grid` mostra apenas geometria de quatro intervalos.
-Ambos os comandos são exemplos do checkout; o wheel contém somente `gridbot`.
+Os dois exemplos também integram o wheel atual, junto de gridbot e
+research_console. A main inclui o Research Lab G4 desde o PR #2. Os três
+packs de examples/lab_packs são fixtures matemáticos independentes desses dois
+cenários PAPER; podem ser analisados pela biblioteca sem executar o motor.

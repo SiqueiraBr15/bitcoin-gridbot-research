@@ -8,8 +8,9 @@ const path = require("node:path");
 const vm = require("node:vm");
 const numbers = require("../../research_console/static/numbers.js");
 class Element {
-  constructor(tag) {
+  constructor(tag, ownerDocument = null) {
     this.tagName = tag;
+    this.ownerDocument = ownerDocument;
     this.children = [];
     this.parent = null;
     this.attributes = {};
@@ -47,6 +48,11 @@ class Element {
     }
   }
   replaceChildren(...items) {
+    if (
+      this.ownerDocument?.activeElement !== this &&
+      this.contains(this.ownerDocument?.activeElement)
+    )
+      this.ownerDocument.activeElement = this.ownerDocument.body;
     for (const item of this.children) item.parent = null;
     this.children = [];
     this.append(...items);
@@ -61,12 +67,31 @@ class Element {
     (this.listeners[name] ||= []).push(listener);
   }
   querySelector(tag) {
-    return walk(this).find((e) => e !== this && e.tagName === tag) || null;
+    return (
+      walk(this).find(
+        (e) =>
+          e !== this &&
+          (tag.startsWith("#")
+            ? e.id === tag.slice(1)
+            : tag.startsWith(".")
+              ? e.classList.contains(tag.slice(1))
+              : e.tagName === tag),
+      ) || null
+    );
+  }
+  contains(element) {
+    return !!element && walk(this).includes(element);
+  }
+  focus() {
+    if (this.isConnected && !this.disabled && this.ownerDocument)
+      this.ownerDocument.activeElement = this;
   }
   click() {
-    if (!this.disabled)
+    if (!this.disabled) {
+      this.focus();
       for (const listener of this.listeners.click || [])
         listener({ target: this });
+    }
   }
 }
 function walk(root) {
@@ -100,31 +125,49 @@ const result = () => ({
 const flush = async () => {
   for (let i = 0; i < 8; i++) await new Promise(setImmediate);
 };
-function harness(route) {
+function harness(route, guided = false) {
   const calls = [],
-    root = new Element("main");
+    document = {},
+    root = new Element("main", document);
+  document.body = new Element("body", document);
+  document.body.connected = true;
+  document.body.append(root);
+  document.activeElement = document.body;
+  document.createElement = (tag) => new Element(tag, document);
+  document.createElementNS = (_, tag) => new Element(tag, document);
   root.connected = true;
   root.className = "research-lab";
   const context = {
     Node: Element,
-    document: {
-      createElement: (tag) => new Element(tag),
-      createElementNS: (_, tag) => new Element(tag),
-    },
+    document,
     GridNumbers: numbers,
     GridCharts: { dispose() {}, lineChart() {} },
     AbortController,
     AbortSignal,
     URLSearchParams,
+    URL,
+    Blob,
     performance,
     setTimeout,
     sessionStorage: { getItem: () => null, setItem() {} },
     fetch: async (url, options) => {
       calls.push({ url, options });
+      if (options?.signal?.aborted)
+        throw new DOMException("Aborted", "AbortError");
       return route(url, options);
     },
   };
   context.window = context;
+  if (guided) {
+    for (const file of ["review_model.js", "review_view.js"])
+      vm.runInNewContext(
+        fs.readFileSync(
+          path.join(__dirname, "../../research_console/static", file),
+          "utf8",
+        ),
+        context,
+      );
+  }
   vm.runInNewContext(
     fs.readFileSync(
       path.join(__dirname, "../../research_console/static/lab.js"),
@@ -137,6 +180,7 @@ function harness(route) {
     root,
     api: context.GridLab,
     calls,
+    document,
     buttons: (name) =>
       walk(root).filter(
         (e) => e.tagName === "button" && e.textContent === name,
@@ -459,4 +503,608 @@ test("analysis timeout is explicit and never displays an old result or a private
     h.all().some((e) => e.tagName === "table"),
     false,
   );
+});
+
+const guidedCases = require("../fixtures/g5_guided_analysis.json").cases;
+for (const invalid of [false, true])
+  test(`catalog invalidation releases the guided busy state: invalid=${invalid}`, async () => {
+    const fixture = guidedCases[0];
+    let changed = false;
+    const h = guidedHarness(fixture, (url) =>
+      url === "/api/lab/preview"
+        ? json({
+            study: fixture.study,
+            preview_token: "synthetic",
+            persistence_enabled: true,
+          })
+        : changed && url === "/api/lab/library"
+          ? json({
+              studies: invalid
+                ? [{ ...fixture.study, integrity: "INVALID" }]
+                : [],
+              persistence_enabled: true,
+            })
+          : null,
+    );
+    await flush();
+    h.buttons("Analisar " + fixture.study.title)[0].click();
+    await flush();
+    changed = true;
+    h.api.deactivate();
+    h.api.render(h.root, {});
+    await flush();
+    assert.equal(h.root.getAttribute("aria-busy"), "false");
+    assert.equal(h.buttons("Validar prévia do arquivo")[0].disabled, false);
+    assert.equal(
+      h.all().find((e) => e.classList.contains("guided-review")).dataset
+        .reviewState,
+      invalid ? "INVALID" : "UNAVAILABLE",
+    );
+    assert.equal(
+      h.all().some((e) => e.dataset.metric),
+      false,
+    );
+    h.all().find((e) => e.type === "file").files = [
+      { size: 10, arrayBuffer: async () => new ArrayBuffer(10) },
+    ];
+    h.buttons("Validar prévia do arquivo")[0].click();
+    await flush();
+    assert.match(h.status(), /Prévia validada/);
+    assert.equal(h.buttons("Confirmar importação local").length, 1);
+  });
+function guidedHarness(fixture, overrides = () => null) {
+  return harness(
+    (url, options) =>
+      overrides(url, options) ||
+      (url === "/api/lab/library"
+        ? json({ studies: [fixture.study], persistence_enabled: true })
+        : url.startsWith("/api/lab/analysis?")
+          ? json(fixture.analysis)
+          : url === "/api/lab/replay"
+            ? json({
+                status: "EQUIVALENT",
+                result_sha256:
+                  fixture.analysis.analysis_manifest.expected_result_sha256,
+              })
+            : url.startsWith("/api/lab/export?")
+              ? new Response("synthetic zip sentinel")
+              : Promise.reject(new Error("Unexpected endpoint: " + url))),
+    true,
+  );
+}
+
+test("selection repaint keeps contextual focus, then respects focus outside the Lab", async () => {
+  const fixture = guidedCases[0];
+  let delay = false,
+    finish;
+  const h = guidedHarness(fixture, (url) =>
+    delay && url.startsWith("/api/lab/analysis?")
+      ? new Promise((resolve) => {
+          finish = () => resolve(json(fixture.analysis));
+        })
+      : null,
+  );
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("5. Comparação")[0].click();
+  delay = true;
+  h.buttons("Aplicar seleção analítica")[0].click();
+  await flush();
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+  assert.equal(h.root.getAttribute("aria-busy"), "true");
+  const outside = h.document.createElement("button");
+  h.document.body.append(outside);
+  outside.focus();
+  finish();
+  await flush();
+  assert.equal(h.document.activeElement, outside);
+  assert.equal(h.root.getAttribute("aria-busy"), "false");
+});
+
+test("manifest error retains its initiating control and successful replay has contextual focus", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.status(), /Escolha um manifesto/);
+  assert.equal(h.document.activeElement.id, "review-validate-manifest");
+  const input = h.all().find((e) => e.type === "file");
+  input.files = [
+    {
+      size: 10,
+      text: async () => JSON.stringify(fixture.analysis.analysis_manifest),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+});
+
+test("mode changes and account changes keep focus on the corresponding live control", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  const select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = "MIX";
+  select.listeners.change[0]();
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  assert.equal(h.document.activeElement.value, "MIX");
+  h.buttons("Modo detalhado")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-detailed");
+  const detailed = h.all().find((e) => e.id === "review-account-focus");
+  detailed.focus();
+  detailed.value = "BTC_HOLD";
+  detailed.listeners.change[0]();
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  assert.equal(h.document.activeElement.value, "BTC_HOLD");
+  h.buttons("Revisão Guiada de Evidências")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-guided");
+  h.buttons("Abrir modo detalhado")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-detailed");
+});
+
+test("invalid manifest replaces old replay success and an in-flight file validation cannot overlap", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Conferir reprodução determinística")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+  h.all().find((e) => e.type === "file").files = [
+    { size: 10, text: async () => "{broken" },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: FAILED/);
+  assert.match(h.status(), /JSON inválido/);
+  let finish;
+  h.all().find((e) => e.type === "file").files = [
+    {
+      size: 10,
+      text: () =>
+        new Promise((resolve) => {
+          finish = () =>
+            resolve(JSON.stringify(fixture.analysis.analysis_manifest));
+        }),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.equal(h.buttons("Validar manifesto escolhido")[0].disabled, true);
+  assert.equal(
+    h.buttons("Conferir reprodução determinística")[0].disabled,
+    true,
+  );
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+  finish();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+});
+
+test("account labels include full distinct long IDs alongside identical Unicode context", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ["X".repeat(79) + "A", "X".repeat(79) + "B", "Z"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+    r.policy = "Política Δ";
+    r.window_id = "same";
+    r.cost_scenario = "same";
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = [...ids];
+  const before = JSON.stringify(fixture.analysis),
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  const select = h.all().find((e) => e.id === "review-account-focus");
+  assert.equal(new Set(select.children.map((o) => o.textContent)).size, 3);
+  select.children.forEach((o, i) => {
+    assert.equal(o.value, ids[i]);
+    assert.ok(o.textContent.includes(ids[i]));
+    assert.match(o.textContent, /Política Δ/);
+    assert.equal(o.children.length, 0);
+  });
+  assert.equal(JSON.stringify(fixture.analysis), before);
+});
+
+test("late manifest read failure cannot mark another study as failed or steal its focus", async () => {
+  const a = guidedCases[0],
+    b = guidedCases[1];
+  let rejectFile;
+  const h = guidedHarness(a, (url) =>
+    url === "/api/lab/library"
+      ? json({ studies: [a.study, b.study], persistence_enabled: true })
+      : url.startsWith("/api/lab/analysis?") && url.includes(b.study.id)
+        ? json(b.analysis)
+        : null,
+  );
+  await flush();
+  h.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.all().find((e) => e.type === "file").files = [
+    {
+      size: 10,
+      text: () =>
+        new Promise((_, reject) => {
+          rejectFile = reject;
+        }),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  h.buttons("1. Evidência")[0].click();
+  h.buttons("Analisar " + b.study.title)[0].click();
+  await flush();
+  const focused = h.document.activeElement;
+  rejectFile(new SyntaxError("DO_NOT_SHOW_OBSOLETE_ERROR"));
+  await flush();
+  assert.equal(h.document.activeElement, focused);
+  assert.match(h.root.textContent, new RegExp(b.study.title));
+  assert.doesNotMatch(h.root.textContent, /DO_NOT_SHOW_OBSOLETE_ERROR/);
+  assert.equal(h.root.querySelector(".status").getAttribute("role"), "status");
+  h.buttons("6. Verificação")[0].click();
+  assert.match(h.root.textContent, /Replay desta seleção: NOT_RUN/);
+});
+
+test("confirming a new pack invalidates a replay even before persistence returns", async () => {
+  const a = guidedCases[0],
+    b = guidedCases[2];
+  let finishReplay, finishConfirm;
+  const h = harness((url) => {
+    if (url === "/api/lab/library")
+      return json({ studies: [a.study, b.study], persistence_enabled: true });
+    if (url.startsWith("/api/lab/analysis?"))
+      return json(url.includes(b.study.id) ? b.analysis : a.analysis);
+    if (url === "/api/lab/replay")
+      return new Promise((resolve) => {
+        finishReplay = () =>
+          resolve(
+            json({
+              status: "EQUIVALENT",
+              result_sha256:
+                a.analysis.analysis_manifest.expected_result_sha256,
+            }),
+          );
+      });
+    if (url === "/api/lab/preview")
+      return json({
+        study: b.study,
+        preview_token: "synthetic",
+        persistence_enabled: true,
+      });
+    if (url === "/api/lab/confirm")
+      return new Promise((resolve) => {
+        finishConfirm = () => resolve(json(b.study));
+      });
+    throw new Error("Unexpected route " + url);
+  }, true);
+  await flush();
+  h.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Conferir reprodução determinística")[0].click();
+  await flush();
+  h.buttons("1. Evidência")[0].click();
+  h.all().find((e) => e.type === "file").files = [
+    { size: 10, arrayBuffer: async () => new ArrayBuffer(10) },
+  ];
+  h.buttons("Validar prévia do arquivo")[0].click();
+  await flush();
+  h
+    .all()
+    .find(
+      (e) =>
+        e.tagName === "label" && e.textContent.startsWith("Confirmo persistir"),
+    )
+    .children.find((e) => e.tagName === "input").checked = true;
+  h.buttons("Confirmar importação local")[0].click();
+  await flush();
+  assert.equal(h.root.dataset.importState, "IMPORT_PENDING");
+  finishReplay();
+  await flush();
+  assert.match(h.status(), /Confirmando a persistência/);
+  assert.equal(h.root.getAttribute("aria-busy"), "true");
+  finishConfirm();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: NOT_RUN/);
+  assert.match(h.root.textContent, new RegExp(b.study.title));
+  assert.equal(h.root.getAttribute("aria-busy"), "false");
+});
+for (const fixture of guidedCases)
+  test(`guided DOM flow, replay and real export dispatch: ${fixture.study.pack_id}`, async () => {
+    const h = guidedHarness(fixture);
+    await flush();
+    h.buttons("Analisar " + fixture.study.title)[0].click();
+    await flush();
+    assert.equal(h.root.dataset.analysisState, "ANALYSIS_SUCCESS");
+    for (let step = 2; step <= 7; step++) {
+      h.buttons("Próxima")[0].click();
+      await flush();
+      assert.equal(
+        h
+          .all()
+          .find((e) => e.id === "review-step-heading")
+          .textContent.startsWith(step + "."),
+        true,
+      );
+      if (step === 2) assert.match(h.root.textContent, /NAV inicial.*100/);
+      if (step === 3) assert.match(h.root.textContent, /BTC equivalente/);
+      if (step === 6) {
+        h.buttons("Conferir reprodução determinística")[0].click();
+        await flush();
+        assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+      }
+    }
+    const before = h.calls.length;
+    h.buttons("Baixar pacote de análise")[0].click();
+    await flush();
+    assert.equal(
+      h.calls.slice(before).filter((c) => c.url.startsWith("/api/lab/export?"))
+        .length,
+      1,
+    );
+    assert.doesNotMatch(h.status(), /not a function|falhou/i);
+    assert.equal(
+      h.calls.some((c) => c.url.startsWith("/api/lab/paper")),
+      false,
+    );
+  });
+
+test("guided HTTP error clears values, exposes alert, and can recover with the same evidence", async () => {
+  const fixture = guidedCases[0];
+  let fail = false;
+  const h = guidedHarness(fixture, (url) =>
+    fail && url.startsWith("/api/lab/analysis?")
+      ? json({ error: "Opaque failure", reason: "ANALYSIS_FAILED" }, 500)
+      : null,
+  );
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /NAV final/);
+  h.buttons("1. Evidência")[0].click();
+  fail = true;
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.doesNotMatch(h.root.textContent, /NAV final/);
+  assert.equal(
+    h
+      .all()
+      .find((e) => e.className === "status")
+      .getAttribute("role"),
+    "alert",
+  );
+});
+
+test("guided pack declaration alone cannot enable an export", async () => {
+  const f = structuredClone(guidedCases[0]);
+  f.analysis.export_scope = null;
+  f.study.export_scope = null;
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("7. Resumo")[0].click();
+  await flush();
+  assert.equal(h.buttons("Baixar pacote de análise")[0].disabled, true);
+  assert.match(h.root.textContent, /Exportação: BLOQUEADA/);
+});
+
+test("guided incomplete risk and aggregate-only states never invent complete metrics", async () => {
+  const f = structuredClone(guidedCases[0]);
+  for (const r of f.analysis.rows) {
+    r.metrics.exact.max_drawdown = null;
+    r.metrics.risk.risk_complete = false;
+    r.metrics.risk.violates_20_percent = null;
+  }
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("4. Risco")[0].click();
+  await flush();
+  assert.match(
+    h.root.textContent,
+    /evidência de risco incompleta.*violação indisponível/,
+  );
+  assert.equal(
+    h.all().find((e) => e.dataset.metric === "Drawdown máximo da janela")
+      .textContent,
+    "Indisponível",
+  );
+  h.buttons("5. Comparação")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Inelegível: métrica indisponível/);
+  const a = structuredClone(f);
+  a.analysis.rows = [];
+  a.analysis.accounts = [];
+  a.analysis.analysis_manifest.accounts = [];
+  a.analysis.status = "AGGREGATE_ONLY_NO_CURVES";
+  a.analysis.aggregates = [
+    {
+      policy: "CASH",
+      cost_scenario: "SYNTHETIC",
+      observations: 3,
+      losses: 1,
+      violations: 0,
+    },
+  ];
+  const aggregate = guidedHarness(a);
+  await flush();
+  aggregate.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  aggregate.buttons("2. Patrimônio")[0].click();
+  await flush();
+  assert.match(aggregate.root.textContent, /somente contagens declaradas/);
+  assert.equal(
+    aggregate.all().some((e) => e.dataset.metric),
+    false,
+  );
+});
+
+test("guided exact values survive display rounding without altering export selection", async () => {
+  const f = structuredClone(guidedCases[0]);
+  f.analysis.rows[0].metrics.exact.btc_physical = "1/" + "1" + "0".repeat(100);
+  f.analysis.rows[0].metrics.exact.btc_equivalent = "115/13";
+  const h = guidedHarness(f);
+  await flush();
+  h.buttons("Analisar " + f.study.title)[0].click();
+  await flush();
+  h.buttons("3. BTC")[0].click();
+  await flush();
+  assert.match(
+    h.all().find((e) => e.dataset.metric === "BTC físico").textContent,
+    /e-100/,
+  );
+  assert.equal(
+    h.all().find((e) => e.dataset.metric === "BTC equivalente").textContent,
+    "8,84615385",
+  );
+  h.buttons("7. Resumo")[0].click();
+  await flush();
+  h.buttons("Baixar pacote de análise")[0].click();
+  await flush();
+  const query = h.calls.find((c) => c.url.startsWith("/api/lab/export?")).url;
+  assert.equal(new URLSearchParams(query.split("?")[1]).get("id"), f.study.id);
+  assert.equal(query.includes("8,846"), false);
+});
+
+test("selected account identity stays visible and exact across accounts, steps and modes", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ["A".repeat(79) + "0", "A".repeat(79) + "1", "CASH._-0"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = [...ids];
+  const before = JSON.stringify(fixture.analysis);
+  const h = guidedHarness(fixture);
+  const visible = () => h.all().find((e) => e.id === "review-selected-account");
+  await flush();
+  assert.equal(visible(), undefined);
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  const check = (id) => {
+    assert.equal(visible().tagName, "p");
+    assert.equal(visible().textContent, "Conta selecionada: " + id);
+    assert.equal(visible().getAttribute("aria-hidden"), "true");
+    assert.equal(visible().getAttribute("tabindex"), null);
+    assert.equal(visible().getAttribute("aria-live"), null);
+    assert.equal(visible().children.length, 0);
+    assert.equal(
+      h.all().find((e) => e.id === "review-account-focus").value,
+      id,
+    );
+  };
+  check(ids[0]);
+  let select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = ids[1];
+  select.listeners.change[0]();
+  check(ids[1]);
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  for (const label of ["2. Patrimônio", "3. BTC", "7. Resumo"]) {
+    h.buttons(label)[0].click();
+    check(ids[1]);
+    assert.equal(h.document.activeElement.id, "review-step-heading");
+  }
+  h.buttons("Modo detalhado")[0].click();
+  check(ids[1]);
+  select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = ids[2];
+  select.listeners.change[0]();
+  check(ids[2]);
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  h.buttons("Revisão Guiada de Evidências")[0].click();
+  check(ids[2]);
+  assert.equal(JSON.stringify(fixture.analysis), before);
+});
+
+test("selected account identity clears while loading, on failure and without series", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  let fail = false,
+    finish;
+  const h = guidedHarness(fixture, (url) =>
+    fail && url.startsWith("/api/lab/analysis?")
+      ? new Promise((resolve) => {
+          finish = () => resolve(json({}, 500));
+        })
+      : null,
+  );
+  const visible = () => h.all().find((e) => e.id === "review-selected-account");
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  assert.ok(visible());
+  fail = true;
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  assert.equal(visible(), undefined);
+  finish();
+  await flush();
+  assert.equal(visible(), undefined);
+  const aggregate = structuredClone(fixture);
+  aggregate.analysis.rows = [];
+  aggregate.analysis.accounts = [];
+  aggregate.analysis.analysis_manifest.accounts = [];
+  aggregate.analysis.status = "AGGREGATE_ONLY_NO_CURVES";
+  const empty = guidedHarness(aggregate);
+  await flush();
+  empty.buttons("Analisar " + aggregate.study.title)[0].click();
+  await flush();
+  assert.equal(
+    empty.all().some((e) => e.id === "review-selected-account"),
+    false,
+  );
+});
+
+test("selected account copy treats a hostile transport identifier only as text", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ['A<img src=x onerror="alert(1)">', "B", "C"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = ids;
+  const h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  for (const mode of [null, "Modo detalhado"]) {
+    if (mode) h.buttons(mode)[0].click();
+    const copy = h.all().find((e) => e.id === "review-selected-account");
+    assert.equal(copy.textContent, "Conta selecionada: " + ids[0]);
+    assert.equal(copy.children.length, 0);
+    assert.equal(
+      h.all().some((e) => e.tagName === "img"),
+      false,
+    );
+  }
 });

@@ -24,6 +24,7 @@ const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
 test("Lab identifiers, headings and study actions wrap within the available width", () => {
   for (const selector of [
     ".research-lab .lab-controls label",
+    ".research-lab .tag",
     ".research-lab .legend .series-label",
     ".research-lab .readout > span",
     ".research-lab .panel h2",

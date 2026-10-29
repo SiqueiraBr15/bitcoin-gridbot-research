@@ -1,0 +1,1795 @@
+{
+  "cases": [
+    {
+      "analysis": {
+        "accounts": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "0",
+                "10",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9",
+                "0",
+                "10",
+                "90"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "7",
+                "0",
+                "10",
+                "70"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "10",
+                "0",
+                "10",
+                "100"
+              ],
+              [
+                "2020-01-05T00:00:00+00:00",
+                "8",
+                "0",
+                "10",
+                "80"
+              ],
+              [
+                "2020-01-06T00:00:00+00:00",
+                "6",
+                "0",
+                "10",
+                "60"
+              ]
+            ],
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "7",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "10",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-05T00:00:00+00:00",
+                "8",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-06T00:00:00+00:00",
+                "6",
+                "100",
+                "0",
+                "100"
+              ]
+            ],
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "50",
+                "5",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9",
+                "50",
+                "5",
+                "95"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "7",
+                "50",
+                "5",
+                "85"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "10",
+                "50",
+                "5",
+                "100"
+              ],
+              [
+                "2020-01-05T00:00:00+00:00",
+                "8",
+                "50",
+                "5",
+                "90"
+              ],
+              [
+                "2020-01-06T00:00:00+00:00",
+                "6",
+                "50",
+                "5",
+                "80"
+              ]
+            ],
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          }
+        ],
+        "aggregates": [],
+        "analysis_manifest": {
+          "accounts": [
+            "BTC_HOLD",
+            "CASH",
+            "MIX"
+          ],
+          "analytics_version": "G4_ANALYTICS_V1",
+          "expected_result_sha256": "04ee687e7a32b6b7c20de0eae7686250097d1831cba8665ca55b84be022df326",
+          "implementation_sha256": "099b49271410e3b3bb3caf9b91231cb414af9fb3af7e3a79c46c630b8c895df7",
+          "manifest_sha256": "22c3adfc34caaad9a189bedd25f036a0336b5558fb770ec11136dd6651a394f2",
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ],
+          "pack_sha256": "8a7f1bb54814bbe681c1cbc4324502b24e64c0a9247b147d1f87827504a89690",
+          "provenance": "DECLARED_NOT_AUTHENTICATED",
+          "redistribution": "PUBLIC",
+          "schema": "GRIDBOT_ANALYSIS_V1"
+        },
+        "analytics_version": "G4_ANALYTICS_V1",
+        "data_nature": "SYNTHETIC",
+        "descriptive": [
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 432000,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 1,
+            "overlapping": false,
+            "policy": "BTC_HOLD",
+            "return_max": "-0.4",
+            "return_min": "-0.4",
+            "violations": 1,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 432000,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 0,
+            "overlapping": false,
+            "policy": "CASH",
+            "return_max": "0",
+            "return_min": "0",
+            "violations": 0,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 432000,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 1,
+            "overlapping": false,
+            "policy": "MIX",
+            "return_max": "-0.2",
+            "return_min": "-0.2",
+            "violations": 0,
+            "windows": 1
+          }
+        ],
+        "export_scope": "RAW_AND_DERIVED",
+        "integrity": "SHA256_AND_CONSERVATION_VALIDATED",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "22c3adfc34caaad9a189bedd25f036a0336b5558fb770ec11136dd6651a394f2",
+        "numeric_contract": "EXACT_RATIONAL_DECIMAL_V2",
+        "pack_sha256": "8a7f1bb54814bbe681c1cbc4324502b24e64c0a9247b147d1f87827504a89690",
+        "pareto": {
+          "meaning": "WITHIN_COMPARABLE_GROUPS_NOT_GLOBAL_WINNER",
+          "non_dominated": [
+            "BTC_HOLD",
+            "CASH",
+            "MIX"
+          ],
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ]
+        },
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "rows": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "10",
+              "delta_nav": "-40",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "-0.4",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "evidence": {
+              "account_id": "BTC_HOLD",
+              "file": "results.json",
+              "final_point_index": 5,
+              "series_sha256": "d823c0e2c022c45182463e01a2ac8a6fd72f513be380f01024564e80b5d55c82",
+              "sha256": "934a20877fed666ac1a1759005a1b5cf20474784b7710040b174b977a7b8f5a9",
+              "timestamp": "2020-01-06T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f58d979335fba9634b254f1473adca884093fd48352aade9ec496f057f64673f",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "10",
+              "btc_physical": "10",
+              "cash_usdt": "0",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "10",
+                "btc_physical": "10",
+                "cash_usdt": "0",
+                "exposure_mean_left": "1",
+                "fees_usdt": "0",
+                "max_drawdown": "2/5",
+                "nav_final": "60",
+                "nav_initial": "100",
+                "return_ratio": "-2/5",
+                "return_usdt": "-40"
+              },
+              "exposure_final": "1",
+              "exposure_mean_left": "1",
+              "fees_usdt": "0",
+              "max_drawdown": "0.4",
+              "nav_final": "60",
+              "nav_initial": "100",
+              "observed_seconds": 432000,
+              "return_ratio": "-0.4",
+              "return_usdt": "-40",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "-20",
+                "drawdowns": [
+                  "0",
+                  "-0.1",
+                  "-0.3",
+                  "0",
+                  "-0.2",
+                  "-0.4"
+                ],
+                "episodes": [
+                  {
+                    "censored": false,
+                    "end_index": 3,
+                    "exceeds_20_percent": true,
+                    "first_below_at": "2020-01-02T00:00:00+00:00",
+                    "first_below_index": 1,
+                    "magnitude": "0.3",
+                    "magnitude_fraction": "3/10",
+                    "observed_end": "2020-01-04T00:00:00+00:00",
+                    "observed_seconds": 259200,
+                    "peak_at": "2020-01-01T00:00:00+00:00",
+                    "peak_index": 0,
+                    "peak_nav": "100",
+                    "reason": "RECOVERED_AT_OBSERVED_MARK",
+                    "recovery_at": "2020-01-04T00:00:00+00:00",
+                    "trough_at": "2020-01-03T00:00:00+00:00",
+                    "trough_index": 2,
+                    "trough_nav": "70"
+                  },
+                  {
+                    "censored": true,
+                    "end_index": 5,
+                    "exceeds_20_percent": true,
+                    "first_below_at": "2020-01-05T00:00:00+00:00",
+                    "first_below_index": 4,
+                    "magnitude": "0.4",
+                    "magnitude_fraction": "2/5",
+                    "observed_end": "2020-01-06T00:00:00+00:00",
+                    "observed_seconds": 172800,
+                    "peak_at": "2020-01-04T00:00:00+00:00",
+                    "peak_index": 3,
+                    "peak_nav": "100",
+                    "reason": "END_OF_OBSERVATIONS",
+                    "recovery_at": null,
+                    "trough_at": "2020-01-06T00:00:00+00:00",
+                    "trough_index": 5,
+                    "trough_nav": "60"
+                  }
+                ],
+                "gaps": [],
+                "max_drawdown": "0.4",
+                "max_drawdown_fraction": "2/5",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": true
+              },
+              "sample_loss_count": 4,
+              "sampled_seconds": 432000,
+              "underwater_seconds_left": 259200,
+              "valid_sample_returns": 5
+            },
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "0",
+              "delta_nav": "0",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "0",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "evidence": {
+              "account_id": "CASH",
+              "file": "results.json",
+              "final_point_index": 5,
+              "series_sha256": "bba2c79842dffe8a489f2a472abf90d09afb73bdba04d7735289e5ab3e2d260d",
+              "sha256": "934a20877fed666ac1a1759005a1b5cf20474784b7710040b174b977a7b8f5a9",
+              "timestamp": "2020-01-06T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f58d979335fba9634b254f1473adca884093fd48352aade9ec496f057f64673f",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "16.666666666666666666666666666666666666666666666667",
+              "btc_physical": "0",
+              "cash_usdt": "100",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "50/3",
+                "btc_physical": "0",
+                "cash_usdt": "100",
+                "exposure_mean_left": "0",
+                "fees_usdt": "0",
+                "max_drawdown": "0",
+                "nav_final": "100",
+                "nav_initial": "100",
+                "return_ratio": "0",
+                "return_usdt": "0"
+              },
+              "exposure_final": "0",
+              "exposure_mean_left": "0",
+              "fees_usdt": "0",
+              "max_drawdown": "0",
+              "nav_final": "100",
+              "nav_initial": "100",
+              "observed_seconds": 432000,
+              "return_ratio": "0",
+              "return_usdt": "0",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "20",
+                "drawdowns": [
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "episodes": [],
+                "gaps": [],
+                "max_drawdown": "0",
+                "max_drawdown_fraction": "0",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 0,
+              "sampled_seconds": 432000,
+              "underwater_seconds_left": 0,
+              "valid_sample_returns": 5
+            },
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "5",
+              "delta_nav": "-20",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "-0.2",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-06T00:00:00+00:00",
+            "evidence": {
+              "account_id": "MIX",
+              "file": "results.json",
+              "final_point_index": 5,
+              "series_sha256": "a154fb11f87fff368ba2b656ddea962a6f5b46e244be47302e0df9ac37691891",
+              "sha256": "934a20877fed666ac1a1759005a1b5cf20474784b7710040b174b977a7b8f5a9",
+              "timestamp": "2020-01-06T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f58d979335fba9634b254f1473adca884093fd48352aade9ec496f057f64673f",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "13.333333333333333333333333333333333333333333333333",
+              "btc_physical": "5",
+              "cash_usdt": "50",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "40/3",
+                "btc_physical": "5",
+                "cash_usdt": "50",
+                "exposure_mean_left": "6773/14535",
+                "fees_usdt": "0",
+                "max_drawdown": "1/5",
+                "nav_final": "80",
+                "nav_initial": "100",
+                "return_ratio": "-1/5",
+                "return_usdt": "-20"
+              },
+              "exposure_final": "0.375",
+              "exposure_mean_left": "0.46597867217062263501891984864121087031303749570003",
+              "fees_usdt": "0",
+              "max_drawdown": "0.2",
+              "nav_final": "80",
+              "nav_initial": "100",
+              "observed_seconds": 432000,
+              "return_ratio": "-0.2",
+              "return_usdt": "-20",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "0",
+                "drawdowns": [
+                  "0",
+                  "-0.05",
+                  "-0.15",
+                  "0",
+                  "-0.1",
+                  "-0.2"
+                ],
+                "episodes": [
+                  {
+                    "censored": false,
+                    "end_index": 3,
+                    "exceeds_20_percent": false,
+                    "first_below_at": "2020-01-02T00:00:00+00:00",
+                    "first_below_index": 1,
+                    "magnitude": "0.15",
+                    "magnitude_fraction": "3/20",
+                    "observed_end": "2020-01-04T00:00:00+00:00",
+                    "observed_seconds": 259200,
+                    "peak_at": "2020-01-01T00:00:00+00:00",
+                    "peak_index": 0,
+                    "peak_nav": "100",
+                    "reason": "RECOVERED_AT_OBSERVED_MARK",
+                    "recovery_at": "2020-01-04T00:00:00+00:00",
+                    "trough_at": "2020-01-03T00:00:00+00:00",
+                    "trough_index": 2,
+                    "trough_nav": "85"
+                  },
+                  {
+                    "censored": true,
+                    "end_index": 5,
+                    "exceeds_20_percent": false,
+                    "first_below_at": "2020-01-05T00:00:00+00:00",
+                    "first_below_index": 4,
+                    "magnitude": "0.2",
+                    "magnitude_fraction": "1/5",
+                    "observed_end": "2020-01-06T00:00:00+00:00",
+                    "observed_seconds": 172800,
+                    "peak_at": "2020-01-04T00:00:00+00:00",
+                    "peak_index": 3,
+                    "peak_nav": "100",
+                    "reason": "END_OF_OBSERVATIONS",
+                    "recovery_at": null,
+                    "trough_at": "2020-01-06T00:00:00+00:00",
+                    "trough_index": 5,
+                    "trough_nav": "80"
+                  }
+                ],
+                "gaps": [],
+                "max_drawdown": "0.2",
+                "max_drawdown_fraction": "1/5",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 4,
+              "sampled_seconds": 432000,
+              "underwater_seconds_left": 259200,
+              "valid_sample_returns": 5
+            },
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "risk_violation"
+          }
+        ],
+        "source_kind": "SYNTHETIC_DEMO",
+        "status": "VALIDATED_OBSERVATIONS"
+      },
+      "study": {
+        "benchmarks": [
+          "CASH"
+        ],
+        "costs": [
+          "SYNTHETIC_ZERO_COST"
+        ],
+        "created_at": "2020-01-01T00:00:00+00:00",
+        "currency": "USDT",
+        "data_nature": "SYNTHETIC",
+        "dataset_identity": "risk_violation",
+        "deletable": false,
+        "end": "2020-01-06T00:00:00+00:00",
+        "export_scope": "RAW_AND_DERIVED",
+        "files": {
+          "results.json": {
+            "bytes": 1645,
+            "sha256": "934a20877fed666ac1a1759005a1b5cf20474784b7710040b174b977a7b8f5a9"
+          }
+        },
+        "flow_convention": "NO_EXTERNAL_FLOWS_DECLARED",
+        "id": "8a7f1bb54814bbe681c1cbc4324502b24e64c0a9247b147d1f87827504a89690",
+        "integrity": "VALIDATED",
+        "license": "CC0-1.0",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "22c3adfc34caaad9a189bedd25f036a0336b5558fb770ec11136dd6651a394f2",
+        "marks": 18,
+        "origin": "BUNDLED",
+        "pack_id": "risk_violation",
+        "policies": [
+          "BTC_HOLD",
+          "CASH",
+          "MIX"
+        ],
+        "producer_version": "G4_FIXTURES_V1",
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "sampling_seconds": 86400,
+        "schema_version": 1,
+        "source_kind": "SYNTHETIC_DEMO",
+        "start": "2020-01-01T00:00:00+00:00",
+        "study_identity": "risk_violation",
+        "timezone": "UTC",
+        "title": "SYNTHETIC DEMO risk_violation",
+        "units": [
+          "UTC",
+          "USDT_PER_BTC",
+          "USDT",
+          "BTC",
+          "USDT"
+        ],
+        "wallets": 3
+      }
+    },
+    {
+      "analysis": {
+        "accounts": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "0",
+                "10",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9.5",
+                "0",
+                "10",
+                "95"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "9",
+                "0",
+                "10",
+                "90"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "8.5",
+                "0",
+                "10",
+                "85"
+              ]
+            ],
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9.5",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "9",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "8.5",
+                "100",
+                "0",
+                "100"
+              ]
+            ],
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "50",
+                "5",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "9.5",
+                "50",
+                "5",
+                "97.5"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "9",
+                "50",
+                "5",
+                "95"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "8.5",
+                "50",
+                "5",
+                "92.5"
+              ]
+            ],
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          }
+        ],
+        "aggregates": [],
+        "analysis_manifest": {
+          "accounts": [
+            "BTC_HOLD",
+            "CASH",
+            "MIX"
+          ],
+          "analytics_version": "G4_ANALYTICS_V1",
+          "expected_result_sha256": "b3acc53960c7e7a1db7bee8d7427fccd05cf1c5c30d0dc0b175217e66837ca10",
+          "implementation_sha256": "099b49271410e3b3bb3caf9b91231cb414af9fb3af7e3a79c46c630b8c895df7",
+          "manifest_sha256": "d8fd3ac00ff2f331c5f200085f75f662ef879bae506c2a52588c5249c5a4c665",
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ],
+          "pack_sha256": "a0528ebd5d15aab7f6a26e527fa60d7b2b4e1357574e73fd892f6726554f5cad",
+          "provenance": "DECLARED_NOT_AUTHENTICATED",
+          "redistribution": "PUBLIC",
+          "schema": "GRIDBOT_ANALYSIS_V1"
+        },
+        "analytics_version": "G4_ANALYTICS_V1",
+        "data_nature": "SYNTHETIC",
+        "descriptive": [
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 1,
+            "overlapping": false,
+            "policy": "BTC_HOLD",
+            "return_max": "-0.15",
+            "return_min": "-0.15",
+            "violations": 0,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 0,
+            "overlapping": false,
+            "policy": "CASH",
+            "return_max": "0",
+            "return_min": "0",
+            "violations": 0,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 1,
+            "overlapping": false,
+            "policy": "MIX",
+            "return_max": "-0.075",
+            "return_min": "-0.075",
+            "violations": 0,
+            "windows": 1
+          }
+        ],
+        "export_scope": "RAW_AND_DERIVED",
+        "integrity": "SHA256_AND_CONSERVATION_VALIDATED",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "d8fd3ac00ff2f331c5f200085f75f662ef879bae506c2a52588c5249c5a4c665",
+        "numeric_contract": "EXACT_RATIONAL_DECIMAL_V2",
+        "pack_sha256": "a0528ebd5d15aab7f6a26e527fa60d7b2b4e1357574e73fd892f6726554f5cad",
+        "pareto": {
+          "meaning": "WITHIN_COMPARABLE_GROUPS_NOT_GLOBAL_WINNER",
+          "non_dominated": [
+            "BTC_HOLD",
+            "CASH",
+            "MIX"
+          ],
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ]
+        },
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "rows": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "10",
+              "delta_nav": "-15",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "-0.15",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "BTC_HOLD",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "cb92a07b6879eecbc1bde1fc891290ce5e22690ae2253236d4db934b57f994f1",
+              "sha256": "85f2e70fa4fb89f0ae1bdf53448d3ae36a9affd3d94d0633730ec927d97db3ee",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f95ae24b20360b6cb4e35fb770c0477ea12c55862932e773efae58fa5cb9cada",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "10",
+              "btc_physical": "10",
+              "cash_usdt": "0",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "10",
+                "btc_physical": "10",
+                "cash_usdt": "0",
+                "exposure_mean_left": "1",
+                "fees_usdt": "0",
+                "max_drawdown": "3/20",
+                "nav_final": "85",
+                "nav_initial": "100",
+                "return_ratio": "-3/20",
+                "return_usdt": "-15"
+              },
+              "exposure_final": "1",
+              "exposure_mean_left": "1",
+              "fees_usdt": "0",
+              "max_drawdown": "0.15",
+              "nav_final": "85",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "-0.15",
+              "return_usdt": "-15",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "5",
+                "drawdowns": [
+                  "0",
+                  "-0.05",
+                  "-0.1",
+                  "-0.15"
+                ],
+                "episodes": [
+                  {
+                    "censored": true,
+                    "end_index": 3,
+                    "exceeds_20_percent": false,
+                    "first_below_at": "2020-01-02T00:00:00+00:00",
+                    "first_below_index": 1,
+                    "magnitude": "0.15",
+                    "magnitude_fraction": "3/20",
+                    "observed_end": "2020-01-04T00:00:00+00:00",
+                    "observed_seconds": 259200,
+                    "peak_at": "2020-01-01T00:00:00+00:00",
+                    "peak_index": 0,
+                    "peak_nav": "100",
+                    "reason": "END_OF_OBSERVATIONS",
+                    "recovery_at": null,
+                    "trough_at": "2020-01-04T00:00:00+00:00",
+                    "trough_index": 3,
+                    "trough_nav": "85"
+                  }
+                ],
+                "gaps": [],
+                "max_drawdown": "0.15",
+                "max_drawdown_fraction": "3/20",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 3,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 172800,
+              "valid_sample_returns": 3
+            },
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "0",
+              "delta_nav": "0",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "0",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "CASH",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "a38e95dec3ff561c9221613352c94f76505321670107f5b85db5c5c57b8e3b8b",
+              "sha256": "85f2e70fa4fb89f0ae1bdf53448d3ae36a9affd3d94d0633730ec927d97db3ee",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f95ae24b20360b6cb4e35fb770c0477ea12c55862932e773efae58fa5cb9cada",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "11.764705882352941176470588235294117647058823529412",
+              "btc_physical": "0",
+              "cash_usdt": "100",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "200/17",
+                "btc_physical": "0",
+                "cash_usdt": "100",
+                "exposure_mean_left": "0",
+                "fees_usdt": "0",
+                "max_drawdown": "0",
+                "nav_final": "100",
+                "nav_initial": "100",
+                "return_ratio": "0",
+                "return_usdt": "0"
+              },
+              "exposure_final": "0",
+              "exposure_mean_left": "0",
+              "fees_usdt": "0",
+              "max_drawdown": "0",
+              "nav_final": "100",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "0",
+              "return_usdt": "0",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "20",
+                "drawdowns": [
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "episodes": [],
+                "gaps": [],
+                "max_drawdown": "0",
+                "max_drawdown_fraction": "0",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 0,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 0,
+              "valid_sample_returns": 3
+            },
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "5",
+              "delta_nav": "-7.5",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "-0.075",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "MIX",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "75fdaf929e7bae8d044d0d401555982be201c333e89aa5c44288b64aa68340da",
+              "sha256": "85f2e70fa4fb89f0ae1bdf53448d3ae36a9affd3d94d0633730ec927d97db3ee",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "f95ae24b20360b6cb4e35fb770c0477ea12c55862932e773efae58fa5cb9cada",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "10.882352941176470588235294117647058823529411764706",
+              "btc_physical": "5",
+              "cash_usdt": "50",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "185/17",
+                "btc_physical": "5",
+                "cash_usdt": "50",
+                "exposure_mean_left": "2165/4446",
+                "fees_usdt": "0",
+                "max_drawdown": "3/40",
+                "nav_final": "185/2",
+                "nav_initial": "100",
+                "return_ratio": "-3/40",
+                "return_usdt": "-15/2"
+              },
+              "exposure_final": "0.45945945945945945945945945945945945945945945945946",
+              "exposure_mean_left": "0.48695456590193432298695456590193432298695456590193",
+              "fees_usdt": "0",
+              "max_drawdown": "0.075",
+              "nav_final": "92.5",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "-0.075",
+              "return_usdt": "-7.5",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "12.5",
+                "drawdowns": [
+                  "0",
+                  "-0.025",
+                  "-0.05",
+                  "-0.075"
+                ],
+                "episodes": [
+                  {
+                    "censored": true,
+                    "end_index": 3,
+                    "exceeds_20_percent": false,
+                    "first_below_at": "2020-01-02T00:00:00+00:00",
+                    "first_below_index": 1,
+                    "magnitude": "0.075",
+                    "magnitude_fraction": "3/40",
+                    "observed_end": "2020-01-04T00:00:00+00:00",
+                    "observed_seconds": 259200,
+                    "peak_at": "2020-01-01T00:00:00+00:00",
+                    "peak_index": 0,
+                    "peak_nav": "100",
+                    "reason": "END_OF_OBSERVATIONS",
+                    "recovery_at": null,
+                    "trough_at": "2020-01-04T00:00:00+00:00",
+                    "trough_index": 3,
+                    "trough_nav": "92.5"
+                  }
+                ],
+                "gaps": [],
+                "max_drawdown": "0.075",
+                "max_drawdown_fraction": "3/40",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 3,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 172800,
+              "valid_sample_returns": 3
+            },
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "unfavorable"
+          }
+        ],
+        "source_kind": "SYNTHETIC_DEMO",
+        "status": "VALIDATED_OBSERVATIONS"
+      },
+      "study": {
+        "benchmarks": [
+          "CASH"
+        ],
+        "costs": [
+          "SYNTHETIC_ZERO_COST"
+        ],
+        "created_at": "2020-01-01T00:00:00+00:00",
+        "currency": "USDT",
+        "data_nature": "SYNTHETIC",
+        "dataset_identity": "unfavorable",
+        "deletable": false,
+        "end": "2020-01-04T00:00:00+00:00",
+        "export_scope": "RAW_AND_DERIVED",
+        "files": {
+          "results.json": {
+            "bytes": 1355,
+            "sha256": "85f2e70fa4fb89f0ae1bdf53448d3ae36a9affd3d94d0633730ec927d97db3ee"
+          }
+        },
+        "flow_convention": "NO_EXTERNAL_FLOWS_DECLARED",
+        "id": "a0528ebd5d15aab7f6a26e527fa60d7b2b4e1357574e73fd892f6726554f5cad",
+        "integrity": "VALIDATED",
+        "license": "CC0-1.0",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "d8fd3ac00ff2f331c5f200085f75f662ef879bae506c2a52588c5249c5a4c665",
+        "marks": 12,
+        "origin": "BUNDLED",
+        "pack_id": "unfavorable",
+        "policies": [
+          "BTC_HOLD",
+          "CASH",
+          "MIX"
+        ],
+        "producer_version": "G4_FIXTURES_V1",
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "sampling_seconds": 86400,
+        "schema_version": 1,
+        "source_kind": "SYNTHETIC_DEMO",
+        "start": "2020-01-01T00:00:00+00:00",
+        "study_identity": "unfavorable",
+        "timezone": "UTC",
+        "title": "SYNTHETIC DEMO unfavorable",
+        "units": [
+          "UTC",
+          "USDT_PER_BTC",
+          "USDT",
+          "BTC",
+          "USDT"
+        ],
+        "wallets": 3
+      }
+    },
+    {
+      "analysis": {
+        "accounts": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "0",
+                "10",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "11",
+                "0",
+                "10",
+                "110"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "12",
+                "0",
+                "10",
+                "120"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "13",
+                "0",
+                "10",
+                "130"
+              ]
+            ],
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "11",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "12",
+                "100",
+                "0",
+                "100"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "13",
+                "100",
+                "0",
+                "100"
+              ]
+            ],
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "fees_usdt": "0",
+            "initial_nav": "100",
+            "points": [
+              [
+                "2020-01-01T00:00:00+00:00",
+                "10",
+                "50",
+                "5",
+                "100"
+              ],
+              [
+                "2020-01-02T00:00:00+00:00",
+                "11",
+                "50",
+                "5",
+                "105"
+              ],
+              [
+                "2020-01-03T00:00:00+00:00",
+                "12",
+                "50",
+                "5",
+                "110"
+              ],
+              [
+                "2020-01-04T00:00:00+00:00",
+                "13",
+                "50",
+                "5",
+                "115"
+              ]
+            ],
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          }
+        ],
+        "aggregates": [],
+        "analysis_manifest": {
+          "accounts": [
+            "BTC_HOLD",
+            "CASH",
+            "MIX"
+          ],
+          "analytics_version": "G4_ANALYTICS_V1",
+          "expected_result_sha256": "dc61e71de47a29bbc21dc700f75307d7345011cdd2c6daa376e42eab18f5691d",
+          "implementation_sha256": "099b49271410e3b3bb3caf9b91231cb414af9fb3af7e3a79c46c630b8c895df7",
+          "manifest_sha256": "8487e0cc3ed1550a56e3f534d888a037bc318e694e38bad2ebecb8e96be7c4eb",
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ],
+          "pack_sha256": "e393055d5f854f47042956aa705e41f93ac03a965a7f7b9a3aa3919660a5e79e",
+          "provenance": "DECLARED_NOT_AUTHENTICATED",
+          "redistribution": "PUBLIC",
+          "schema": "GRIDBOT_ANALYSIS_V1"
+        },
+        "analytics_version": "G4_ANALYTICS_V1",
+        "data_nature": "SYNTHETIC",
+        "descriptive": [
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 0,
+            "overlapping": false,
+            "policy": "BTC_HOLD",
+            "return_max": "0.3",
+            "return_min": "0.3",
+            "violations": 0,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 0,
+            "overlapping": false,
+            "policy": "CASH",
+            "return_max": "0",
+            "return_min": "0",
+            "violations": 0,
+            "windows": 1
+          },
+          {
+            "complete_risk_windows": 1,
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "defined_returns": 1,
+            "duration_seconds": 259200,
+            "inference": "DESCRIPTIVE_DEPENDENT_WINDOWS_NO_CONFIDENCE_INTERVAL",
+            "initial_nav": "100",
+            "losses": 0,
+            "overlapping": false,
+            "policy": "MIX",
+            "return_max": "0.15",
+            "return_min": "0.15",
+            "violations": 0,
+            "windows": 1
+          }
+        ],
+        "export_scope": "RAW_AND_DERIVED",
+        "integrity": "SHA256_AND_CONSERVATION_VALIDATED",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "8487e0cc3ed1550a56e3f534d888a037bc318e694e38bad2ebecb8e96be7c4eb",
+        "numeric_contract": "EXACT_RATIONAL_DECIMAL_V2",
+        "pack_sha256": "e393055d5f854f47042956aa705e41f93ac03a965a7f7b9a3aa3919660a5e79e",
+        "pareto": {
+          "meaning": "WITHIN_COMPARABLE_GROUPS_NOT_GLOBAL_WINNER",
+          "non_dominated": [
+            "BTC_HOLD"
+          ],
+          "objectives": [
+            "nav_final",
+            "btc_physical",
+            "max_drawdown"
+          ]
+        },
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "rows": [
+          {
+            "account_id": "BTC_HOLD",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "10",
+              "delta_nav": "30",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "0.3",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "BTC_HOLD",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "746363b86368df03321e4c0611d752beace94868c62c596c07111c58a21b1b95",
+              "sha256": "97ef6434fae80dfaff6ba9a28f54039c0ed1e5e3c992114caa979000bdc03fd1",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "1840b9234239064e0cc65e0ccda720e526b063c6108e10fc0b3467c35a04a8c3",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "10",
+              "btc_physical": "10",
+              "cash_usdt": "0",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "10",
+                "btc_physical": "10",
+                "cash_usdt": "0",
+                "exposure_mean_left": "1",
+                "fees_usdt": "0",
+                "max_drawdown": "0",
+                "nav_final": "130",
+                "nav_initial": "100",
+                "return_ratio": "3/10",
+                "return_usdt": "30"
+              },
+              "exposure_final": "1",
+              "exposure_mean_left": "1",
+              "fees_usdt": "0",
+              "max_drawdown": "0",
+              "nav_final": "130",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "0.3",
+              "return_usdt": "30",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "20",
+                "drawdowns": [
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "episodes": [],
+                "gaps": [],
+                "max_drawdown": "0",
+                "max_drawdown_fraction": "0",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 0,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 0,
+              "valid_sample_returns": 3
+            },
+            "policy": "BTC_HOLD",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          },
+          {
+            "account_id": "CASH",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "0",
+              "delta_nav": "0",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "0",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "CASH",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "70e36f1ea0b7cee25cc49cc90a125cc92df093fa1d692526fc13735ba9bbfa7c",
+              "sha256": "97ef6434fae80dfaff6ba9a28f54039c0ed1e5e3c992114caa979000bdc03fd1",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "1840b9234239064e0cc65e0ccda720e526b063c6108e10fc0b3467c35a04a8c3",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "7.6923076923076923076923076923076923076923076923077",
+              "btc_physical": "0",
+              "cash_usdt": "100",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "100/13",
+                "btc_physical": "0",
+                "cash_usdt": "100",
+                "exposure_mean_left": "0",
+                "fees_usdt": "0",
+                "max_drawdown": "0",
+                "nav_final": "100",
+                "nav_initial": "100",
+                "return_ratio": "0",
+                "return_usdt": "0"
+              },
+              "exposure_final": "0",
+              "exposure_mean_left": "0",
+              "fees_usdt": "0",
+              "max_drawdown": "0",
+              "nav_final": "100",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "0",
+              "return_usdt": "0",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "20",
+                "drawdowns": [
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "episodes": [],
+                "gaps": [],
+                "max_drawdown": "0",
+                "max_drawdown_fraction": "0",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 0,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 0,
+              "valid_sample_returns": 3
+            },
+            "policy": "CASH",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          },
+          {
+            "account_id": "MIX",
+            "benchmark": "CASH",
+            "benchmark_comparison": {
+              "delta_btc": "5",
+              "delta_nav": "15",
+              "reference": "CASH",
+              "relative_btc": null,
+              "relative_nav": "0.15",
+              "status": "COMPARABLE"
+            },
+            "cost_scenario": "SYNTHETIC_ZERO_COST",
+            "end": "2020-01-04T00:00:00+00:00",
+            "evidence": {
+              "account_id": "MIX",
+              "file": "results.json",
+              "final_point_index": 3,
+              "series_sha256": "a54f48d705f47907d5b7b11752640ca84efd3e2b0ace87ab0aa3727a00f65f93",
+              "sha256": "97ef6434fae80dfaff6ba9a28f54039c0ed1e5e3c992114caa979000bdc03fd1",
+              "timestamp": "2020-01-04T00:00:00+00:00",
+              "units": [
+                "UTC",
+                "USDT_PER_BTC",
+                "USDT",
+                "BTC",
+                "USDT"
+              ]
+            },
+            "group_id": "1840b9234239064e0cc65e0ccda720e526b063c6108e10fc0b3467c35a04a8c3",
+            "metrics": {
+              "annualized_reason": "ANNUALIZATION_DAY_COUNT_NOT_DEFINED_IN_V1",
+              "annualized_return": null,
+              "btc_change": "0",
+              "btc_equivalent": "8.8461538461538461538461538461538461538461538461538",
+              "btc_physical": "5",
+              "cash_usdt": "50",
+              "exact": {
+                "btc_change": "0",
+                "btc_equivalent": "115/13",
+                "btc_physical": "5",
+                "cash_usdt": "50",
+                "exposure_mean_left": "725/1386",
+                "fees_usdt": "0",
+                "max_drawdown": "0",
+                "nav_final": "115",
+                "nav_initial": "100",
+                "return_ratio": "3/20",
+                "return_usdt": "15"
+              },
+              "exposure_final": "0.56521739130434782608695652173913043478260869565217",
+              "exposure_mean_left": "0.52308802308802308802308802308802308802308802308802",
+              "fees_usdt": "0",
+              "max_drawdown": "0",
+              "nav_final": "115",
+              "nav_initial": "100",
+              "observed_seconds": 259200,
+              "return_ratio": "0.15",
+              "return_usdt": "15",
+              "risk": {
+                "definition": "G4_SEGMENTED_HIGH_WATER_V1",
+                "distance_to_20_pp": "20",
+                "drawdowns": [
+                  "0",
+                  "0",
+                  "0",
+                  "0"
+                ],
+                "episodes": [],
+                "gaps": [],
+                "max_drawdown": "0",
+                "max_drawdown_fraction": "0",
+                "risk_complete": true,
+                "sampling_seconds": 86400,
+                "status": "OBSERVED_SEGMENTS_ONLY",
+                "violates_20_percent": false
+              },
+              "sample_loss_count": 0,
+              "sampled_seconds": 259200,
+              "underwater_seconds_left": 0,
+              "valid_sample_returns": 3
+            },
+            "policy": "MIX",
+            "start": "2020-01-01T00:00:00+00:00",
+            "window_id": "favorable"
+          }
+        ],
+        "source_kind": "SYNTHETIC_DEMO",
+        "status": "VALIDATED_OBSERVATIONS"
+      },
+      "study": {
+        "benchmarks": [
+          "CASH"
+        ],
+        "costs": [
+          "SYNTHETIC_ZERO_COST"
+        ],
+        "created_at": "2020-01-01T00:00:00+00:00",
+        "currency": "USDT",
+        "data_nature": "SYNTHETIC",
+        "dataset_identity": "favorable",
+        "deletable": false,
+        "end": "2020-01-04T00:00:00+00:00",
+        "export_scope": "RAW_AND_DERIVED",
+        "files": {
+          "results.json": {
+            "bytes": 1348,
+            "sha256": "97ef6434fae80dfaff6ba9a28f54039c0ed1e5e3c992114caa979000bdc03fd1"
+          }
+        },
+        "flow_convention": "NO_EXTERNAL_FLOWS_DECLARED",
+        "id": "e393055d5f854f47042956aa705e41f93ac03a965a7f7b9a3aa3919660a5e79e",
+        "integrity": "VALIDATED",
+        "license": "CC0-1.0",
+        "limitations": [
+          "Preços inteiramente fictícios",
+          "Sem fluxos externos declarados",
+          "Taxas zero apenas nesta fixture matemática",
+          "Não é desempenho de estratégia"
+        ],
+        "manifest_sha256": "8487e0cc3ed1550a56e3f534d888a037bc318e694e38bad2ebecb8e96be7c4eb",
+        "marks": 12,
+        "origin": "BUNDLED",
+        "pack_id": "favorable",
+        "policies": [
+          "BTC_HOLD",
+          "CASH",
+          "MIX"
+        ],
+        "producer_version": "G4_FIXTURES_V1",
+        "provenance": "DECLARED_NOT_AUTHENTICATED",
+        "redistribution": "PUBLIC",
+        "sampling_seconds": 86400,
+        "schema_version": 1,
+        "source_kind": "SYNTHETIC_DEMO",
+        "start": "2020-01-01T00:00:00+00:00",
+        "study_identity": "favorable",
+        "timezone": "UTC",
+        "title": "SYNTHETIC DEMO favorable",
+        "units": [
+          "UTC",
+          "USDT_PER_BTC",
+          "USDT",
+          "BTC",
+          "USDT"
+        ],
+        "wallets": 3
+      }
+    }
+  ],
+  "nature": "SYNTHETIC_DEMO_ONLY"
+}

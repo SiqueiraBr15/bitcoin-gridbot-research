@@ -39,6 +39,10 @@ dev-mode-dirs = ["src", "."]
 [tool.hatch.build.targets.wheel.force-include]
 "docs/G4_EVIDENCE_PACK_V1.md" = "research_console/help/EVIDENCE_PACK_V1.md"
 "docs/G4_RESEARCH_LAB.md" = "research_console/help/RESEARCH_LAB.md"
+"docs/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md" = "research_console/help/G5_GUIDED_EVIDENCE_REVIEW_CONTRACT.md"
+"docs/G5_GUIDED_EVIDENCE_REVIEW_UX.md" = "research_console/help/G5_GUIDED_EVIDENCE_REVIEW_UX.md"
+"docs/G5_IMPLEMENTATION_ACCEPTANCE_MATRIX.md" = "research_console/help/G5_IMPLEMENTATION_ACCEPTANCE_MATRIX.md"
+"docs/G5_GUIDED_REVIEW.md" = "research_console/help/G5_GUIDED_REVIEW.md"
 
 # ---------------------------------------------------------------- ruff
 [tool.ruff]

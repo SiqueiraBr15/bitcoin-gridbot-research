@@ -1,4 +1,4 @@
-# Offline Research Lab — G4, endurecido na G4.1
+# Offline Research Lab — G4 integrada à main
 
 Biblioteca local para inspecionar resultados existentes, comparar patrimônio,
 BTC físico, custos e risco e reproduzir análises. Não executa estratégias
@@ -7,10 +7,11 @@ observações matemáticas fictícias, sem significado de desempenho de mercado.
 
 ## Abrir
 
-Instale conforme [o guia do console](RESEARCH_CONSOLE.md). Nesta candidata local,
-use a branch local `release/g4-offline-research-lab`; a G4 ainda não foi publicada.
-O clone da main remota ainda contém G1–G3. A seleção dessa candidata depende do
-checkout local existente ou de uma publicação posterior explicitamente autorizada.
+Instale conforme [o guia do console](RESEARCH_CONSOLE.md). A G4 foi integrada
+à main pelo [PR #2](https://github.com/SiqueiraBr15/bitcoin-gridbot-research/pull/2),
+merge `acaa6879877c8a081a127f3ea8a0cdbb840b88cd`. O clone padrão já contém
+o Lab; não é necessário checkout de candidata. A versão continua
+`0.1.0.dev0`, sem release/tag formal criada nesse checkpoint.
 
 ```powershell
 .\.venv\Scripts\python.exe -m research_console --port 8769
@@ -256,7 +257,7 @@ O primeiro comando mede somente o console, não toda a base. Consulte a
 [auditoria G4](reviews/G4_OFFLINE_RESEARCH_LAB_IMPLEMENTATION_AUDIT.md) para evidências,
 falhas encontradas e limites. Windows foi exercitado; Linux/macOS não foram testados.
 Não há prontidão para produção ou vantagem econômica comprovada por estes exemplos.
-Os gates atuais da candidata e a consolidação por nodeid são apresentados na
+Os gates históricos G4.1 e a consolidação daquela fase são apresentados na
 [auditoria G4.1](reviews/G4_1_RESEARCH_LAB_HARDENING_AND_GLOBAL_QUALITY_AUDIT.md).
 Indicadores G3.1 exibidos no catálogo continuam identificados como históricos.
 
@@ -300,3 +301,21 @@ Falhas internas de análise são distintas de dados inválidos. A interface não
 deve conservar tabelas/gráficos de uma seleção anterior ao mostrar falha de outra.
 Nenhuma mensagem de sucesso substitui validação de conservação, autorização de
 exportação, replay ou conferência de proveniência.
+
+## Estado integrado e continuidade
+
+A validação global histórica G4.8 (27/10/2026 UTC) registrou 3.633 Python PASS,
+dois skips preexistentes e cobertura de 96,46987628%, threshold de 85%. A G4.10
+(27–28/10/2026 UTC) aprovou 171 Python/um skip e 46 JavaScript, wheel e
+regressões independentes. A G4.12 verificou merge/397 blobs e instalação limpa.
+Esses números não são novos testes desta revisão documental. Actions permanece
+desativado; Linux/macOS não foram validados.
+
+O P3 diagnóstico Windows10053 permanece: tentativa redundante de 422 depois de
+desconexão, sem entrega e com recuperação já verificada. Cancelar HTTP não
+interrompe necessariamente CPU no servidor sequencial. Sem promessa de latência.
+
+Revisão Guiada G5.2 está implementada localmente, sujeita à revisão independente.
+Consulte [o guia](G5_GUIDED_REVIEW.md), o contrato G5.1 e a matriz preservada.
+O wheel G5.2 inclui os dois guias G4 e os quatro documentos G5 de uso/contrato/UX/
+matriz em research_console/help. Auditorias completas continuam no checkout.

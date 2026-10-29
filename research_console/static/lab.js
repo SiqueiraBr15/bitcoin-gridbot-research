@@ -45,9 +45,10 @@
     if (description) p.append(node("p", description, "explain"));
     return p;
   };
-  const button = (label, action, cls = "action") => {
+  const button = (label, action, cls = "action", id = "") => {
     const b = node("button", label, cls);
     b.type = "button";
+    if (id) b.id = id;
     b.disabled = busy;
     b.addEventListener("click", () => {
       const target = root;
@@ -139,9 +140,39 @@
     objectives = ["nav_final", "btc_physical", "max_drawdown"],
     focus = "";
   let message = "",
+    actionError = false,
     busy = false,
     analysisState = "DATA_UNAVAILABLE",
     importState = "IMPORT_IDLE";
+  const guideModel = global.GridGuidedReview;
+  const review = guideModel ? new guideModel.State() : null;
+  let reviewMode = guideModel ? "guided" : "detailed",
+    reviewStep = 1;
+  try {
+    if (guideModel) {
+      const pref = guideModel.preference(
+        JSON.parse(sessionStorage.getItem("gridbot.g5.review") || "{}"),
+      );
+      reviewMode = pref.mode;
+      reviewStep = pref.step;
+    }
+  } catch {
+    /* Corrupt preferences never become data authority. */
+  }
+  function reviewPreference() {
+    try {
+      sessionStorage.setItem(
+        "gridbot.g5.review",
+        JSON.stringify({ mode: reviewMode, step: reviewStep }),
+      );
+    } catch {}
+  }
+  function goReview(step) {
+    reviewStep = step;
+    reviewPreference();
+    paint();
+    root?.querySelector(".review-step-title")?.focus();
+  }
   let controller = new AbortController();
   let catalogController = new AbortController(),
     catalogRevision = 0;
@@ -200,10 +231,13 @@
       };
       const error = new Error(
         descriptions[problem.reason] ||
-          (response.status >= 500
-            ? "Falha interna do serviço de análise. Tente novamente."
-            : "Schema ou dados inválidos. O pack exige manifesto e resultados válidos."),
+          (response.status === 403
+            ? "Sessão local expirada ou origem recusada. Recarregue a página."
+            : response.status >= 500
+              ? "Falha interna do serviço de análise. Tente novamente."
+              : "Schema ou dados inválidos. O pack exige manifesto e resultados válidos."),
       );
+      error.status = response.status;
       error.reason = Object.hasOwn(descriptions, problem.reason)
         ? problem.reason
         : "";
@@ -228,7 +262,9 @@
   }
   function showError(error, prefix = "") {
     busy = false;
+    actionError = true;
     if (error instanceof NumericFormatError) {
+      review?.fail(review.generation, error);
       analysis = null;
       analysisState = "ANALYSIS_FAILURE";
     }
@@ -251,6 +287,12 @@
     controller.abort();
     controller = new AbortController();
     const ticket = ++revision;
+    const reviewTicket = review?.begin({
+      accounts: keep ? chosen : null,
+      objectives,
+    });
+    actionError = false;
+    if (!keep) reviewStep = 1;
     study = s;
     analysis = null;
     analysisState = "ANALYSIS_PENDING";
@@ -267,7 +309,10 @@
     try {
       const result = await json("/api/lab/analysis?" + params());
       if (ticket !== revision || !model.canPaint(root)) return;
+      if (review && !review.commit(reviewTicket, s, result)) return;
       analysis = result;
+      if (!result.rows.some((r) => r.account_id === focus))
+        focus = result.rows[0]?.account_id || "";
       analysisState = "ANALYSIS_SUCCESS";
       if (!keep) availableAccounts = result.accounts.map((a) => a.account_id);
       message =
@@ -276,6 +321,7 @@
       // This operation owns its revision. The import button's earlier ticket
       // must not swallow a current analysis failure after selectStudy increments it.
       if (ticket === revision && error?.name !== "AbortError") {
+        review?.fail(reviewTicket, error);
         analysis = null;
         analysisState =
           error?.reason === "DATA_UNAVAILABLE"
@@ -308,16 +354,44 @@
     )
       return;
     studies = data.studies;
+    const currentStudy = studies.find((s) => s.id === study?.id);
+    if (study && currentStudy?.integrity !== "VALIDATED") {
+      controller.abort();
+      controller = new AbortController();
+      revision++;
+      review?.invalidate();
+      review?.fail(
+        review.generation,
+        currentStudy
+          ? { status: 422, reason: "INTEGRITY_MISMATCH" }
+          : { reason: "DATA_UNAVAILABLE" },
+      );
+      busy = false;
+      analysis = null;
+      study = null;
+      reviewStep = 1;
+      analysisState = "DATA_UNAVAILABLE";
+      message =
+        "Estudo indisponível ou inválido. Escolha uma evidência válida.";
+    }
     capabilities.persistence = data.persistence_enabled === true;
     capabilities.archiveAdapter = data.archive_adapter;
     Object.assign(context, capabilities);
     paint();
   }
   async function download(url, filename) {
-    const ticket = revision;
-    const blob = await (await request(url)).blob();
-    if (ticket !== revision || !model.canPaint(root)) return;
-    saveBlob(blob, filename);
+    const ticket = revision,
+      binding = review?.identity;
+    review?.action("export", "RUNNING", binding);
+    try {
+      const blob = await (await request(url)).blob();
+      if (ticket !== revision || !model.canPaint(root)) return;
+      saveBlob(blob, filename);
+      review?.action("export", "COMPLETED", binding);
+    } catch (error) {
+      if (ticket === revision) review?.action("export", "FAILED", binding);
+      throw error;
+    }
   }
   function saveBlob(blob, filename) {
     const url = URL.createObjectURL(blob),
@@ -346,9 +420,11 @@
           : "Prévia em memória disponível. Para persistir, inicie com --lab-dir apontando para uma pasta nova ou exclusiva do laboratório.",
     );
     const file = node("input");
+    file.id = "review-import-file";
     file.type = "file";
     file.accept = ".gbpack,.zip";
     const pin = node("input");
+    pin.id = "review-import-pin";
     pin.type = "text";
     pin.maxLength = 64;
     pin.placeholder = "Opcional · fornecido por outra fonte";
@@ -357,42 +433,47 @@
       field("SHA-256 externo opcional", pin),
     );
     box.append(
-      button("Validar prévia do arquivo", async () => {
-        preview = null;
-        const ticket = revision;
-        const selected = file.files?.[0];
-        if (!selected) throw new Error("Escolha um arquivo local.");
-        if (selected.size > 2097152) throw new Error("O pack excede 2 MiB.");
-        const expectedPin = pin.value.trim().toLowerCase();
-        if (expectedPin && !/^[a-f0-9]{64}$/.test(expectedPin))
-          throw new Error("SHA-256 externo inválido.");
-        busy = true;
-        message = "Lendo somente o arquivo escolhido…";
-        paint();
-        try {
-          const data = await json("/api/lab/preview", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/zip",
-              "X-GridBot-Lab": "1",
-            },
-            body: await selected.arrayBuffer(),
-          });
-          if (ticket !== revision || !model.canPaint(root)) return;
-          if (expectedPin && data.study.id !== expectedPin)
-            throw new Error(
-              "O SHA-256 externo diverge. Importação não confirmada.",
-            );
-          preview = data;
-          message =
-            "Prévia validada. Hash não comprova autoria. Confirme as permissões de uso.";
-        } finally {
-          if (ticket === revision) {
-            busy = false;
-            paint();
+      button(
+        "Validar prévia do arquivo",
+        async () => {
+          preview = null;
+          const ticket = revision;
+          const selected = file.files?.[0];
+          if (!selected) throw new Error("Escolha um arquivo local.");
+          if (selected.size > 2097152) throw new Error("O pack excede 2 MiB.");
+          const expectedPin = pin.value.trim().toLowerCase();
+          if (expectedPin && !/^[a-f0-9]{64}$/.test(expectedPin))
+            throw new Error("SHA-256 externo inválido.");
+          busy = true;
+          message = "Lendo somente o arquivo escolhido…";
+          paint();
+          try {
+            const data = await json("/api/lab/preview", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/zip",
+                "X-GridBot-Lab": "1",
+              },
+              body: await selected.arrayBuffer(),
+            });
+            if (ticket !== revision || !model.canPaint(root)) return;
+            if (expectedPin && data.study.id !== expectedPin)
+              throw new Error(
+                "O SHA-256 externo diverge. Importação não confirmada.",
+              );
+            preview = data;
+            message =
+              "Prévia validada. Hash não comprova autoria. Confirme as permissões de uso.";
+          } finally {
+            if (ticket === revision) {
+              busy = false;
+              paint();
+            }
           }
-        }
-      }),
+        },
+        "action",
+        "review-validate-preview",
+      ),
     );
     if (preview) {
       box.append(
@@ -410,8 +491,12 @@
       const action = button("Confirmar importação local", async () => {
         if (!confirm.checked)
           throw new Error("Marque a confirmação explícita antes de persistir.");
-        const ticket = revision,
+        const ticket = ++revision,
           token = preview.preview_token;
+        controller.abort();
+        controller = new AbortController();
+        review?.invalidate();
+        study = null;
         busy = true;
         importState = "IMPORT_PENDING";
         analysisState = "DATA_UNAVAILABLE";
@@ -455,9 +540,11 @@
       "Três packs pequenos de observações fictícias. Dados históricos só existem quando uma origem é autorizada explicitamente; resumos agregados não substituem séries.",
     );
     const search = node("input");
+    search.id = "review-library-search";
     search.type = "search";
     search.value = query;
     const type = node("select");
+    type.id = "review-library-source";
     [
       "",
       "SYNTHETIC_DEMO",
@@ -471,6 +558,7 @@
     });
     type.value = kind;
     const order = node("select");
+    order.id = "review-library-order";
     [
       ["title", "Nome"],
       ["start", "Data inicial"],
@@ -521,7 +609,12 @@
             `${(s.start || "").slice(0, 10)} → ${(s.end || "").slice(0, 10)} · UTC`,
           ),
         );
-        const b = button("Analisar " + s.title, () => selectStudy(s));
+        const b = button(
+          "Analisar " + s.title,
+          () => selectStudy(s),
+          "action",
+          "review-study-" + s.id,
+        );
         b.disabled = s.integrity !== "VALIDATED";
         card.append(b, details(s));
         if (s.export_scope === "RAW_AND_DERIVED")
@@ -555,6 +648,8 @@
                 if (ticket !== revision || !model.canPaint(root)) return;
                 busy = false;
                 if (study?.id === s.id) {
+                  review?.invalidate();
+                  reviewStep = 1;
                   analysis = null;
                   study = null;
                 }
@@ -679,51 +774,7 @@
         "Pareto: políticas não dominadas apenas em condições equivalentes. Não é recomendação nem evidência de desempenho futuro.",
       ),
     );
-    const controls = node("div", null, "lab-controls");
-    const accountChoices = node("fieldset");
-    accountChoices.append(node("legend", "Contas incluídas"));
-    const originalIds = availableAccounts;
-    const newChosen = new Set(chosen || originalIds);
-    originalIds.forEach((id) => {
-      const c = node("input");
-      c.type = "checkbox";
-      c.checked = newChosen.has(id);
-      c.addEventListener("change", () => {
-        if (c.checked) newChosen.add(id);
-        else newChosen.delete(id);
-      });
-      accountChoices.append(field(id, c));
-    });
-    const objectiveChoices = node("fieldset");
-    objectiveChoices.append(node("legend", "Objetivos de Pareto · sem pesos"));
-    const nextObjectives = new Set(objectives);
-    [
-      ["nav_final", "Maximizar NAV"],
-      ["btc_physical", "Maximizar BTC físico"],
-      ["max_drawdown", "Minimizar drawdown"],
-      ["fees_usdt", "Minimizar taxas"],
-    ].forEach(([key, title]) => {
-      const c = node("input");
-      c.type = "checkbox";
-      c.checked = nextObjectives.has(key);
-      c.addEventListener("change", () => {
-        if (c.checked) nextObjectives.add(key);
-        else nextObjectives.delete(key);
-      });
-      objectiveChoices.append(field(title, c));
-    });
-    controls.append(
-      accountChoices,
-      objectiveChoices,
-      button("Aplicar seleção analítica", () => {
-        if (!newChosen.size || !nextObjectives.size)
-          throw new Error("Selecione ao menos uma conta e um objetivo.");
-        chosen = [...newChosen].sort();
-        objectives = [...nextObjectives].sort();
-        return selectStudy(study, true);
-      }),
-    );
-    summary.append(controls);
+    selectionControls(summary);
     table(
       summary,
       [
@@ -797,6 +848,7 @@
     if (!focus || !analysis.rows.some((r) => r.account_id === focus))
       focus = analysis.rows[0]?.account_id || "";
     const select = node("select");
+    select.id = "review-account-focus";
     analysis.rows.forEach((r) => {
       const o = node("option", r.account_id);
       o.value = r.account_id;
@@ -814,6 +866,14 @@
     evidence.append(field("Conta para investigar", select));
     const row = analysis.rows.find((r) => r.account_id === focus);
     if (row) {
+      const selected = node(
+        "p",
+        `Conta selecionada: ${row.account_id}`,
+        "review-context",
+      );
+      selected.id = "review-selected-account";
+      selected.setAttribute("aria-hidden", "true");
+      evidence.append(selected);
       const risk = row.metrics.risk;
       const riskStatus = node(
         "p",
@@ -863,6 +923,116 @@
       );
     }
     parent.append(evidence);
+    analysisCharts(parent);
+    const robustness = panel(
+      "Robustez descritiva",
+      "Janelas sobrepostas são dependentes. Não há intervalo de confiança, causalidade, agregação como execução contínua ou busca de parâmetros vencedores.",
+    );
+    table(
+      robustness,
+      [
+        "Política",
+        "Custo",
+        "Duração s",
+        "Janelas",
+        "Perdas",
+        "Violações",
+        "Risco completo",
+        "Retorno mín.",
+        "Retorno máx.",
+        "Sobreposição",
+      ],
+      analysis.descriptive.map((d) => [
+        d.policy,
+        d.cost_scenario,
+        d.duration_seconds,
+        d.windows,
+        d.losses,
+        d.violations,
+        d.complete_risk_windows,
+        d.return_min,
+        d.return_max,
+        d.overlapping,
+      ]),
+    );
+    parent.append(robustness);
+    analysisActions(parent);
+  }
+  function selectionControls(parent) {
+    if (!analysis.accounts.length) return;
+    const controls = node("div", null, "lab-controls");
+    const accountChoices = node("fieldset");
+    accountChoices.append(node("legend", "Contas incluídas"));
+    const originalIds = availableAccounts;
+    const newChosen = new Set(chosen || originalIds);
+    originalIds.forEach((id) => {
+      const c = node("input");
+      c.type = "checkbox";
+      c.checked = newChosen.has(id);
+      c.addEventListener("change", () => {
+        if (c.checked) newChosen.add(id);
+        else newChosen.delete(id);
+      });
+      accountChoices.append(field(id, c));
+    });
+    const objectiveChoices = node("fieldset");
+    objectiveChoices.append(node("legend", "Objetivos de Pareto · sem pesos"));
+    const nextObjectives = new Set(objectives);
+    [
+      ["nav_final", "Maximizar NAV"],
+      ["btc_physical", "Maximizar BTC físico"],
+      ["max_drawdown", "Minimizar drawdown"],
+      ["fees_usdt", "Minimizar taxas"],
+    ].forEach(([key, title]) => {
+      const c = node("input");
+      c.type = "checkbox";
+      c.checked = nextObjectives.has(key);
+      c.addEventListener("change", () => {
+        if (c.checked) nextObjectives.add(key);
+        else nextObjectives.delete(key);
+      });
+      objectiveChoices.append(field(title, c));
+    });
+    controls.append(
+      accountChoices,
+      objectiveChoices,
+      button(
+        "Aplicar seleção analítica",
+        () => {
+          if (!newChosen.size || !nextObjectives.size)
+            throw new Error("Selecione ao menos uma conta e um objetivo.");
+          chosen = [...newChosen].sort();
+          objectives = [...nextObjectives].sort();
+          return selectStudy(study, true);
+        },
+        "action",
+        "review-apply-selection",
+      ),
+    );
+    parent.append(controls);
+    const current =
+      analysis.rows.find((r) => r.account_id === focus) || analysis.rows[0];
+    if (
+      current?.benchmark &&
+      availableAccounts.includes(current.benchmark) &&
+      !analysis.rows.some((r) => r.account_id === current.benchmark)
+    ) {
+      parent.append(
+        button(
+          "Incluir benchmark declarado na seleção",
+          () => {
+            chosen = [
+              ...new Set([...(chosen || availableAccounts), current.benchmark]),
+            ].sort();
+            return selectStudy(study, true);
+          },
+          "secondary",
+          "review-include-benchmark",
+        ),
+      );
+    }
+  }
+  function analysisCharts(parent, fields = ["nav", "drawdown"]) {
     if (analysis.accounts.length) {
       const converted = analysis.accounts.map((a) => {
         const row = analysis.rows.find((r) => r.account_id === a.account_id),
@@ -909,19 +1079,26 @@
         sampling_seconds: study.sampling_seconds,
         risk_definition: "G4_SEGMENTED_HIGH_WATER_V1",
       };
-      GridCharts.lineChart(parent, {
-        accounts: converted,
-        field: "nav",
-        unit: "USDT",
-        title: "Marcas validadas · NAV em USDT",
-        selected: focus,
-        labels: Object.create(null),
-        context: chartContext,
-      });
+      for (const graphField of fields.filter((f) =>
+        ["nav", "btc"].includes(f),
+      )) {
+        GridCharts.lineChart(parent, {
+          accounts: converted,
+          field: graphField,
+          unit: graphField === "nav" ? "USDT" : "BTC",
+          title:
+            graphField === "nav"
+              ? "Marcas validadas · NAV em USDT"
+              : "Marcas validadas · BTC físico",
+          selected: focus,
+          labels: Object.create(null),
+          context: chartContext,
+        });
+      }
       const riskAccounts = converted.filter((a) =>
         a.series.every((p) => p.drawdown != null),
       );
-      if (riskAccounts.length)
+      if (fields.includes("drawdown") && riskAccounts.length)
         GridCharts.lineChart(parent, {
           accounts: riskAccounts,
           field: "drawdown",
@@ -932,193 +1109,213 @@
           context: chartContext,
         });
     }
-    const robustness = panel(
-      "Robustez descritiva",
-      "Janelas sobrepostas são dependentes. Não há intervalo de confiança, causalidade, agregação como execução contínua ou busca de parâmetros vencedores.",
-    );
-    table(
-      robustness,
-      [
-        "Política",
-        "Custo",
-        "Duração s",
-        "Janelas",
-        "Perdas",
-        "Violações",
-        "Risco completo",
-        "Retorno mín.",
-        "Retorno máx.",
-        "Sobreposição",
-      ],
-      analysis.descriptive.map((d) => [
-        d.policy,
-        d.cost_scenario,
-        d.duration_seconds,
-        d.windows,
-        d.losses,
-        d.violations,
-        d.complete_risk_windows,
-        d.return_min,
-        d.return_max,
-        d.overlapping,
-      ]),
-    );
-    parent.append(robustness);
+  }
+  async function replayCurrent(manifest) {
+    const ticket = revision,
+      binding = review?.identity;
+    review?.action("replay", "RUNNING", binding);
+    paint();
+    try {
+      const result = await post("/api/lab/replay", { id: study.id, manifest });
+      if (ticket !== revision || !model.canPaint(root)) return;
+      if (
+        result.status !== "EQUIVALENT" ||
+        result.result_sha256 !==
+          analysis.analysis_manifest.expected_result_sha256
+      )
+        throw new Error("Replay não equivalente à seleção atual.");
+      review?.action("replay", "EQUIVALENT", binding);
+      message = "Replay EQUIVALENT · nenhuma estratégia executada";
+    } catch (error) {
+      if (ticket === revision) review?.action("replay", "FAILED", binding);
+      throw error;
+    } finally {
+      if (ticket === revision && model.canPaint(root)) paint();
+    }
+  }
+  function analysisActions(
+    parent,
+    { replay = true, download: showDownload = true } = {},
+  ) {
     const exports = panel(
       "Reprodução e exportação",
-      "Replay recalcula análises dos mesmos dados e código. Não executa estratégias históricas. As restrições declaradas são aplicadas no servidor.",
+      "Mesmos dados e código; direitos continuam controlados pelo servidor.",
     );
-    const reviewed = node("input");
-    reviewed.type = "checkbox";
-    if (
-      (!analysis.export_scope ||
-        (analysis.export_scope === "DERIVED_ONLY" &&
-          analysis.redistribution === "PUBLIC")) &&
-      analysis.redistribution !== "RESTRICTED"
-    ) {
-      exports.append(
-        node(
-          "p",
-          analysis.export_scope
-            ? "Autorização atual: somente derivados. Dados brutos e SVG continuam bloqueados. Uma ampliação exige nova confirmação dos direitos."
-            : "Exportação bloqueada: a licença declarada pelo pack não comprova direitos. Autorize somente após verificar uma base independente. A autorização vale apenas nesta sessão e para estes bytes.",
-        ),
-      );
-      const basis = node("select"),
-        scope = node("select"),
-        consent = node("input");
-      consent.type = "checkbox";
-      for (const [value, text] of [
-        ["OWN_DATA", "Dados próprios"],
-        ["VERIFIED_PUBLIC_LICENSE", "Licença pública verificada fora do pack"],
-        ["RIGHTSHOLDER_PERMISSION", "Permissão do titular dos direitos"],
-      ]) {
-        const option = node("option", text);
-        option.value = value;
-        basis.append(option);
+    if (showDownload) {
+      const reviewed = node("input");
+      reviewed.type = "checkbox";
+      if (
+        (!analysis.export_scope ||
+          (analysis.export_scope === "DERIVED_ONLY" &&
+            analysis.redistribution === "PUBLIC")) &&
+        analysis.redistribution !== "RESTRICTED"
+      ) {
+        exports.append(
+          node(
+            "p",
+            analysis.export_scope
+              ? "Autorização atual: somente derivados. Dados brutos e SVG continuam bloqueados. Uma ampliação exige nova confirmação dos direitos."
+              : "Exportação bloqueada: a licença declarada pelo pack não comprova direitos. Autorize somente após verificar uma base independente. A autorização vale apenas nesta sessão e para estes bytes.",
+          ),
+        );
+        const basis = node("select"),
+          scope = node("select"),
+          consent = node("input");
+        consent.type = "checkbox";
+        for (const [value, text] of [
+          ["OWN_DATA", "Dados próprios"],
+          [
+            "VERIFIED_PUBLIC_LICENSE",
+            "Licença pública verificada fora do pack",
+          ],
+          ["RIGHTSHOLDER_PERMISSION", "Permissão do titular dos direitos"],
+        ]) {
+          const option = node("option", text);
+          option.value = value;
+          basis.append(option);
+        }
+        for (const [value, text] of [
+          ["DERIVED_ONLY", "Somente resultados derivados"],
+          ...(analysis.redistribution === "PUBLIC"
+            ? [["RAW_AND_DERIVED", "Dados brutos e derivados"]]
+            : []),
+        ]) {
+          const option = node("option", text);
+          option.value = value;
+          scope.append(option);
+        }
+        exports.append(
+          field("Base independente dos direitos", basis),
+          field("Escopo da autorização", scope),
+          field(
+            "Verifiquei os direitos fora do pack e autorizo esta exportação",
+            consent,
+          ),
+        );
+        exports.append(
+          button(
+            "Autorizar exportação nesta sessão",
+            async () => {
+              if (!consent.checked)
+                throw new Error(
+                  "Confirme a verificação independente dos direitos.",
+                );
+              const ticket = revision,
+                id = study.id,
+                authorization = {
+                  id,
+                  scope: scope.value,
+                  basis: basis.value,
+                  confirmed: true,
+                };
+              busy = true;
+              paint();
+              const authorized = await post(
+                "/api/lab/authorize-export",
+                authorization,
+              );
+              if (ticket !== revision || !model.canPaint(root)) return;
+              await refresh();
+              if (ticket !== revision || !model.canPaint(root)) return;
+              await selectStudy(authorized, true);
+            },
+            "action",
+            "review-authorize-export",
+          ),
+        );
       }
-      for (const [value, text] of [
-        ["DERIVED_ONLY", "Somente resultados derivados"],
-        ...(analysis.redistribution === "PUBLIC"
-          ? [["RAW_AND_DERIVED", "Dados brutos e derivados"]]
-          : []),
-      ]) {
-        const option = node("option", text);
-        option.value = value;
-        scope.append(option);
-      }
-      exports.append(
-        field("Base independente dos direitos", basis),
-        field("Escopo da autorização", scope),
-        field(
-          "Verifiquei os direitos fora do pack e autorizo esta exportação",
-          consent,
-        ),
-      );
-      exports.append(
-        button("Autorizar exportação nesta sessão", async () => {
-          if (!consent.checked)
-            throw new Error(
-              "Confirme a verificação independente dos direitos.",
-            );
-          const ticket = revision,
-            id = study.id,
-            authorization = {
-              id,
-              scope: scope.value,
-              basis: basis.value,
-              confirmed: true,
-            };
-          busy = true;
-          paint();
-          const authorized = await post(
-            "/api/lab/authorize-export",
-            authorization,
-          );
-          if (ticket !== revision || !model.canPaint(root)) return;
-          await refresh();
-          if (ticket !== revision || !model.canPaint(root)) return;
-          await selectStudy(authorized, true);
-        }),
-      );
-    }
-    if (analysis.redistribution === "AGGREGATES_ONLY")
-      exports.append(
-        field("Revisei e autorizo somente os agregados permitidos", reviewed),
-      );
-    const exportButton = button("Baixar pacote de análise", () => {
-      const p = params();
-      if (analysis.redistribution === "AGGREGATES_ONLY") {
-        if (!reviewed.checked)
-          throw new Error("Revise os agregados antes de exportar.");
-        p.set("reviewed", "1");
-      }
-      return download("/api/lab/export?" + p, "gridbot-analysis.zip");
-    });
-    exportButton.disabled = !analysis.export_scope;
-    const manifestButton = button(
-      "Baixar manifesto da análise",
-      () =>
-        saveBlob(
-          new Blob([JSON.stringify(analysis.analysis_manifest, null, 2)], {
-            type: "application/json",
-          }),
-          "gridbot-analysis-manifest.json",
-        ),
-      "secondary",
-    );
-    manifestButton.disabled = !analysis.export_scope;
-    exports.append(
-      exportButton,
-      manifestButton,
-      button(
-        "Conferir reprodução determinística",
-        async () => {
-          const ticket = revision;
-          const result = await post("/api/lab/replay", {
-            id: study.id,
-            manifest: analysis.analysis_manifest,
-          });
-          if (ticket !== revision || !model.canPaint(root)) return;
-          message = `Replay ${result.status} · nenhuma estratégia executada`;
-          paint();
-        },
+      if (analysis.redistribution === "AGGREGATES_ONLY")
+        exports.append(
+          field("Revisei e autorizo somente os agregados permitidos", reviewed),
+        );
+      const exportButton = button("Baixar pacote de análise", () => {
+        const p = params();
+        if (analysis.redistribution === "AGGREGATES_ONLY") {
+          if (!reviewed.checked)
+            throw new Error("Revise os agregados antes de exportar.");
+          p.set("reviewed", "1");
+        }
+        return download("/api/lab/export?" + p, "gridbot-analysis.zip");
+      });
+      exportButton.id = "review-export";
+      exportButton.disabled = busy || !analysis.export_scope;
+      const manifestButton = button(
+        "Baixar manifesto da análise",
+        () =>
+          saveBlob(
+            new Blob([JSON.stringify(analysis.analysis_manifest, null, 2)], {
+              type: "application/json",
+            }),
+            "gridbot-analysis-manifest.json",
+          ),
         "secondary",
-      ),
-    );
-    const replayFile = node("input");
-    replayFile.type = "file";
-    replayFile.accept = ".json";
-    exports.append(
-      field("Manifesto de outra sessão para reproduzir", replayFile),
-    );
-    exports.append(
-      button(
+      );
+      manifestButton.disabled = busy || !analysis.export_scope;
+      exports.append(exportButton, manifestButton);
+    }
+    if (replay) {
+      const run = button(
+        "Conferir reprodução determinística",
+        () => replayCurrent(analysis.analysis_manifest),
+        "secondary",
+      );
+      run.id = "review-replay";
+      run.disabled = busy || review?.replay === "RUNNING";
+      exports.append(run);
+      const replayFile = node("input");
+      replayFile.id = "review-replay-file";
+      replayFile.type = "file";
+      replayFile.accept = ".json";
+      exports.append(
+        field("Manifesto de outra sessão para reproduzir", replayFile),
+      );
+      const validate = button(
         "Validar manifesto escolhido",
         async () => {
           const ticket = revision,
-            identity = study.id;
-          const f = replayFile.files?.[0];
-          if (!f || f.size > 16000)
-            throw new Error("Escolha um manifesto JSON de até 16 KB.");
-          const manifest = JSON.parse(await f.text());
-          if (ticket !== revision || !model.canPaint(root)) return;
-          const result = await post("/api/lab/replay", {
-            id: identity,
-            manifest,
-          });
-          if (ticket !== revision || !model.canPaint(root)) return;
-          message = `Replay ${result.status}`;
-          paint();
+            identity = study.id,
+            binding = review?.identity;
+          try {
+            const f = replayFile.files?.[0];
+            if (!f || f.size > 16000)
+              throw new Error("Escolha um manifesto JSON de até 16 KB.");
+            review?.action("replay", "RUNNING", binding);
+            paint();
+            const manifest = JSON.parse(await f.text());
+            if (ticket !== revision || !model.canPaint(root)) return;
+            await replayCurrent(manifest);
+          } catch (error) {
+            if (ticket === revision && study?.id === identity)
+              review?.action("replay", "FAILED", binding);
+            throw error;
+          }
         },
         "secondary",
-      ),
-    );
+        "review-validate-manifest",
+      );
+      validate.disabled = busy || review?.replay === "RUNNING";
+      exports.append(validate);
+    }
     exports.append(details(analysis.analysis_manifest));
     parent.append(exports);
   }
   function paint() {
     if (!model.canPaint(root)) return;
+    const ownsFocus = root.contains(document.activeElement);
+    const activeReviewControl = ownsFocus ? document.activeElement?.id : "";
+    const restoreFocus = () => {
+      // Restore only within the subtree being replaced, never steal focus from
+      // another panel when an asynchronous response finishes.
+      if (!ownsFocus) return;
+      const target = /^review-[a-z0-9-]+$/.test(activeReviewControl || "")
+        ? root.querySelector("#" + activeReviewControl)
+        : null;
+      (target && !target.disabled
+        ? target
+        : root.querySelector("#review-step-heading") ||
+          root.querySelector("#review-mode-detailed")
+      )?.focus();
+    };
     const renderStarted = performance.now();
     GridCharts.dispose(root);
     root.replaceChildren();
@@ -1132,11 +1329,62 @@
     );
     status.setAttribute(
       "role",
-      analysisState === "ANALYSIS_FAILURE" || importState === "IMPORT_FAILURE"
+      actionError ||
+        analysisState === "ANALYSIS_FAILURE" ||
+        importState === "IMPORT_FAILURE"
         ? "alert"
         : "status",
     );
     root.append(status);
+    if (guideModel && global.GridReviewView) {
+      const modes = node("div", null, "review-mode");
+      for (const [mode, label] of [
+        ["guided", "Revisão Guiada de Evidências"],
+        ["detailed", "Modo detalhado"],
+      ]) {
+        const b = node("button", label, "secondary");
+        b.id = "review-mode-" + mode;
+        b.type = "button";
+        b.setAttribute("aria-pressed", String(reviewMode === mode));
+        b.addEventListener("click", () => {
+          reviewMode = mode;
+          reviewPreference();
+          paint();
+        });
+        modes.append(b);
+      }
+      root.append(modes);
+      if (reviewMode === "guided") {
+        global.GridReviewView.render(
+          root,
+          { study, analysis, focus, step: reviewStep, state: review },
+          {
+            go: goReview,
+            focus(id) {
+              focus = id;
+              paint();
+            },
+            detailed() {
+              reviewMode = "detailed";
+              reviewPreference();
+              paint();
+            },
+            selection: selectionControls,
+            charts: analysisCharts,
+            scatter,
+            actions: analysisActions,
+          },
+          { node, panel, field, table, present },
+        );
+        if (reviewStep === 1) {
+          library(root);
+          imports(root);
+        }
+        restoreFocus();
+        root.dataset.labRenderMs = String(performance.now() - renderStarted);
+        return;
+      }
+    }
     library(root);
     imports(root);
     if (!busy) results(root);
@@ -1176,6 +1424,7 @@
       }),
     );
     root.append(paper);
+    restoreFocus();
     root.dataset.labRenderMs = String(performance.now() - renderStarted);
   }
   global.GridLab = {
@@ -1184,6 +1433,7 @@
       catalogController.abort();
       catalogRevision++;
       revision++;
+      review?.invalidate();
       if (analysisState === "ANALYSIS_PENDING") {
         analysisState = "DATA_UNAVAILABLE";
         message =
@@ -1203,16 +1453,43 @@
       context = { ...options, ...capabilities };
       paint();
       const targetRoot = root;
+      const returningStudy = study,
+        returningRevision = revision;
       const pendingCatalog = refresh(),
         ticket = catalogRevision;
+      if (returningStudy && analysis) {
+        analysis = null;
+        analysisState = "ANALYSIS_PENDING";
+        review?.begin({ accounts: chosen, objectives });
+        busy = true;
+        actionError = false;
+        message = "Revalidando esta evidência ao voltar ao Lab…";
+        paint();
+        pendingCatalog
+          .then(() => {
+            if (
+              returningRevision === revision &&
+              root === targetRoot &&
+              study?.id === returningStudy.id &&
+              model.canPaint(root)
+            )
+              return selectStudy(study, true);
+          })
+          .catch(() => {});
+      }
       pendingCatalog.catch((error) => {
         if (
           ticket === catalogRevision &&
           targetRoot === root &&
           model.canPaint(root) &&
           error?.name !== "AbortError"
-        )
+        ) {
+          if (!analysis) {
+            analysisState = "ANALYSIS_FAILURE";
+            review?.fail(review.generation, error);
+          }
           showError(error, "Não foi possível consultar a biblioteca. ");
+        }
       });
     },
   };

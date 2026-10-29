@@ -429,6 +429,8 @@ class Handler(BaseHTTPRequestHandler):
             "/numbers.js": ("numbers.js", "text/javascript"),
             "/state.js": ("state.js", "text/javascript"),
             "/lab.js": ("lab.js", "text/javascript"),
+            "/review_model.js": ("review_model.js", "text/javascript"),
+            "/review_view.js": ("review_view.js", "text/javascript"),
         }
         if url.path in assets and not url.query:
             name, mime = assets[url.path]

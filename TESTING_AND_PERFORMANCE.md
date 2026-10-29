@@ -1,5 +1,22 @@
 # Testes, reprodução e performance
 
+## Estado atual — G4 integrada, 28/10/2026
+
+Main integrada pelo PR #2: acaa6879877c8a081a127f3ea8a0cdbb840b88cd.
+G4.8 (27/10/2026 UTC):3.633 Python PASS/dois skips preexistentes; cobertura
+global histórica de 96,46987628%, branches e threshold de 85%. G4.10
+(27–28/10/2026 UTC):171 Python PASS/um skip Windows e 46 JavaScript PASS.
+G4.12 verificou integração, wheel novo, instalação limpa e oito verificações HTTP.
+São escopos distintos; não somar repetições nem chamar isso de suíte nova.
+
+As seções abaixo preservam diagnósticos e campanhas G1–G3. Pendências
+naquelas rodadas não descrevem o estado atual da G4. Os relatórios G4.8 e
+G4.9 em docs/reviews documentam os gates públicos posteriores. Os recibos
+locais G4.10/G4.12 não são recursos do wheel. Revisões documentais verificam
+links, segurança, build e instalação proporcionalmente, sem nova cobertura
+global quando não medida. G5 continua contrato pendente, sem interface nova.
+
+
 Esta validação é local em Windows/Python 3.13. Nenhuma execução Linux ou GitHub
 Actions foi demonstrada.
 
