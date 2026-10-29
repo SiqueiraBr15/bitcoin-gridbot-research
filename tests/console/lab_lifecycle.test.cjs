@@ -8,8 +8,9 @@ const path = require("node:path");
 const vm = require("node:vm");
 const numbers = require("../../research_console/static/numbers.js");
 class Element {
-  constructor(tag) {
+  constructor(tag, ownerDocument = null) {
     this.tagName = tag;
+    this.ownerDocument = ownerDocument;
     this.children = [];
     this.parent = null;
     this.attributes = {};
@@ -47,6 +48,11 @@ class Element {
     }
   }
   replaceChildren(...items) {
+    if (
+      this.ownerDocument?.activeElement !== this &&
+      this.contains(this.ownerDocument?.activeElement)
+    )
+      this.ownerDocument.activeElement = this.ownerDocument.body;
     for (const item of this.children) item.parent = null;
     this.children = [];
     this.append(...items);
@@ -73,11 +79,19 @@ class Element {
       ) || null
     );
   }
-  focus() {}
+  contains(element) {
+    return !!element && walk(this).includes(element);
+  }
+  focus() {
+    if (this.isConnected && !this.disabled && this.ownerDocument)
+      this.ownerDocument.activeElement = this;
+  }
   click() {
-    if (!this.disabled)
+    if (!this.disabled) {
+      this.focus();
       for (const listener of this.listeners.click || [])
         listener({ target: this });
+    }
   }
 }
 function walk(root) {
@@ -113,15 +127,19 @@ const flush = async () => {
 };
 function harness(route, guided = false) {
   const calls = [],
-    root = new Element("main");
+    document = {},
+    root = new Element("main", document);
+  document.body = new Element("body", document);
+  document.body.connected = true;
+  document.body.append(root);
+  document.activeElement = document.body;
+  document.createElement = (tag) => new Element(tag, document);
+  document.createElementNS = (_, tag) => new Element(tag, document);
   root.connected = true;
   root.className = "research-lab";
   const context = {
     Node: Element,
-    document: {
-      createElement: (tag) => new Element(tag),
-      createElementNS: (_, tag) => new Element(tag),
-    },
+    document,
     GridNumbers: numbers,
     GridCharts: { dispose() {}, lineChart() {} },
     AbortController,
@@ -162,6 +180,7 @@ function harness(route, guided = false) {
     root,
     api: context.GridLab,
     calls,
+    document,
     buttons: (name) =>
       walk(root).filter(
         (e) => e.tagName === "button" && e.textContent === name,
@@ -553,6 +572,196 @@ function guidedHarness(fixture, overrides = () => null) {
     true,
   );
 }
+
+test("selection repaint keeps contextual focus, then respects focus outside the Lab", async () => {
+  const fixture = guidedCases[0];
+  let delay = false,
+    finish;
+  const h = guidedHarness(fixture, (url) =>
+    delay && url.startsWith("/api/lab/analysis?")
+      ? new Promise((resolve) => {
+          finish = () => resolve(json(fixture.analysis));
+        })
+      : null,
+  );
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("5. Comparação")[0].click();
+  delay = true;
+  h.buttons("Aplicar seleção analítica")[0].click();
+  await flush();
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+  assert.equal(h.root.getAttribute("aria-busy"), "true");
+  const outside = h.document.createElement("button");
+  h.document.body.append(outside);
+  outside.focus();
+  finish();
+  await flush();
+  assert.equal(h.document.activeElement, outside);
+  assert.equal(h.root.getAttribute("aria-busy"), "false");
+});
+
+test("manifest error retains its initiating control and successful replay has contextual focus", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.status(), /Escolha um manifesto/);
+  assert.equal(h.document.activeElement.id, "review-validate-manifest");
+  const input = h.all().find((e) => e.type === "file");
+  input.files = [
+    {
+      size: 10,
+      text: async () => JSON.stringify(fixture.analysis.analysis_manifest),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+});
+
+test("mode changes and account changes keep focus on the corresponding live control", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("2. Patrimônio")[0].click();
+  const select = h.all().find((e) => e.id === "review-account-focus");
+  select.focus();
+  select.value = "MIX";
+  select.listeners.change[0]();
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  assert.equal(h.document.activeElement.value, "MIX");
+  h.buttons("Modo detalhado")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-detailed");
+  const detailed = h.all().find((e) => e.id === "review-account-focus");
+  detailed.focus();
+  detailed.value = "BTC_HOLD";
+  detailed.listeners.change[0]();
+  assert.equal(h.document.activeElement.id, "review-account-focus");
+  assert.equal(h.document.activeElement.value, "BTC_HOLD");
+  h.buttons("Revisão Guiada de Evidências")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-guided");
+  h.buttons("Abrir modo detalhado")[0].click();
+  assert.equal(h.document.activeElement.id, "review-mode-detailed");
+});
+
+test("invalid manifest replaces old replay success and an in-flight file validation cannot overlap", async () => {
+  const fixture = guidedCases[0],
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.buttons("Conferir reprodução determinística")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+  h.all().find((e) => e.type === "file").files = [
+    { size: 10, text: async () => "{broken" },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: FAILED/);
+  assert.match(h.status(), /JSON inválido/);
+  let finish;
+  h.all().find((e) => e.type === "file").files = [
+    {
+      size: 10,
+      text: () =>
+        new Promise((resolve) => {
+          finish = () =>
+            resolve(JSON.stringify(fixture.analysis.analysis_manifest));
+        }),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  assert.equal(h.buttons("Validar manifesto escolhido")[0].disabled, true);
+  assert.equal(
+    h.buttons("Conferir reprodução determinística")[0].disabled,
+    true,
+  );
+  assert.equal(h.document.activeElement.id, "review-step-heading");
+  finish();
+  await flush();
+  assert.match(h.root.textContent, /Replay desta seleção: EQUIVALENT/);
+});
+
+test("account labels include full distinct long IDs alongside identical Unicode context", async () => {
+  const fixture = structuredClone(guidedCases[0]);
+  const ids = ["X".repeat(79) + "A", "X".repeat(79) + "B", "Z"];
+  fixture.analysis.rows.forEach((r, i) => {
+    r.account_id = ids[i];
+    r.policy = "Política Δ";
+    r.window_id = "same";
+    r.cost_scenario = "same";
+  });
+  fixture.analysis.accounts.forEach((a, i) => {
+    a.account_id = ids[i];
+  });
+  fixture.analysis.analysis_manifest.accounts = [...ids];
+  const before = JSON.stringify(fixture.analysis),
+    h = guidedHarness(fixture);
+  await flush();
+  h.buttons("Analisar " + fixture.study.title)[0].click();
+  await flush();
+  const select = h.all().find((e) => e.id === "review-account-focus");
+  assert.equal(new Set(select.children.map((o) => o.textContent)).size, 3);
+  select.children.forEach((o, i) => {
+    assert.equal(o.value, ids[i]);
+    assert.ok(o.textContent.includes(ids[i]));
+    assert.match(o.textContent, /Política Δ/);
+    assert.equal(o.children.length, 0);
+  });
+  assert.equal(JSON.stringify(fixture.analysis), before);
+});
+
+test("late manifest read failure cannot mark another study as failed or steal its focus", async () => {
+  const a = guidedCases[0],
+    b = guidedCases[1];
+  let rejectFile;
+  const h = guidedHarness(a, (url) =>
+    url === "/api/lab/library"
+      ? json({ studies: [a.study, b.study], persistence_enabled: true })
+      : url.startsWith("/api/lab/analysis?") && url.includes(b.study.id)
+        ? json(b.analysis)
+        : null,
+  );
+  await flush();
+  h.buttons("Analisar " + a.study.title)[0].click();
+  await flush();
+  h.buttons("6. Verificação")[0].click();
+  h.all().find((e) => e.type === "file").files = [
+    {
+      size: 10,
+      text: () =>
+        new Promise((_, reject) => {
+          rejectFile = reject;
+        }),
+    },
+  ];
+  h.buttons("Validar manifesto escolhido")[0].click();
+  await flush();
+  h.buttons("1. Evidência")[0].click();
+  h.buttons("Analisar " + b.study.title)[0].click();
+  await flush();
+  const focused = h.document.activeElement;
+  rejectFile(new SyntaxError("DO_NOT_SHOW_OBSOLETE_ERROR"));
+  await flush();
+  assert.equal(h.document.activeElement, focused);
+  assert.match(h.root.textContent, new RegExp(b.study.title));
+  assert.doesNotMatch(h.root.textContent, /DO_NOT_SHOW_OBSOLETE_ERROR/);
+  assert.equal(h.root.querySelector(".status").getAttribute("role"), "status");
+  h.buttons("6. Verificação")[0].click();
+  assert.match(h.root.textContent, /Replay desta seleção: NOT_RUN/);
+});
 
 test("confirming a new pack invalidates a replay even before persistence returns", async () => {
   const a = guidedCases[0],

@@ -45,9 +45,10 @@
     if (description) p.append(node("p", description, "explain"));
     return p;
   };
-  const button = (label, action, cls = "action") => {
+  const button = (label, action, cls = "action", id = "") => {
     const b = node("button", label, cls);
     b.type = "button";
+    if (id) b.id = id;
     b.disabled = busy;
     b.addEventListener("click", () => {
       const target = root;
@@ -419,9 +420,11 @@
           : "Prévia em memória disponível. Para persistir, inicie com --lab-dir apontando para uma pasta nova ou exclusiva do laboratório.",
     );
     const file = node("input");
+    file.id = "review-import-file";
     file.type = "file";
     file.accept = ".gbpack,.zip";
     const pin = node("input");
+    pin.id = "review-import-pin";
     pin.type = "text";
     pin.maxLength = 64;
     pin.placeholder = "Opcional · fornecido por outra fonte";
@@ -430,42 +433,47 @@
       field("SHA-256 externo opcional", pin),
     );
     box.append(
-      button("Validar prévia do arquivo", async () => {
-        preview = null;
-        const ticket = revision;
-        const selected = file.files?.[0];
-        if (!selected) throw new Error("Escolha um arquivo local.");
-        if (selected.size > 2097152) throw new Error("O pack excede 2 MiB.");
-        const expectedPin = pin.value.trim().toLowerCase();
-        if (expectedPin && !/^[a-f0-9]{64}$/.test(expectedPin))
-          throw new Error("SHA-256 externo inválido.");
-        busy = true;
-        message = "Lendo somente o arquivo escolhido…";
-        paint();
-        try {
-          const data = await json("/api/lab/preview", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/zip",
-              "X-GridBot-Lab": "1",
-            },
-            body: await selected.arrayBuffer(),
-          });
-          if (ticket !== revision || !model.canPaint(root)) return;
-          if (expectedPin && data.study.id !== expectedPin)
-            throw new Error(
-              "O SHA-256 externo diverge. Importação não confirmada.",
-            );
-          preview = data;
-          message =
-            "Prévia validada. Hash não comprova autoria. Confirme as permissões de uso.";
-        } finally {
-          if (ticket === revision) {
-            busy = false;
-            paint();
+      button(
+        "Validar prévia do arquivo",
+        async () => {
+          preview = null;
+          const ticket = revision;
+          const selected = file.files?.[0];
+          if (!selected) throw new Error("Escolha um arquivo local.");
+          if (selected.size > 2097152) throw new Error("O pack excede 2 MiB.");
+          const expectedPin = pin.value.trim().toLowerCase();
+          if (expectedPin && !/^[a-f0-9]{64}$/.test(expectedPin))
+            throw new Error("SHA-256 externo inválido.");
+          busy = true;
+          message = "Lendo somente o arquivo escolhido…";
+          paint();
+          try {
+            const data = await json("/api/lab/preview", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/zip",
+                "X-GridBot-Lab": "1",
+              },
+              body: await selected.arrayBuffer(),
+            });
+            if (ticket !== revision || !model.canPaint(root)) return;
+            if (expectedPin && data.study.id !== expectedPin)
+              throw new Error(
+                "O SHA-256 externo diverge. Importação não confirmada.",
+              );
+            preview = data;
+            message =
+              "Prévia validada. Hash não comprova autoria. Confirme as permissões de uso.";
+          } finally {
+            if (ticket === revision) {
+              busy = false;
+              paint();
+            }
           }
-        }
-      }),
+        },
+        "action",
+        "review-validate-preview",
+      ),
     );
     if (preview) {
       box.append(
@@ -532,9 +540,11 @@
       "Três packs pequenos de observações fictícias. Dados históricos só existem quando uma origem é autorizada explicitamente; resumos agregados não substituem séries.",
     );
     const search = node("input");
+    search.id = "review-library-search";
     search.type = "search";
     search.value = query;
     const type = node("select");
+    type.id = "review-library-source";
     [
       "",
       "SYNTHETIC_DEMO",
@@ -548,6 +558,7 @@
     });
     type.value = kind;
     const order = node("select");
+    order.id = "review-library-order";
     [
       ["title", "Nome"],
       ["start", "Data inicial"],
@@ -598,7 +609,12 @@
             `${(s.start || "").slice(0, 10)} → ${(s.end || "").slice(0, 10)} · UTC`,
           ),
         );
-        const b = button("Analisar " + s.title, () => selectStudy(s));
+        const b = button(
+          "Analisar " + s.title,
+          () => selectStudy(s),
+          "action",
+          "review-study-" + s.id,
+        );
         b.disabled = s.integrity !== "VALIDATED";
         card.append(b, details(s));
         if (s.export_scope === "RAW_AND_DERIVED")
@@ -832,6 +848,7 @@
     if (!focus || !analysis.rows.some((r) => r.account_id === focus))
       focus = analysis.rows[0]?.account_id || "";
     const select = node("select");
+    select.id = "review-account-focus";
     analysis.rows.forEach((r) => {
       const o = node("option", r.account_id);
       o.value = r.account_id;
@@ -971,13 +988,18 @@
     controls.append(
       accountChoices,
       objectiveChoices,
-      button("Aplicar seleção analítica", () => {
-        if (!newChosen.size || !nextObjectives.size)
-          throw new Error("Selecione ao menos uma conta e um objetivo.");
-        chosen = [...newChosen].sort();
-        objectives = [...nextObjectives].sort();
-        return selectStudy(study, true);
-      }),
+      button(
+        "Aplicar seleção analítica",
+        () => {
+          if (!newChosen.size || !nextObjectives.size)
+            throw new Error("Selecione ao menos uma conta e um objetivo.");
+          chosen = [...newChosen].sort();
+          objectives = [...nextObjectives].sort();
+          return selectStudy(study, true);
+        },
+        "action",
+        "review-apply-selection",
+      ),
     );
     parent.append(controls);
     const current =
@@ -997,6 +1019,7 @@
             return selectStudy(study, true);
           },
           "secondary",
+          "review-include-benchmark",
         ),
       );
     }
@@ -1162,30 +1185,35 @@
           ),
         );
         exports.append(
-          button("Autorizar exportação nesta sessão", async () => {
-            if (!consent.checked)
-              throw new Error(
-                "Confirme a verificação independente dos direitos.",
+          button(
+            "Autorizar exportação nesta sessão",
+            async () => {
+              if (!consent.checked)
+                throw new Error(
+                  "Confirme a verificação independente dos direitos.",
+                );
+              const ticket = revision,
+                id = study.id,
+                authorization = {
+                  id,
+                  scope: scope.value,
+                  basis: basis.value,
+                  confirmed: true,
+                };
+              busy = true;
+              paint();
+              const authorized = await post(
+                "/api/lab/authorize-export",
+                authorization,
               );
-            const ticket = revision,
-              id = study.id,
-              authorization = {
-                id,
-                scope: scope.value,
-                basis: basis.value,
-                confirmed: true,
-              };
-            busy = true;
-            paint();
-            const authorized = await post(
-              "/api/lab/authorize-export",
-              authorization,
-            );
-            if (ticket !== revision || !model.canPaint(root)) return;
-            await refresh();
-            if (ticket !== revision || !model.canPaint(root)) return;
-            await selectStudy(authorized, true);
-          }),
+              if (ticket !== revision || !model.canPaint(root)) return;
+              await refresh();
+              if (ticket !== revision || !model.canPaint(root)) return;
+              await selectStudy(authorized, true);
+            },
+            "action",
+            "review-authorize-export",
+          ),
         );
       }
       if (analysis.redistribution === "AGGREGATES_ONLY")
@@ -1227,34 +1255,59 @@
       run.disabled = busy || review?.replay === "RUNNING";
       exports.append(run);
       const replayFile = node("input");
+      replayFile.id = "review-replay-file";
       replayFile.type = "file";
       replayFile.accept = ".json";
       exports.append(
         field("Manifesto de outra sessão para reproduzir", replayFile),
       );
-      exports.append(
-        button(
-          "Validar manifesto escolhido",
-          async () => {
-            const ticket = revision,
-              identity = study.id;
+      const validate = button(
+        "Validar manifesto escolhido",
+        async () => {
+          const ticket = revision,
+            identity = study.id,
+            binding = review?.identity;
+          try {
             const f = replayFile.files?.[0];
             if (!f || f.size > 16000)
               throw new Error("Escolha um manifesto JSON de até 16 KB.");
+            review?.action("replay", "RUNNING", binding);
+            paint();
             const manifest = JSON.parse(await f.text());
             if (ticket !== revision || !model.canPaint(root)) return;
             await replayCurrent(manifest);
-          },
-          "secondary",
-        ),
+          } catch (error) {
+            if (ticket === revision && study?.id === identity)
+              review?.action("replay", "FAILED", binding);
+            throw error;
+          }
+        },
+        "secondary",
+        "review-validate-manifest",
       );
+      validate.disabled = busy || review?.replay === "RUNNING";
+      exports.append(validate);
     }
     exports.append(details(analysis.analysis_manifest));
     parent.append(exports);
   }
   function paint() {
     if (!model.canPaint(root)) return;
-    const activeReviewControl = document.activeElement?.id;
+    const ownsFocus = root.contains(document.activeElement);
+    const activeReviewControl = ownsFocus ? document.activeElement?.id : "";
+    const restoreFocus = () => {
+      // Restore only within the subtree being replaced, never steal focus from
+      // another panel when an asynchronous response finishes.
+      if (!ownsFocus) return;
+      const target = /^review-[a-z0-9-]+$/.test(activeReviewControl || "")
+        ? root.querySelector("#" + activeReviewControl)
+        : null;
+      (target && !target.disabled
+        ? target
+        : root.querySelector("#review-step-heading") ||
+          root.querySelector("#review-mode-detailed")
+      )?.focus();
+    };
     const renderStarted = performance.now();
     GridCharts.dispose(root);
     root.replaceChildren();
@@ -1282,6 +1335,7 @@
         ["detailed", "Modo detalhado"],
       ]) {
         const b = node("button", label, "secondary");
+        b.id = "review-mode-" + mode;
         b.type = "button";
         b.setAttribute("aria-pressed", String(reviewMode === mode));
         b.addEventListener("click", () => {
@@ -1318,20 +1372,7 @@
           library(root);
           imports(root);
         }
-        if (
-          [
-            "review-account-focus",
-            "review-step-heading",
-            "review-replay",
-            "review-export",
-          ].includes(activeReviewControl)
-        ) {
-          const target = root.querySelector("#" + activeReviewControl);
-          (target && !target.disabled
-            ? target
-            : root.querySelector("#review-step-heading")
-          )?.focus();
-        }
+        restoreFocus();
         root.dataset.labRenderMs = String(performance.now() - renderStarted);
         return;
       }
@@ -1375,6 +1416,7 @@
       }),
     );
     root.append(paper);
+    restoreFocus();
     root.dataset.labRenderMs = String(performance.now() - renderStarted);
   }
   global.GridLab = {

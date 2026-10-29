@@ -53,7 +53,7 @@
       analysis.rows.forEach((r) => {
         const o = node(
           "option",
-          `${r.policy} · ${r.window_id} · ${r.cost_scenario}`,
+          `${r.account_id} · ${r.policy} · ${r.window_id} · ${r.cost_scenario}`,
         );
         o.value = r.account_id;
         select.append(o);
@@ -412,6 +412,7 @@
       controls.append(b);
     }
     const exit = node("button", "Abrir modo detalhado", "secondary");
+    exit.id = "review-open-detailed";
     exit.type = "button";
     exit.addEventListener("click", hooks.detailed);
     controls.append(exit);
